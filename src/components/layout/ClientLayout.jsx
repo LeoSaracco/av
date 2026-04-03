@@ -1,0 +1,59 @@
+import React from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+
+export function ClientLayout({ children }) {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const handleLogout = () => { logout(); navigate('/'); };
+
+  return (
+    <div className="client-layout">
+      {/* Top navbar */}
+      <nav className="client-navbar">
+        <NavLink to="/" style={{ fontFamily: 'var(--font-main)', fontWeight: 800, fontSize: 18, color: 'var(--color-text)' }}>
+          Adrián Vila
+        </NavLink>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div className="avatar" style={{ width: 34, height: 34, fontSize: 13 }}>
+            {user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
+          </div>
+          <button className="btn btn-ghost btn-sm" onClick={handleLogout}>Salir</button>
+        </div>
+      </nav>
+
+      {/* Content */}
+      <div className="client-content animate-fade">
+        {children}
+      </div>
+
+      {/* Bottom nav */}
+      <div className="client-bottom-nav">
+        <NavLink to="/client" end className={({ isActive }) => `client-bottom-nav-item ${isActive ? 'active' : ''}`}>
+          <HomeIcon /><span>Inicio</span>
+        </NavLink>
+        <NavLink to="/client/routine" className={({ isActive }) => `client-bottom-nav-item ${isActive ? 'active' : ''}`}>
+          <DumbbellIcon /><span>Rutina</span>
+        </NavLink>
+        <NavLink to="/client/progress" className={({ isActive }) => `client-bottom-nav-item ${isActive ? 'active' : ''}`}>
+          <ChartIcon /><span>Evolución</span>
+        </NavLink>
+        <NavLink to="/client/goals" className={({ isActive }) => `client-bottom-nav-item ${isActive ? 'active' : ''}`}>
+          <TargetIcon /><span>Objetivos</span>
+        </NavLink>
+        <NavLink to="/client/notes" className={({ isActive }) => `client-bottom-nav-item ${isActive ? 'active' : ''}`}>
+          <NotesIcon /><span>Notas</span>
+        </NavLink>
+      </div>
+    </div>
+  );
+}
+
+function Icon({ size = 20, children }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{children}</svg>;
+}
+function HomeIcon() { return <Icon><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></Icon>; }
+function DumbbellIcon() { return <Icon><path d="M6 5v14M18 5v14M2 9h4M18 9h4M2 15h4M18 15h4"/></Icon>; }
+function ChartIcon() { return <Icon><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></Icon>; }
+function TargetIcon() { return <Icon><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></Icon>; }
+function NotesIcon() { return <Icon><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></Icon>; }
