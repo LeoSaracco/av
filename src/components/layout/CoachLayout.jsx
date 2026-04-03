@@ -7,6 +7,7 @@ const navItems = [
   { label: 'Clientes', path: '/coach/clients', icon: UsersIcon },
   { label: 'Templates', path: '/coach/templates', icon: LayoutIcon },
   { label: 'Rutinas', path: '/coach/routines', icon: DumbbellIcon },
+  { label: 'Dieta/Nutrición', path: '/coach/diet-templates', icon: AppleIcon },
   { label: 'Asignaciones', path: '/coach/assign', icon: LinkIcon },
   { label: 'Observaciones', path: '/coach/notes', icon: NotesIcon },
 ];
@@ -96,3 +97,4 @@ function LinkIcon({ size }) { return <Icon size={size}><path d="M10 13a5 5 0 007
 function NotesIcon({ size }) { return <Icon size={size}><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></Icon>; }
 function MenuIcon({ size }) { return <Icon size={size}><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></Icon>; }
 function LogoutIcon({ size }) { return <Icon size={size}><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></Icon>; }
+function AppleIcon({ size }) { return <Icon size={size}><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/></Icon>; }

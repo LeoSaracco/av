@@ -6,7 +6,7 @@ import { ClientLayout } from '../../components/layout/ClientLayout';
 
 export default function ClientDashboard() {
   const { user } = useAuth();
-  const { getClient, getAssignmentForClient, getRoutine, getNotesForClient, getProgressForClient } = useApp();
+  const { getClient, getAssignmentForClient, getRoutine, getNotesForClient, getProgressForClient, getDietAssignmentForClient, getDiet } = useApp();
   const navigate = useNavigate();
 
   const client = getClient(user?.clientId);
@@ -14,6 +14,9 @@ export default function ClientDashboard() {
   const routine = assignment ? getRoutine(assignment.routineId) : null;
   const notes = client ? getNotesForClient(client.id) : [];
   const progress = client ? getProgressForClient(client.id) : [];
+  
+  const dietAssignment = client ? getDietAssignmentForClient(client.id) : null;
+  const diet = dietAssignment ? getDiet(dietAssignment.dietId) : null;
   const latestNote = notes[0];
   const lastWeight = progress.length > 0 ? progress[progress.length - 1] : null;
   const firstWeight = progress.length > 0 ? progress[0] : null;
@@ -91,6 +94,34 @@ export default function ClientDashboard() {
         )}
       </div>
 
+      {/* Diet card */}
+      <div
+        className="card card-hover"
+        style={{ gap: 14, marginBottom: 16, cursor: 'pointer' }}
+        onClick={() => navigate('/client/nutrition')}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h3 style={{ fontSize: 15 }}>🥗 Mi dieta</h3>
+          <span style={{ color: 'var(--color-accent)', fontSize: 18 }}>→</span>
+        </div>
+        {diet ? (
+          <>
+            <div>
+              <div style={{ fontWeight: 700, fontFamily: 'var(--font-main)', fontSize: 16 }}>{diet.name}</div>
+              <div style={{ fontSize: 12, color: 'var(--color-accent)', marginTop: 4, fontWeight: 600 }}>{diet.goal}</div>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+               <span style={{ fontSize: 11, background: 'var(--color-bg-3)', border: '1px solid var(--color-accent)', borderRadius: 'var(--radius-sm)', padding: '3px 8px', color: 'var(--color-text-2)' }}>
+                  {diet.meals?.length || 0} comidas
+               </span>
+            </div>
+            <p style={{ fontSize: 12, color: 'var(--color-accent)', fontWeight: 600, marginTop: 4 }}>Ver plan e indicaciones →</p>
+          </>
+        ) : (
+          <p style={{ color: 'var(--color-text-3)', fontSize: 14 }}>Tu coach aún no te asignó una dieta.</p>
+        )}
+      </div>
+
       {/* Latest note */}
       {latestNote && (
         <div className="card" style={{ gap: 10, marginBottom: 16, cursor: 'pointer' }} onClick={() => navigate('/client/notes')}>
@@ -104,6 +135,22 @@ export default function ClientDashboard() {
           <span style={{ fontSize: 11, color: 'var(--color-text-3)' }}>{latestNote.createdAt}</span>
         </div>
       )}
+
+      {/* AI Assistant CTA */}
+      <div
+        className="card"
+        style={{ gap: 12, marginBottom: 16, cursor: 'pointer', background: 'linear-gradient(135deg, rgba(138, 43, 226, 0.15), transparent)', border: '1px solid rgba(138, 43, 226, 0.3)' }}
+        onClick={() => navigate('/client/ai-assistant')}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h3 style={{ fontSize: 15, color: '#b180ff', display: 'flex', alignItems: 'center', gap: 6 }}>✨ Lluvia de Ideas IA</h3>
+          <span style={{ color: '#b180ff', fontSize: 16 }}>→</span>
+        </div>
+        <p style={{ fontSize: 13, color: 'var(--color-text-2)' }}>
+          ¿No sabés qué comer acorde a tu objetivo? Hablá con nuestro NutriBot especializado.
+        </p>
+        <span style={{ fontSize: 13, fontWeight: 600, color: '#b180ff' }}>Consultar IA →</span>
+      </div>
 
       {/* Progress CTA */}
       <div

@@ -41,6 +41,12 @@ export function ClientLayout({ children }) {
         <NavLink to="/client/goals" className={({ isActive }) => `client-bottom-nav-item ${isActive ? 'active' : ''}`}>
           <TargetIcon /><span>Objetivos</span>
         </NavLink>
+        <NavLink to="/client/nutrition" className={({ isActive }) => `client-bottom-nav-item ${isActive ? 'active' : ''}`}>
+          <AppleIcon /><span>Dieta</span>
+        </NavLink>
+        <NavLink to="/client/ai-assistant" className={({ isActive }) => `client-bottom-nav-item ${isActive ? 'active' : ''}`}>
+          <SparklesIcon /><span>✨ IA</span>
+        </NavLink>
         <NavLink to="/client/notes" className={({ isActive }) => `client-bottom-nav-item ${isActive ? 'active' : ''}`}>
           <NotesIcon /><span>Notas</span>
         </NavLink>
@@ -57,3 +63,5 @@ function DumbbellIcon() { return <Icon><path d="M6 5v14M18 5v14M2 9h4M18 9h4M2 1
 function ChartIcon() { return <Icon><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></Icon>; }
 function TargetIcon() { return <Icon><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></Icon>; }
 function NotesIcon() { return <Icon><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></Icon>; }
+function AppleIcon() { return <Icon><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/></Icon>; }
+function SparklesIcon() { return <Icon><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></Icon>; }

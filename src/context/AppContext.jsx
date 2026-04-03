@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import {
   SEED_CLIENTS, SEED_TEMPLATES, SEED_ROUTINES,
-  SEED_ASSIGNMENTS, SEED_NOTES, SEED_PROGRESS, SEED_PRODUCTS
+  SEED_ASSIGNMENTS, SEED_NOTES, SEED_PROGRESS, SEED_PRODUCTS,
+  SEED_DIET_TEMPLATES, SEED_DIETS, SEED_DIET_ASSIGNMENTS, SEED_NUTRITION_THREADS
 } from '../data/seed';
 
 const AppContext = createContext(null);
@@ -32,6 +33,13 @@ export function AppProvider({ children }) {
   const [progress, setProgress] = useState(() => loadOrSeed('av_progress', SEED_PROGRESS));
   const [products] = useState(() => loadOrSeed('av_products', SEED_PRODUCTS));
   const [cart, setCart] = useState(() => loadOrSeed('av_cart', []));
+  
+  // Nutrition Data
+  const [dietTemplates, setDietTemplates] = useState(() => loadOrSeed('av_diet_templates', SEED_DIET_TEMPLATES));
+  const [diets, setDiets] = useState(() => loadOrSeed('av_diets', SEED_DIETS));
+  const [dietAssignments, setDietAssignments] = useState(() => loadOrSeed('av_diet_assignments', SEED_DIET_ASSIGNMENTS));
+  const [nutritionThreads, setNutritionThreads] = useState(() => loadOrSeed('av_nutrition_threads', SEED_NUTRITION_THREADS));
+
   const [toast, setToast] = useState(null);
 
   // Persist on change
@@ -42,6 +50,10 @@ export function AppProvider({ children }) {
   useEffect(() => { save('av_notes', notes); }, [notes]);
   useEffect(() => { save('av_progress', progress); }, [progress]);
   useEffect(() => { save('av_cart', cart); }, [cart]);
+  useEffect(() => { save('av_diet_templates', dietTemplates); }, [dietTemplates]);
+  useEffect(() => { save('av_diets', diets); }, [diets]);
+  useEffect(() => { save('av_diet_assignments', dietAssignments); }, [dietAssignments]);
+  useEffect(() => { save('av_nutrition_threads', nutritionThreads); }, [nutritionThreads]);
 
   // Toast helper
   const showToast = useCallback((message, type = 'success') => {
@@ -163,6 +175,87 @@ export function AppProvider({ children }) {
   const getProgressForClient = (clientId) =>
     progress.filter(p => p.clientId === clientId).sort((a, b) => a.date.localeCompare(b.date));
 
+  // ── NUTRITION: TEMPLATES ───────────────────────────────────────────────────
+  const addDietTemplate = (data) => {
+    const t = { ...data, id: uid(), createdAt: new Date().toISOString().slice(0, 10) };
+    setDietTemplates(prev => [...prev, t]);
+    showToast('Plantilla de dieta creada');
+    return t;
+  };
+  const updateDietTemplate = (id, data) => {
+    setDietTemplates(prev => prev.map(t => t.id === id ? { ...t, ...data } : t));
+    showToast('Plantilla de dieta actualizada');
+  };
+  const deleteDietTemplate = (id) => {
+    setDietTemplates(prev => prev.filter(t => t.id !== id));
+    showToast('Plantilla de dieta eliminada', 'info');
+  };
+  const getDietTemplate = (id) => dietTemplates.find(t => t.id === id);
+
+  // ── NUTRITION: DIETS ───────────────────────────────────────────────────────
+  const addDiet = (data) => {
+    const d = { ...data, id: uid(), createdAt: new Date().toISOString().slice(0, 10) };
+    setDiets(prev => [...prev, d]);
+    showToast('Dieta persistida');
+    return d;
+  };
+  const updateDiet = (id, data) => {
+    setDiets(prev => prev.map(d => d.id === id ? { ...d, ...data } : d));
+    showToast('Dieta actualizada');
+  };
+  const deleteDiet = (id) => {
+    setDiets(prev => prev.filter(d => d.id !== id));
+  };
+  const getDiet = (id) => diets.find(d => d.id === id);
+  const createDietFromTemplate = (templateId, name, goal) => {
+    const tpl = dietTemplates.find(t => t.id === templateId);
+    if (!tpl) return null;
+    return addDiet({
+      name: name || `${tpl.name} – nueva`,
+      goal: goal || tpl.goal,
+      templateId,
+      indications: tpl.indications,
+      meals: tpl.meals.map(m => ({ ...m, id: uid() })),
+    });
+  };
+
+  // ── NUTRITION: ASSIGNMENTS ─────────────────────────────────────────────────
+  const assignDiet = (clientId, dietId) => {
+    setDietAssignments(prev => {
+      const filtered = prev.filter(a => a.clientId !== clientId);
+      return [...filtered, { id: uid(), clientId, dietId, assignedAt: new Date().toISOString().slice(0, 10), active: true }];
+    });
+    showToast('Dieta asignada correctamente');
+  };
+  const getDietAssignmentForClient = (clientId) => dietAssignments.find(a => a.clientId === clientId && a.active);
+
+  // ── NUTRITION: THREADS ─────────────────────────────────────────────────────
+  const getNutritionThreadForClient = (clientId) => {
+    let thread = nutritionThreads.find(th => th.clientId === clientId);
+    if (!thread) {
+       thread = { id: uid(), clientId, messages: [] };
+       // we don't save it immediately to avoid empty threads, but we return a valid structure
+    }
+    return thread;
+  };
+  const addNutritionMessage = (clientId, sender, text) => {
+    const message = {
+      id: uid(),
+      sender,
+      text,
+      date: new Date().toLocaleString('es-AR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).replace(',', '')
+    };
+    
+    setNutritionThreads(prev => {
+      const existing = prev.find(th => th.clientId === clientId);
+      if (existing) {
+        return prev.map(th => th.clientId === clientId ? { ...th, messages: [...th.messages, message] } : th);
+      } else {
+        return [...prev, { id: uid(), clientId, messages: [message] }];
+      }
+    });
+  };
+
   // ── CART ───────────────────────────────────────────────────────────────────
   const addToCart = (product, opts = {}) => {
     setCart(prev => {
@@ -186,6 +279,7 @@ export function AppProvider({ children }) {
     <AppContext.Provider value={{
       // data
       clients, templates, routines, assignments, notes, progress, products, cart,
+      dietTemplates, diets, dietAssignments, nutritionThreads,
       // clients
       addClient, updateClient, deleteClient, getClient,
       // templates
@@ -198,6 +292,11 @@ export function AppProvider({ children }) {
       addNote, updateNote, deleteNote, getNotesForClient,
       // progress
       addProgress, deleteProgress, getProgressForClient,
+      // nutrition
+      addDietTemplate, updateDietTemplate, deleteDietTemplate, getDietTemplate,
+      addDiet, updateDiet, deleteDiet, getDiet, createDietFromTemplate,
+      assignDiet, getDietAssignmentForClient,
+      getNutritionThreadForClient, addNutritionMessage,
       // cart
       addToCart, removeFromCart, updateCartQty, clearCart, cartTotal, cartCount,
       // utils

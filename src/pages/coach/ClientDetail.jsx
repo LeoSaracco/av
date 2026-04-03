@@ -11,6 +11,7 @@ export default function ClientDetail() {
     getClient, updateClient, getAssignmentForClient, getRoutine,
     getNotesForClient, addNote, updateNote, deleteNote,
     getProgressForClient,
+    dietTemplates, getDietAssignmentForClient, getDiet, createDietFromTemplate, getNutritionThreadForClient, addNutritionMessage, updateDiet, assignDiet
   } = useApp();
 
   const client = getClient(id);
@@ -24,6 +25,33 @@ export default function ClientDetail() {
   const [noteText, setNoteText] = useState('');
   const [editNoteId, setEditNoteId] = useState(null);
   const [confirmNoteId, setConfirmNoteId] = useState(null);
+
+  // Nutrition state
+  const dietAssignment = getDietAssignmentForClient(id);
+  const diet = dietAssignment ? getDiet(dietAssignment.dietId) : null;
+  const thread = getNutritionThreadForClient(id);
+  const [threadInput, setThreadInput] = useState('');
+  const [assignDietModal, setAssignDietModal] = useState(false);
+  const [selectedDietTpl, setSelectedDietTpl] = useState('');
+  const [editDietModal, setEditDietModal] = useState(false);
+  const [editDietForm, setEditDietForm] = useState(null);
+
+  const handleAssignDiet = () => {
+    if (selectedDietTpl) {
+      const newDiet = createDietFromTemplate(selectedDietTpl, null, null);
+      if (newDiet) {
+        assignDiet(client.id, newDiet.id);
+        setAssignDietModal(false);
+      }
+    }
+  };
+
+  const handleSaveEditDiet = () => {
+    if (diet && editDietForm) {
+      updateDiet(diet.id, editDietForm);
+      setEditDietModal(false);
+    }
+  };
 
   if (!client) return (
     <CoachLayout>
@@ -79,6 +107,7 @@ export default function ClientDetail() {
         {[
           { id: 'overview', label: 'Resumen' },
           { id: 'routine', label: 'Rutina' },
+          { id: 'nutrition', label: 'Nutrición' },
           { id: 'notes', label: `Notas (${notes.length})` },
           { id: 'progress', label: `Progreso (${progress.length})` },
         ].map(t => (
@@ -194,6 +223,104 @@ export default function ClientDetail() {
         </div>
       )}
 
+      {/* NUTRITION */}
+      {tab === 'nutrition' && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24 }}>
+          {/* Left panel: Diet Details */}
+          <div>
+            {!diet ? (
+              <div className="empty-state">
+                <span style={{ fontSize: 48 }}>🥗</span>
+                <h3>Sin dieta asignada</h3>
+                <button className="btn btn-primary" onClick={() => setAssignDietModal(true)}>Asignar dieta base</button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+                  <div>
+                    <h2 style={{ fontSize: 20 }}>{diet.name}</h2>
+                    <p style={{ color: 'var(--color-text-2)', fontSize: 13 }}>{diet.goal}</p>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button className="btn btn-sm btn-ghost" onClick={() => setAssignDietModal(true)}>Cambiar base</button>
+                    <button className="btn btn-sm btn-secondary" onClick={() => {
+                        setEditDietForm({ name: diet.name, goal: diet.goal, indications: diet.indications, meals: diet.meals.map(m=>({...m})) });
+                        setEditDietModal(true);
+                      }}>Editar plan</button>
+                  </div>
+                </div>
+                
+                {diet.indications && (
+                   <div style={{ background: 'var(--color-bg-3)', padding: 12, borderRadius: 'var(--radius-md)', borderLeft: '3px solid var(--color-accent)' }}>
+                     <h4 style={{ fontSize: 13, textTransform: 'uppercase', color: 'var(--color-text-3)', marginBottom: 4 }}>Indicaciones Generales</h4>
+                     <p style={{ fontSize: 14 }}>{diet.indications}</p>
+                   </div>
+                )}
+                
+                <h4 style={{ fontSize: 16, marginTop: 8 }}>Comidas / Bloques</h4>
+                {diet.meals?.map((m, i) => (
+                  <div key={m.id} className="card" style={{ gap: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--color-surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700 }}>{i + 1}</div>
+                      <span style={{ fontWeight: 600, fontSize: 15 }}>{m.name}</span>
+                    </div>
+                    <p style={{ fontSize: 14, color: 'var(--color-text-2)', paddingLeft: 34, lineHeight: 1.6 }}>{m.content}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          {/* Right panel: Q&A Thread (only if diet assigned) */}
+          {diet && (
+            <div className="card" style={{ height: 'fit-content', padding: 0, overflow: 'hidden' }}>
+              <div style={{ padding: '16px', borderBottom: '1px solid var(--color-border)', background: 'var(--color-bg-3)' }}>
+                <h3 style={{ fontSize: 16, display: 'flex', alignItems: 'center', gap: 8 }}>💬 Consultas</h3>
+                <p style={{ fontSize: 12, color: 'var(--color-text-3)' }}>Historial de seguimiento</p>
+              </div>
+              
+              <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 12, maxHeight: 400, overflowY: 'auto' }}>
+                {thread.messages.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '20px 0', color: 'var(--color-text-3)', fontSize: 13 }}>No hay mensajes aún</div>
+                ) : (
+                  thread.messages.map(msg => (
+                    <div key={msg.id} style={{
+                      alignSelf: msg.sender === 'coach' ? 'flex-end' : 'flex-start',
+                      maxWidth: '85%',
+                      background: msg.sender === 'coach' ? 'var(--color-accent-dim)' : 'var(--color-surface-2)',
+                      padding: '10px 14px',
+                      borderRadius: 'var(--radius-md)',
+                      borderBottomRightRadius: msg.sender === 'coach' ? 0 : 'var(--radius-md)',
+                      borderBottomLeftRadius: msg.sender !== 'coach' ? 0 : 'var(--radius-md)',
+                    }}>
+                      <div style={{ fontSize: 11, color: msg.sender === 'coach' ? 'var(--color-accent)' : 'var(--color-text-3)', marginBottom: 4, fontWeight: 600 }}>
+                        {msg.sender === 'coach' ? 'Yo (Coach)' : client.name} • {msg.date}
+                      </div>
+                      <div style={{ fontSize: 13, lineHeight: 1.5 }}>{msg.text}</div>
+                    </div>
+                  ))
+                )}
+              </div>
+              
+              <div style={{ padding: 12, borderTop: '1px solid var(--color-border)', background: 'var(--color-bg-3)', display: 'flex', gap: 8 }}>
+                <input className="form-input" placeholder="Escribir mensaje..." value={threadInput} onChange={e => setThreadInput(e.target.value)} onKeyDown={e => {
+                  if (e.key === 'Enter' && threadInput.trim()) {
+                    addNutritionMessage(client.id, 'coach', threadInput);
+                    setThreadInput('');
+                  }
+                }} />
+                <button className="btn btn-primary" onClick={() => {
+                  if (threadInput.trim()) {
+                    addNutritionMessage(client.id, 'coach', threadInput);
+                    setThreadInput('');
+                  }
+                }} disabled={!threadInput.trim()}>Enviar</button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* NOTES */}
       {tab === 'notes' && (
         <div>
@@ -272,6 +399,62 @@ export default function ClientDetail() {
       <ConfirmModal open={!!confirmNoteId} onClose={() => setConfirmNoteId(null)}
         onConfirm={() => deleteNote(confirmNoteId)}
         title="Eliminar observación" message="¿Eliminar esta observación?" />
+        
+      {/* Assign Diet Modal */}
+      <Modal open={assignDietModal} onClose={() => setAssignDietModal(false)}
+        title="Asignar plantilla de dieta"
+        footer={
+          <>
+            <button className="btn btn-ghost" onClick={() => setAssignDietModal(false)}>Cancelar</button>
+            <button className="btn btn-primary" disabled={!selectedDietTpl} onClick={handleAssignDiet}>Asignar Dieta</button>
+          </>
+        }>
+          <div className="form-group">
+            <label className="form-label">Seleccionar plantilla</label>
+            <select className="form-input" value={selectedDietTpl} onChange={e=>setSelectedDietTpl(e.target.value)}>
+              <option value="">-- Sin asignar --</option>
+              {dietTemplates.map(t => <option value={t.id} key={t.id}>{t.name}</option>)}
+            </select>
+          </div>
+      </Modal>
+
+      {/* Edit Diet Form Modal */}
+      <Modal open={editDietModal} onClose={() => setEditDietModal(false)}
+        title="Editar dieta del cliente"
+        footer={
+          <>
+            <button className="btn btn-ghost" onClick={() => setEditDietModal(false)}>Cancelar</button>
+            <button className="btn btn-primary" onClick={handleSaveEditDiet}>Guardar</button>
+          </>
+        }>
+        {editDietForm && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ background: 'rgba(0,255,0,0.06)', border: '1px solid rgba(0,255,0,0.15)', borderRadius: 'var(--radius-sm)', padding: '8px 12px', fontSize: 12, color: 'var(--color-accent)' }}>
+              ✓ Editás la dieta asignada. El template original no se modifica.
+            </div>
+            <div className="form-group">
+              <label className="form-label">Nombre</label>
+              <input className="form-input" value={editDietForm.name} onChange={e => setEditDietForm(f => ({ ...f, name: e.target.value }))} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Objetivo</label>
+              <input className="form-input" value={editDietForm.goal} onChange={e => setEditDietForm(f => ({ ...f, goal: e.target.value }))} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Indicaciones Generales</label>
+              <textarea className="form-input" rows={3} value={editDietForm.indications} onChange={e => setEditDietForm(f => ({ ...f, indications: e.target.value }))} />
+            </div>
+            
+            <h4 style={{ fontSize: 15, marginTop: 8 }}>Comidas (Editar contenido)</h4>
+            {editDietForm.meals.map((m, idx) => (
+              <div key={m.id} style={{ background: 'var(--color-bg-3)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: 12 }}>
+                 <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 8 }}>{m.name}</div>
+                 <textarea className="form-input" rows={2} value={m.content} onChange={e => setEditDietForm(f => ({ ...f, meals: f.meals.map((meal, i) => i === idx ? { ...meal, content: e.target.value } : meal) }))} />
+              </div>
+            ))}
+          </div>
+        )}
+      </Modal>
     </CoachLayout>
   );
 }

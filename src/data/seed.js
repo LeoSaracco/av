@@ -280,6 +280,91 @@ export const SEED_PRODUCTS = [
   },
 ];
 
+export const SEED_DIET_TEMPLATES = [
+  {
+    id: 'dt1',
+    name: 'Déficit Calórico General',
+    goal: 'Pérdida de peso y definición',
+    description: 'Dieta estructurada en 4 comidas, con alto contenido proteico para saciedad.',
+    indications: 'Beber al menos 3 litros de agua al día. Cocinar con rocío vegetal.',
+    meals: [
+      { id: 'm1', name: 'Desayuno', content: '3 huevos revueltos, 1 tostada de pan integral, infusión sin azúcar.' },
+      { id: 'm2', name: 'Almuerzo', content: '150g de pechuga de pollo, ensalada de hojas verdes tomate y zanahoria, 1 cucharada de aceite de oliva.' },
+      { id: 'm3', name: 'Merienda', content: '1 yogurt descremado natural o con fruta, puñado de almendras (30g).' },
+      { id: 'm4', name: 'Cena', content: '200g de pescado blanco al horno, porción generosa de brócoli al vapor.' },
+    ],
+    createdAt: '2025-09-02',
+  },
+  {
+    id: 'dt2',
+    name: 'Volumen Limpio',
+    goal: 'Aumento de masa muscular minimizando ganancia de grasa',
+    description: 'Aporte de carbohidratos complejos antes y después de entrenar.',
+    indications: 'El timing de los carbohidratos es fundamental. Evitar harinas refinadas.',
+    meals: [
+      { id: 'm5', name: 'Desayuno', content: 'Pancakes de avena (60g), 4 claras y 1 yema, 1 banana, syrup sin azúcar.' },
+      { id: 'm6', name: 'Media Mañana', content: 'Batido de proteína whey (30g) + 1 manzana.' },
+      { id: 'm7', name: 'Almuerzo', content: '200g de carne magra (cuadril/lomo), 1 taza de arroz integral cocido, vegetales asados.' },
+      { id: 'm8', name: 'Merienda', content: 'Tostadas de arroz con pechuga de pollo feteada y palta (50g).' },
+      { id: 'm9', name: 'Cena', content: '250g de pechuga o pescado, 2 papas medianas al horno, ensalada mixta.' },
+    ],
+    createdAt: '2025-09-06',
+  }
+];
+
+export const SEED_DIETS = [
+  {
+    id: 'd1',
+    name: 'Déficit Calórico – Martina',
+    goal: 'Pérdida de peso y definición',
+    templateId: 'dt1',
+    indications: 'Agregamos una colación si sentís mucha hambre a la tarde.',
+    meals: JSON.parse(JSON.stringify(SEED_DIET_TEMPLATES[0].meals)),
+    createdAt: '2025-09-21',
+  },
+  {
+    id: 'd2',
+    name: 'Volumen Ajustado – Lucas',
+    goal: 'Máxima ganancia limpia',
+    templateId: 'dt2',
+    indications: 'Aumentamos calorías respecto a la versión base.',
+    meals: [
+      { id: 'm5b', name: 'Desayuno', content: 'Pancakes de avena (100g), 5 claras y 2 yemas, 1 banana.' },
+      { id: 'm6b', name: 'Media Mañana', content: 'Batido whey (40g) + 2 manzanas + nueces.' },
+      { id: 'm7b', name: 'Almuerzo', content: '250g carne magra, 1.5 tazas arroz integral, vegetales.' },
+      { id: 'm8b', name: 'Merienda (Post-entreno)', content: 'Bagel integral con pasta de maní y jamón de pavo.' },
+      { id: 'm9b', name: 'Cena', content: '300g pescado, 3 papas medianas, ensalada.' },
+    ],
+    createdAt: '2025-10-06',
+  }
+];
+
+export const SEED_DIET_ASSIGNMENTS = [
+  { id: 'da1', clientId: 'c1', dietId: 'd1', assignedAt: '2025-09-21', active: true },
+  { id: 'da2', clientId: 'c2', dietId: 'd2', assignedAt: '2025-10-06', active: true },
+];
+
+export const SEED_NUTRITION_THREADS = [
+  {
+    id: 'th1',
+    clientId: 'c1',
+    messages: [
+      { id: 'm1', sender: 'coach', text: 'Martina, acá te dejo tu nuevo plan nutricional. Cualquier duda escribime por acá.', date: '2025-09-21 10:00' },
+      { id: 'm2', sender: 'client', text: 'Gracias Adrián. En el desayuno, ¿puedo cambiar la tostada por galletas de arroz?', date: '2025-09-21 11:30' },
+      { id: 'm3', sender: 'coach', text: 'Sí, claro. Podés consumir 3 galletas de arroz en lugar de la tostada integral.', date: '2025-09-21 12:45' }
+    ],
+  },
+  {
+    id: 'th2',
+    clientId: 'c2',
+    messages: [
+      { id: 'm4', sender: 'coach', text: 'Lucas, subimos las calorías en este plan para asegurar ese volumen.', date: '2025-10-06 09:00' },
+      { id: 'm5', sender: 'client', text: 'Bárbaro, me cuesta un poco meter tantas claras a la mañana, ¿se puede usar huevo entero?', date: '2025-10-07 08:20' },
+      { id: 'm6', sender: 'coach', text: 'Podés usar 3 huevos enteros y 1 clara, suma un poco más de grasa pero estamos en volumen, no pasa nada.', date: '2025-10-07 09:15' }
+    ],
+  }
+];
+
 // ── MOCK USERS ─────────────────────────────────────────────────────────────────
 export const MOCK_USERS = [
   { id: 'coach1', role: 'coach', name: 'Adrián Vila', email: 'adrian@av.com', password: 'coach123' },

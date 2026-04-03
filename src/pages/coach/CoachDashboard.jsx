@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { CoachLayout } from '../../components/layout/CoachLayout';
 
 export default function CoachDashboard() {
-  const { clients, routines, templates, assignments, notes } = useApp();
+  const { clients, routines, templates, assignments, notes, dietTemplates } = useApp();
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -14,7 +14,7 @@ export default function CoachDashboard() {
   const recentNotes = notes.slice(-3).reverse();
 
   const stats = [
-    { label: 'Clientes', value: clients.length, active: activeClients, icon: '👥', path: '/coach/clients' },
+    { label: 'Dietas Base', value: dietTemplates?.length || 0, icon: '🥗', path: '/coach/diet-templates' },
     { label: 'Rutinas', value: routines.length, icon: '💪', path: '/coach/routines' },
     { label: 'Templates', value: templates.length, icon: '📋', path: '/coach/templates' },
     { label: 'Asignadas', value: assignedCount, icon: '🔗', path: '/coach/assign' },
@@ -126,9 +126,10 @@ export default function CoachDashboard() {
           <h3 style={{ fontSize: 16, marginBottom: 16 }}>Acciones rápidas</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {[
-              { emoji: '👤', label: 'Agregar cliente', path: '/coach/clients', action: 'add' },
-              { emoji: '📋', label: 'Crear template', path: '/coach/templates', action: 'add' },
-              { emoji: '💪', label: 'Nueva rutina', path: '/coach/routines', action: 'add' },
+              { emoji: '👤', label: 'Nuevo cliente', path: '/coach/clients', action: 'add' },
+              { emoji: '📋', label: 'Nuevo template', path: '/coach/templates' },
+              { emoji: '🥗', label: 'Dieta base', path: '/coach/diet-templates' },
+              { emoji: '💪', label: 'Nueva rutina', path: '/coach/routines' },
               { emoji: '🔗', label: 'Asignar rutina', path: '/coach/assign' },
             ].map(a => (
               <button key={a.label}

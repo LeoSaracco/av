@@ -1,16 +1,27 @@
-# React + Vite
+# AV Fitness App - PaaS Mockup
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este proyecto es una plataforma interactiva "Platform as a Service" (PaaS) diseñada inicialmente para el coach Adrián Vila, con la capacidad de escalar a una arquitectura multi-coach en el futuro. Permite a los profesionales del fitness gestionar rutinas, hacer seguimiento del progreso y proveer planes nutricionales a sus clientes.
 
-Currently, two official plugins are available:
+## Arquitectura y Stack
+*   **Frontend**: React + Vite
+*   **Estado & Persistencia**: Context API + `localStorage` (mockup de backend)
+*   **Estilos**: Vanilla CSS con variables nativas, paleta dark mode premium "Glassmorphism" con acentos verde flúor.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Módulo de Nutrición Bidireccional
+La aplicación incluye un módulo de `DietTemplates` para Coaches y visualización simplificada para Clientes. Adicionalmente, cuenta con un chat/hilo de consultas asíncrono para dudas en tiempo real.
 
-## React Compiler
+### 🤖 Integración Pendiente (Asistente IA Dedicado)
+Se ha incorporado un submódulo independiente **"Asistente IA ✨"** (`/client/ai-assistant`) en el dashboard del cliente. El propósito es actuar como un chatbot inteligente que genera una "lluvia de ideas" de comidas sugeridas si el cliente no sabe qué comer y potenciar la experiencia. 
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**Instrucciones para el equipo de Backend:**
+Cuando se conecte una API/BD real, la funcionalidad de IA en el Cliente debe funcionar como un chatbot websocket o endpoint dedicado (ej. `/api/ai/chat`) que cumpla con los siguientes requisitos:
+1.  **Contexto Inicial**: El cliente de React envía un prompt de sistema invisible a la IA junto con el objetivo nutricional actual (ej. "Entrenás a Martina, su objetivo es Volumen").
+2.  **Llamada a LLM**: El servidor formula e interroga directamente al LLM (OpenAI, Claude, etc.) ante cada pregunta del cliente.
+3.  **Persistencia Aislada**: El historial de charla con la IA debe guardarse internamente en la DB en una colección apartada (`ai_threads`) y NO mezclarse en el hilo general de Consultas humano.
+4.  Actualmente la respuesta ("typing" y mensajería condicional por peso/volumen) está mockeada en el frontend local mediante `setTimeout`, pero la lógica decisional entera deberá trasladarse a la nube.
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Instalación Local
+```bash
+npm install
+npm run dev
+```

@@ -13,6 +13,7 @@ import CoachDashboard from './pages/coach/CoachDashboard';
 import Clients from './pages/coach/Clients';
 import ClientDetail from './pages/coach/ClientDetail';
 import Templates from './pages/coach/Templates';
+import DietTemplates from './pages/coach/DietTemplates';
 import Routines from './pages/coach/Routines';
 import Assign from './pages/coach/Assign';
 import Notes from './pages/coach/Notes';
@@ -22,7 +23,9 @@ import ClientDashboard from './pages/client/ClientDashboard';
 import ClientRoutine from './pages/client/ClientRoutine';
 import ClientProgress from './pages/client/ClientProgress';
 import ClientGoals from './pages/client/ClientGoals';
+import ClientNutrition from './pages/client/ClientNutrition';
 import ClientNotes from './pages/client/ClientNotes';
+import ClientAIAssistant from './pages/client/ClientAIAssistant';
 
 // Store pages
 import Store from './pages/store/Store';
@@ -70,6 +73,7 @@ export default function App() {
             <Route path="/coach/clients" element={<CoachRoute><Clients /></CoachRoute>} />
             <Route path="/coach/clients/:id" element={<CoachRoute><ClientDetail /></CoachRoute>} />
             <Route path="/coach/templates" element={<CoachRoute><Templates /></CoachRoute>} />
+            <Route path="/coach/diet-templates" element={<CoachRoute><DietTemplates /></CoachRoute>} />
             <Route path="/coach/routines" element={<CoachRoute><Routines /></CoachRoute>} />
             <Route path="/coach/assign" element={<CoachRoute><Assign /></CoachRoute>} />
             <Route path="/coach/notes" element={<CoachRoute><Notes /></CoachRoute>} />
@@ -79,6 +83,8 @@ export default function App() {
             <Route path="/client/routine" element={<ClientRoute><ClientRoutine /></ClientRoute>} />
             <Route path="/client/progress" element={<ClientRoute><ClientProgress /></ClientRoute>} />
             <Route path="/client/goals" element={<ClientRoute><ClientGoals /></ClientRoute>} />
+            <Route path="/client/nutrition" element={<ClientRoute><ClientNutrition /></ClientRoute>} />
+            <Route path="/client/ai-assistant" element={<ClientRoute><ClientAIAssistant /></ClientRoute>} />
             <Route path="/client/notes" element={<ClientRoute><ClientNotes /></ClientRoute>} />
 
             {/* Store — public */}
