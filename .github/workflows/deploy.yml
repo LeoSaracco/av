@@ -1,54 +1,41 @@
-name: Deploy to GitHub Pages
+name: Deploy to Railway
 
-'on':
+on:
   push:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
 
 jobs:
-  build:
+  deploy-frontend:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build
-        run: npm run build
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+          node-version: 22
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build
+      - uses: railwayapp/railway-deploy@v1
         with:
-          path: ./dist
+          service: av-frontend
+          railway_token: ${{ secrets.RAILWAY_TOKEN }}
 
-  deploy:
-    needs: build
+  deploy-backend:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: 'temurin'
+      - name: Build jar
+        working-directory: backend
+        run: ./gradlew build -x test --no-daemon
+      - uses: railwayapp/railway-deploy@v1
+        with:
+          service: av-backend
+          railway_token: ${{ secrets.RAILWAY_TOKEN }}

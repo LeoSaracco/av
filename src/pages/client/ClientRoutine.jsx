@@ -11,6 +11,30 @@ import { useApp } from '../../context/AppContext';
 import { ClientLayout } from '../../components/layout/ClientLayout';
 
 /**
+ * Convierte URLs de video de YouTube y Vimeo a su formato embed.
+ * Soporta youtube.com/watch, youtu.be, youtube.com/embed,
+ * vimeo.com y player.vimeo.com.
+ *
+ * @param {string} url - URL del video en formato watch, compartir o embed
+ * @returns {string|null} URL de embed o null si la URL no es soportada
+ */
+function getEmbedUrl(url) {
+  if (!url) return null;
+
+  const ytWatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  if (ytWatch) return `https://www.youtube.com/embed/${ytWatch[1]}`;
+
+  if (url.includes('youtube.com/embed/')) return url;
+
+  const vimeoId = url.match(/vimeo\.com\/(\d+)/);
+  if (vimeoId) return `https://player.vimeo.com/video/${vimeoId[1]}`;
+
+  if (url.includes('player.vimeo.com/video/')) return url;
+
+  return null;
+}
+
+/**
  * Visualización de la rutina activa asignada al cliente.
  * Muestra cada ejercicio con sets, reps y descanso en tarjetas expandibles
  * que revelan detalles adicionales, notas del coach y enlace al video
@@ -118,12 +142,30 @@ export default function ClientRoutine() {
                     <p style={{ fontSize: 13, color: 'var(--color-text-2)', lineHeight: 1.6 }}>{ex.notes}</p>
                   </div>
                 )}
-                {ex.videoUrl && (
-                  <a href={ex.videoUrl} target="_blank" rel="noopener noreferrer"
-                    className="btn btn-ghost btn-sm" style={{ marginTop: 10 }}>
-                    🎬 Ver video del ejercicio
-                  </a>
-                )}
+                {ex.videoUrl && (() => {
+                  const embedUrl = getEmbedUrl(ex.videoUrl);
+                  if (embedUrl) {
+                    return (
+                      <div style={{ marginTop: 12, borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--color-border)' }}>
+                        <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0 }}>
+                          <iframe
+                            src={embedUrl}
+                            title={`Video: ${ex.name}`}
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  }
+                  return (
+                    <a href={ex.videoUrl} target="_blank" rel="noopener noreferrer"
+                      className="btn btn-ghost btn-sm" style={{ marginTop: 10 }}>
+                      🎬 Ver video del ejercicio
+                    </a>
+                  );
+                })()}
               </div>
             )}
           </div>

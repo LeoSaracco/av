@@ -1,0 +1,18 @@
+[build]
+builder = "nixpacks"
+
+[monorepo]
+root = "."
+
+[[services]]
+name = "av-frontend"
+path = "."
+buildCommand = "npm ci && npm run build"
+startCommand = "npx serve -s dist -l $PORT"
+
+[[services]]
+name = "av-backend"
+path = "backend"
+buildCommand = "./gradlew build -x test"
+startCommand = "java -jar build/libs/av-fitness-api-0.0.1-SNAPSHOT.jar"
+healthcheckPath = "/actuator/health"

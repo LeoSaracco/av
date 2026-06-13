@@ -6,6 +6,7 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import ThemeToggle from '../ui/ThemeToggle';
 
 /**
  * Layout del panel de cliente.
@@ -32,6 +33,7 @@ export function ClientLayout({ children }) {
           <div className="avatar" style={{ width: 34, height: 34, fontSize: 13 }}>
             {user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
           </div>
+          <ThemeToggle />
           <button className="btn btn-ghost btn-sm" onClick={handleLogout}>Salir</button>
         </div>
       </nav>

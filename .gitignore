@@ -17,6 +17,13 @@ dist-ssr
 .github-pages
 coverage
 
+# Gradle / Java
+backend/build/
+backend/.gradle/
+*.class
+*.jar
+!backend/gradle/wrapper/gradle-wrapper.jar
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

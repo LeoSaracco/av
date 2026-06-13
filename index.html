@@ -7,6 +7,12 @@
     <title>Adrián Vila — Entrenamiento Personalizado</title>
     <meta name="description" content="Plataforma de entrenamiento personalizado con Adrián Vila. Gestión de rutinas, seguimiento de progreso y más." />
     <meta name="theme-color" content="#000000" />
+    <script>
+      (function() {
+        var theme = localStorage.getItem('av_theme');
+        if (theme) document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -1,0 +1,26 @@
+{
+  "nav": {
+    "services": "Services",
+    "plans": "Plans",
+    "about": "About Me",
+    "testimonials": "Testimonials",
+    "store": "Shop",
+    "login": "Sign In"
+  },
+  "hero": {
+    "badge": "Premium Personal Training",
+    "titleLine1": "Your best version",
+    "titleLine2": "starts today.",
+    "subtitle": "100% personalized training, routines designed for your goals, constant monitoring and real results. No excuses.",
+    "cta": "Get Started",
+    "services": "View Services"
+  },
+  "footer": {
+    "brand": "Adrián Vila",
+    "subtitle": "Personal Fitness Coach",
+    "copyright": "© 2026 Adrián Vila. All rights reserved."
+  },
+  "common": {
+    "loading": "Loading..."
+  }
+}

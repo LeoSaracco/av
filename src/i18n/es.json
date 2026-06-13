@@ -1,0 +1,26 @@
+{
+  "nav": {
+    "services": "Servicios",
+    "plans": "Planes",
+    "about": "Sobre mí",
+    "testimonials": "Testimonios",
+    "store": "Tienda",
+    "login": "Acceder"
+  },
+  "hero": {
+    "badge": "Entrenamiento Personalizado Premium",
+    "titleLine1": "Tu mejor versión",
+    "titleLine2": "comienza hoy.",
+    "subtitle": "Entrenamiento 100% personalizado, rutinas diseñadas para tus objetivos, seguimiento constante y resultados reales. Sin excusas.",
+    "cta": "Comenzar ahora",
+    "services": "Ver servicios"
+  },
+  "footer": {
+    "brand": "Adrián Vila",
+    "subtitle": "Preparador Físico Personalizado",
+    "copyright": "© 2026 Adrián Vila. Todos los derechos reservados."
+  },
+  "common": {
+    "loading": "Cargando..."
+  }
+}

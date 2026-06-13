@@ -7,6 +7,7 @@
  */
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import { CoachLayout } from '../../components/layout/CoachLayout';
@@ -26,6 +27,27 @@ export default function CoachDashboard() {
 
   const assignedCount = assignments.filter(a => a.active).length;
   const recentNotes = notes.slice(-3).reverse();
+
+  const statusCounts = clients.reduce((acc, c) => {
+    const s = c.status || 'sin estado';
+    acc[s] = (acc[s] || 0) + 1;
+    return acc;
+  }, {});
+
+  const statusCards = [
+    { status: 'activo', label: 'Activos', color: 'var(--color-accent)', bg: 'var(--color-accent-dim)', count: statusCounts['activo'] || 0 },
+    { status: 'pausado', label: 'Pausados', color: 'var(--color-warning)', bg: 'rgba(255, 184, 0, 0.15)', count: statusCounts['pausado'] || 0 },
+    { status: 'inactivo', label: 'Inactivos', color: 'var(--color-text-3)', bg: 'var(--color-surface-2)', count: statusCounts['inactivo'] || 0 },
+  ];
+
+  const clientActivityData = [
+    { month: 'Ene', activos: 2 },
+    { month: 'Feb', activos: 3 },
+    { month: 'Mar', activos: 4 },
+    { month: 'Abr', activos: 5 },
+    { month: 'May', activos: 4 },
+    { month: 'Jun', activos: assignedCount },
+  ];
 
   const stats = [
     { label: 'Dietas Base', value: dietTemplates?.length || 0, icon: '🥗', path: '/coach/diet-templates' },
@@ -59,6 +81,56 @@ export default function CoachDashboard() {
             </div>
             <div className="stat-value">{s.value}</div>
             <div className="stat-label">{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Client activity chart */}
+      <div className="card" style={{ marginBottom: 20 }}>
+        <h3 style={{ fontSize: 16, marginBottom: 16 }}>Clientes activos por mes</h3>
+        <ResponsiveContainer width="100%" height={200}>
+          <BarChart data={clientActivityData} margin={{ top: 4, right: 4, left: -20, bottom: 4 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+            <XAxis dataKey="month" tick={{ fontSize: 12, fill: 'var(--color-text-3)' }} axisLine={false} tickLine={false} />
+            <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: 'var(--color-text-3)' }} axisLine={false} tickLine={false} />
+            <Tooltip
+              contentStyle={{
+                background: 'var(--color-surface-2)',
+                border: '1px solid var(--color-border)',
+                borderRadius: 'var(--radius-md)',
+                color: 'var(--color-text)',
+                fontSize: 13,
+              }}
+              cursor={{ fill: 'var(--color-accent-dim2)' }}
+            />
+            <Bar dataKey="activos" fill="rgb(0, 255, 0)" radius={[6, 6, 0, 0]} maxBarSize={40} name="Clientes activos" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Client status distribution */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 20 }}>
+        {statusCards.map(s => (
+          <div
+            key={s.status}
+            style={{
+              background: s.bg,
+              border: `1px solid ${s.color}`,
+              borderRadius: 'var(--radius-lg)',
+              padding: '18px 16px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 6,
+              transition: 'var(--transition)',
+            }}
+          >
+            <div style={{ fontSize: 28, fontWeight: 800, fontFamily: 'var(--font-main)', color: s.color }}>
+              {s.count}
+            </div>
+            <div style={{ fontSize: 12, color: s.color, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              {s.label}
+            </div>
           </div>
         ))}
       </div>

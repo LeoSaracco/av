@@ -7,6 +7,7 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import ThemeToggle from '../ui/ThemeToggle';
 
 // ── Navegación ─────────────────────────────────────────────────────────────────
 const navItems = [
@@ -70,10 +71,11 @@ export function CoachLayout({ children }) {
             <div className="avatar" style={{ width: 34, height: 34, fontSize: 13 }}>
               {user?.name?.split(' ').map(n => n[0]).join('').slice(0,2)}
             </div>
-            <div>
+            <div style={{ flex: 1 }}>
               <div style={{ fontSize: 13, fontWeight: 600 }}>{user?.name}</div>
               <div style={{ fontSize: 11, color: 'var(--color-text-3)' }}>Coach</div>
             </div>
+            <ThemeToggle />
           </div>
           <button className="sidebar-nav-item" style={{ color: 'var(--color-error)', width: '100%' }} onClick={handleLogout}>
             <LogoutIcon size={16} />
@@ -90,7 +92,7 @@ export function CoachLayout({ children }) {
             <MenuIcon size={18} />
           </button>
           <span style={{ fontFamily: 'var(--font-main)', fontWeight: 700 }}>Adrián Vila</span>
-          <div style={{ width: 36 }} />
+          <ThemeToggle />
         </div>
 
         <div className="coach-content animate-fade">

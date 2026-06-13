@@ -7,6 +7,7 @@
  */
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useI18n } from '../i18n';
 import { SEED_PLANS } from '../data/seed';
 
 /**
@@ -19,6 +20,7 @@ import { SEED_PLANS } from '../data/seed';
 export default function Landing() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { t } = useI18n();
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
@@ -36,13 +38,13 @@ export default function Landing() {
 
         {/* Desktop nav */}
         <div className="landing-nav-links" style={{ display: 'flex', gap: 28, alignItems: 'center' }}>
-          <a href="#servicios" style={{ color: 'var(--color-text-2)', fontSize: 14 }}>Servicios</a>
-          <a href="#planes" style={{ color: 'var(--color-text-2)', fontSize: 14 }}>Planes</a>
-          <a href="#sobre-mi" style={{ color: 'var(--color-text-2)', fontSize: 14 }}>Sobre mí</a>
-          <a href="#testimonios" style={{ color: 'var(--color-text-2)', fontSize: 14 }}>Testimonios</a>
-          <Link to="/store" style={{ color: 'var(--color-text-2)', fontSize: 14 }}>Tienda</Link>
+          <a href="#servicios" style={{ color: 'var(--color-text-2)', fontSize: 14 }}>{t('nav.services')}</a>
+          <a href="#planes" style={{ color: 'var(--color-text-2)', fontSize: 14 }}>{t('nav.plans')}</a>
+          <a href="#sobre-mi" style={{ color: 'var(--color-text-2)', fontSize: 14 }}>{t('nav.about')}</a>
+          <a href="#testimonios" style={{ color: 'var(--color-text-2)', fontSize: 14 }}>{t('nav.testimonials')}</a>
+          <Link to="/store" style={{ color: 'var(--color-text-2)', fontSize: 14 }}>{t('nav.store')}</Link>
           <button className="btn btn-primary btn-sm" onClick={() => navigate('/login')}>
-            Acceder
+            {t('nav.login')}
           </button>
         </div>
 
@@ -63,12 +65,12 @@ export default function Landing() {
           background: 'var(--color-bg-2)', borderBottom: '1px solid var(--color-border)',
           padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16,
         }}>
-          <a href="#servicios" style={{ color: 'var(--color-text-2)' }} onClick={() => setMenuOpen(false)}>Servicios</a>
-          <a href="#planes" style={{ color: 'var(--color-text-2)' }} onClick={() => setMenuOpen(false)}>Planes</a>
-          <a href="#sobre-mi" style={{ color: 'var(--color-text-2)' }} onClick={() => setMenuOpen(false)}>Sobre mí</a>
-          <a href="#testimonios" style={{ color: 'var(--color-text-2)' }} onClick={() => setMenuOpen(false)}>Testimonios</a>
-          <Link to="/store" style={{ color: 'var(--color-text-2)' }} onClick={() => setMenuOpen(false)}>Tienda</Link>
-          <button className="btn btn-primary" onClick={() => navigate('/login')}>Acceder</button>
+          <a href="#servicios" style={{ color: 'var(--color-text-2)' }} onClick={() => setMenuOpen(false)}>{t('nav.services')}</a>
+          <a href="#planes" style={{ color: 'var(--color-text-2)' }} onClick={() => setMenuOpen(false)}>{t('nav.plans')}</a>
+          <a href="#sobre-mi" style={{ color: 'var(--color-text-2)' }} onClick={() => setMenuOpen(false)}>{t('nav.about')}</a>
+          <a href="#testimonios" style={{ color: 'var(--color-text-2)' }} onClick={() => setMenuOpen(false)}>{t('nav.testimonials')}</a>
+          <Link to="/store" style={{ color: 'var(--color-text-2)' }} onClick={() => setMenuOpen(false)}>{t('nav.store')}</Link>
+          <button className="btn btn-primary" onClick={() => navigate('/login')}>{t('nav.login')}</button>
         </div>
       )}
 
@@ -100,7 +102,7 @@ export default function Landing() {
           textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 28,
         }}>
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-accent)', display: 'inline-block', animation: 'pulse 2s infinite' }}/>
-          Entrenamiento Personalizado Premium
+          {t('hero.badge')}
         </div>
 
         <h1 style={{
@@ -108,24 +110,23 @@ export default function Landing() {
           fontWeight: 900, lineHeight: 1.0, letterSpacing: '-2px', marginBottom: 24,
           maxWidth: 900,
         }}>
-          Tu mejor versión<br/>
-          <span style={{ color: 'var(--color-accent)' }}>comienza hoy.</span>
+          {t('hero.titleLine1')}<br/>
+          <span style={{ color: 'var(--color-accent)' }}>{t('hero.titleLine2')}</span>
         </h1>
 
         <p style={{
           fontSize: 'clamp(16px, 2vw, 20px)', color: 'var(--color-text-2)',
           maxWidth: 560, lineHeight: 1.7, marginBottom: 40,
         }}>
-          Entrenamiento 100% personalizado, rutinas diseñadas para tus objetivos,
-          seguimiento constante y resultados reales. Sin excusas.
+          {t('hero.subtitle')}
         </p>
 
         <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', justifyContent: 'center' }}>
           <button className="btn btn-primary" style={{ fontSize: 16, padding: '14px 32px' }} onClick={() => navigate('/login')}>
-            Comenzar ahora →
+            {t('hero.cta')} →
           </button>
           <a href="#servicios" className="btn btn-ghost" style={{ fontSize: 16, padding: '14px 32px' }}>
-            Ver servicios
+            {t('hero.services')}
           </a>
         </div>
 
