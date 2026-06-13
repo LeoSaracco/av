@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file Gestión de rutinas completas (CRUD). Permite crear rutinas desde
  *       cero o a partir de un template, con ejercicios ordenables,
  *       duplicación y visualización detallada.
@@ -10,6 +10,14 @@ import { useApp } from '../../context/AppContext';
 import { CoachLayout } from '../../components/layout/CoachLayout';
 import { Modal, ConfirmModal } from '../../components/ui/Modals';
 
+/**
+ * Gestión de rutinas completas (CRUD).
+ * Permite crear rutinas desde cero o a partir de un template, con ejercicios
+ * ordenables mediante controles de subir/bajar, duplicación de rutinas y
+ * visualización detallada en modal.
+ *
+ * @returns {JSX.Element} Panel de administración de rutinas con grilla y modales.
+ */
 export default function Routines() {
   const { routines, templates, addRoutine, updateRoutine, deleteRoutine, duplicateRoutine } = useApp();
   const [search, setSearch] = useState('');
@@ -66,6 +74,7 @@ export default function Routines() {
     });
   };
 
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <CoachLayout>
       <div className="page-header">
@@ -97,7 +106,7 @@ export default function Routines() {
             return (
               <div key={r.id} className="card card-hover" style={{ gap: 14 }}>
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignIítems: 'flex-start', gap: 8 }}>
                     <h3 style={{ fontSize: 15, fontFamily: 'var(--font-main)', lineHeight: 1.3, flex: 1 }}>{r.name}</h3>
                     <span className="badge badge-neutral">{r.exercises?.length || 0} ej.</span>
                   </div>
@@ -137,8 +146,8 @@ export default function Routines() {
             {viewRoutine.exercises?.map((ex, i) => (
               <div key={ex.id} className="exercise-card">
                 <div className="exercise-header">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--color-accent-dim)', color: 'var(--color-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700 }}>{i + 1}</div>
+                  <div style={{ display: 'flex', alignIítems: 'center', gap: 10 }}>
+                    <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--color-accent-dim)', color: 'var(--color-accent)', display: 'flex', alignIítems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700 }}>{i + 1}</div>
                     <span className="exercise-name">{ex.name}</span>
                   </div>
                 </div>
@@ -182,7 +191,7 @@ export default function Routines() {
             <input className="form-input" placeholder="Ej: Ganar masa muscular" value={form.goal} onChange={e => setForm(f => ({ ...f, goal: e.target.value }))} />
           </div>
           <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 16 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignIítems: 'center', marginBottom: 12 }}>
               <span style={{ fontWeight: 600, fontSize: 14 }}>Ejercicios ({form.exercises.length})</span>
               <button className="btn btn-sm btn-secondary" onClick={addExercise}>+ Agregar</button>
             </div>
@@ -191,7 +200,7 @@ export default function Routines() {
             )}
             {form.exercises.map((ex, idx) => (
               <div key={idx} style={{ background: 'var(--color-bg-3)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: 14, marginBottom: 10 }}>
-                <div style={{ display: 'flex', gap: 6, marginBottom: 10, alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: 6, marginBottom: 10, alignIítems: 'center' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <button style={{ background: 'none', border: 'none', color: 'var(--color-text-3)', cursor: 'pointer', padding: '1px 4px', fontSize: 12 }} onClick={() => moveExercise(idx, -1)}>▲</button>
                     <button style={{ background: 'none', border: 'none', color: 'var(--color-text-3)', cursor: 'pointer', padding: '1px 4px', fontSize: 12 }} onClick={() => moveExercise(idx, 1)}>▼</button>

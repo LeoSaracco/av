@@ -1,3 +1,10 @@
+﻿/**
+ * @file Punto de entrada de la aplicación. Define el enrutamiento principal
+ *       con HashRouter, protege rutas de coach y cliente con guards de rol,
+ *       e integra los providers de autenticación y contexto global.
+ * @route Múltiples rutas (ver Routes internos).
+ * @auth Mixto — rutas públicas, de coach y de cliente con guards.
+ */
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -37,6 +44,14 @@ import PaymentSimulator from './pages/PaymentSimulator';
 import Onboarding from './pages/Onboarding';
 
 // ── Route guards ──────────────────────────────────────────────────────────────
+/**
+ * Guard de ruta para coach. Redirige al login si no hay usuario,
+ * o al dashboard de cliente si el rol no es coach.
+ *
+ * @param {object}   props
+ * @param {React.ReactNode} props.children - Componente hijo protegido.
+ * @returns {JSX.Element} Componente hijo si el rol es coach, o redirección.
+ */
 function CoachRoute({ children }) {
   const { user, isCoach } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
@@ -44,6 +59,14 @@ function CoachRoute({ children }) {
   return children;
 }
 
+/**
+ * Guard de ruta para cliente. Redirige al login si no hay usuario,
+ * o al dashboard de coach si el rol no es cliente.
+ *
+ * @param {object}   props
+ * @param {React.ReactNode} props.children - Componente hijo protegido.
+ * @returns {JSX.Element} Componente hijo si el rol es cliente, o redirección.
+ */
 function ClientRoute({ children }) {
   const { user, isClient } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
@@ -51,13 +74,28 @@ function ClientRoute({ children }) {
   return children;
 }
 
+/**
+ * redirección autom tica segÃºn rol.
+ * Si el usuario est  autenticado, lo envía al dashboard que corresponda
+ * (coach o cliente). Si no, redirige al login.
+ *
+ * @returns {JSX.Element} Elemento Navigate hacia la ruta correspondiente.
+ */
 function AuthRedirect() {
   const { user, isCoach } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
   return <Navigate to={isCoach ? '/coach' : '/client'} replace />;
 }
 
-// ── App ───────────────────────────────────────────────────────────────────────
+// ── Componente principal ────────────────────────────────────────────────────
+/**
+ * Componente Raíz de la aplicación.
+ * Envuelve todo el áárbol de componentes con AuthProvider y AppProvider,
+ * define el sistema de rutas completo (públicas, coach, cliente, tienda y
+ * onboarding) con guards de autenticación y redirecciones.
+ *
+ * @returns {JSX.Element} Estructura completa de la aplicación con enrutamiento.
+ */
 export default function App() {
   return (
     <AuthProvider>

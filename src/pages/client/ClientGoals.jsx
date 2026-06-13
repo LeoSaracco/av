@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file Página de objetivos y metas del cliente. Muestra el objetivo
  *       principal con barra de progreso, objetivos secundarios con
  *       checkboxes y una línea de tiempo con hitos del programa.
@@ -10,6 +10,14 @@ import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
 import { ClientLayout } from '../../components/layout/ClientLayout';
 
+/**
+ * Página de objetivos y metas del cliente.
+ * Muestra el objetivo principal con barra de progreso porcentual,
+ * objetivos secundarios con indicadores de cumplimiento y una línea
+ * de tiempo con los hitos del programa de entrenamiento.
+ *
+ * @returns {JSX.Element} Vista de objetivos con progreso y línea de hitos.
+ */
 export default function ClientGoals() {
   const { user } = useAuth();
   const { getClient, getProgressForClient } = useApp();
@@ -30,6 +38,7 @@ export default function ClientGoals() {
     ? Math.min(Math.round((parseFloat(weightDiff) / Math.abs(startWeight - targetWeight)) * 100), 100)
     : Math.round((progress.length / 10) * 100);
 
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <ClientLayout>
       <div style={{ marginBottom: 24 }}>
@@ -39,7 +48,7 @@ export default function ClientGoals() {
 
       {/* Main goal */}
       <div className="card" style={{ gap: 16, marginBottom: 16, background: 'linear-gradient(135deg, rgba(0,255,0,0.08), transparent)', border: '1px solid rgba(0,255,0,0.2)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ display: 'flex', alignIítems: 'center', gap: 10 }}>
           <span style={{ fontSize: 28 }}>🎯</span>
           <h2 style={{ fontSize: 18 }}>Objetivo principal</h2>
         </div>
@@ -67,7 +76,7 @@ export default function ClientGoals() {
           { icon: '🥗', title: 'Alimentación', desc: 'Seguir el plan nutricional del coach.', done: true },
           { icon: '📅', title: 'Consistencia', desc: 'Entrenar las sesiones programadas.', done: progress.length >= 2 },
         ].map(g => (
-          <div key={g.title} className="card" style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: '14px 16px' }}>
+          <div key={g.title} className="card" style={{ flexDirection: 'row', alignIítems: 'center', gap: 14, padding: '14px 16px' }}>
             <span style={{ fontSize: 24 }}>{g.icon}</span>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 600, fontSize: 14, fontFamily: 'var(--font-main)', ...(g.done ? { textDecoration: 'none' } : {}) }}>{g.title}</div>
@@ -77,7 +86,7 @@ export default function ClientGoals() {
               width: 24, height: 24, borderRadius: '50%', flexShrink: 0,
               background: g.done ? 'var(--color-accent)' : 'var(--color-bg-3)',
               border: `2px solid ${g.done ? 'var(--color-accent)' : 'var(--color-border)'}`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              display: 'flex', alignIítems: 'center', justifyContent: 'center',
               fontSize: 12, color: g.done ? '#000' : 'transparent',
             }}>
               {g.done ? '✓' : ''}
@@ -97,7 +106,7 @@ export default function ClientGoals() {
           { date: '6 meses', title: 'Objetivo final', done: false },
         ].map((m, i, arr) => (
           <div key={m.title} style={{ display: 'flex', gap: 14 }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignIítems: 'center' }}>
               <div style={{
                 width: 18, height: 18, borderRadius: '50%', flexShrink: 0,
                 background: m.done ? 'var(--color-accent)' : 'var(--color-bg-4)',

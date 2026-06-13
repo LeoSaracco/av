@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file Asistente nutricional con IA (NutriBot). Chat interactivo que
  *       sugiere comidas e ideas según el objetivo del cliente. Usa
  *       respuestas simuladas basadas en el contexto del plan asignado.
@@ -11,6 +11,13 @@ import { useAuth } from '../../context/AuthContext';
 import { ClientLayout } from '../../components/layout/ClientLayout';
 import { useNavigate } from 'react-router-dom';
 
+/**
+ * Asistente nutricional con IA (NutriBot).
+ * Chat interactivo que sugiere comidas e ideas según el objetivo del cliente
+ * usando respuestas simuladas contextualizadas al plan nutricional asignado.
+ *
+ * @returns {JSX.Element} Vista de chat con el asistente NutriBot IA.
+ */
 export default function ClientAIAssistant() {
   const { user } = useAuth();
   const { getDietAssignmentForClient, getDiet } = useApp();
@@ -69,6 +76,7 @@ export default function ClientAIAssistant() {
     }, 1200);
   };
 
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <ClientLayout>
       <div style={{ marginBottom: 16 }}>
@@ -84,8 +92,8 @@ export default function ClientAIAssistant() {
 
       <div className="card" style={{ padding: 0, overflow: 'hidden', height: '65vh', display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '16px 20px', background: 'rgba(138, 43, 226, 0.1)', borderBottom: '1px solid rgba(138, 43, 226, 0.2)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#b180ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🤖</div>
+          <div style={{ display: 'flex', alignIítems: 'center', gap: 12 }}>
+            <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#b180ff', display: 'flex', alignIítems: 'center', justifyContent: 'center', fontSize: 20 }}>🤖</div>
             <div>
               <h3 style={{ fontSize: 16, margin: 0, color: '#b180ff' }}>NutriBot IA</h3>
               <p style={{ fontSize: 12, color: 'var(--color-text-3)', margin: 0 }}>En línea</p>

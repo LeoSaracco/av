@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file Vista de observaciones del coach para el cliente. Lista todas las
  *       notas y feedback que Adrián Vila registró sobre su entrenamiento.
  * @route /client/notes
@@ -9,6 +9,13 @@ import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
 import { ClientLayout } from '../../components/layout/ClientLayout';
 
+/**
+ * Vista de observaciones del coach para el cliente.
+ * Lista cronológicamente todas las notas y feedback que Adrián Vila
+ * registró sobre el entrenamiento del cliente.
+ *
+ * @returns {JSX.Element} Vista de solo lectura de observaciones del coach.
+ */
 export default function ClientNotes() {
   const { user } = useAuth();
   const { getClient, getNotesForClient } = useApp();
@@ -16,6 +23,7 @@ export default function ClientNotes() {
   const client = getClient(user?.clientId);
   const notes = client ? getNotesForClient(client.id) : [];
 
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <ClientLayout>
       <div style={{ marginBottom: 24 }}>
@@ -36,11 +44,11 @@ export default function ClientNotes() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {notes.map((n, i) => (
             <div key={n.id} className="card" style={{ gap: 12 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ display: 'flex', alignIítems: 'center', gap: 10 }}>
                 <div style={{
                   width: 32, height: 32, borderRadius: '50%',
                   background: 'var(--color-accent-dim)', color: 'var(--color-accent)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  display: 'flex', alignIítems: 'center', justifyContent: 'center',
                   fontWeight: 800, fontFamily: 'var(--font-main)', fontSize: 13,
                   flexShrink: 0,
                 }}>AV</div>

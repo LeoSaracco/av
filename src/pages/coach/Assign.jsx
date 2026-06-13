@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file Panel de asignación de rutinas a clientes. Incluye selector de
  *       cliente/rutina, vista de asignaciones actuales y editor inline
  *       para rutinas ya asignadas.
@@ -10,6 +10,13 @@ import { useApp } from '../../context/AppContext';
 import { CoachLayout } from '../../components/layout/CoachLayout';
 import { Modal } from '../../components/ui/Modals';
 
+/**
+ * Panel de asignación de rutinas a clientes.
+ * Incluye selector de cliente/rutina, vista de asignaciones actuales,
+ * confirmación de asignación y alerta de reemplazo si el cliente ya tiene una.
+ *
+ * @returns {JSX.Element} Vista de asignación con panel de selección y listado actual.
+ */
 export default function Assign() {
   const { clients, routines, assignRoutine, getAssignmentForClient, getRoutine } = useApp();
   const [selectedClient, setSelectedClient] = useState('');
@@ -23,6 +30,7 @@ export default function Assign() {
     setTimeout(() => setSuccess(false), 3000);
   };
 
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <CoachLayout>
       <div className="page-header">
@@ -86,7 +94,7 @@ export default function Assign() {
             const routine = assignment ? getRoutine(assignment.routineId) : null;
             return (
               <div key={c.id} className="card" style={{ gap: 12 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ display: 'flex', alignIítems: 'center', gap: 12 }}>
                   <div className="avatar" style={{ width: 36, height: 36, fontSize: 13 }}>
                     {c.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                   </div>
@@ -99,7 +107,7 @@ export default function Assign() {
 
                 {routine ? (
                   <div style={{ background: 'var(--color-bg-3)', borderRadius: 'var(--radius-sm)', padding: '10px 12px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignIítems: 'flex-start', gap: 8 }}>
                       <div>
                         <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-accent)', marginBottom: 2 }}>
                           💪 {routine.name}
@@ -136,7 +144,17 @@ export default function Assign() {
   );
 }
 
-// ── Inline editor for assigned routine ─────────────────────────────────────────
+// ── Editor inline de rutina asignada ─────────────────────────────────────────
+/**
+ * Editor inline para modificar una rutina ya asignada a un cliente.
+ * Abre un modal con formulario para editar nombre, objetivo y parámetros
+ * de cada ejercicio (series, reps, descanso, notas) sin afectar el template.
+ *
+ * @param {object}   props
+ * @param {Object}   props.routine - Datos de la rutina asignada.
+ * @param {string}   props.routineId - ID de la rutina a editar.
+ * @returns {JSX.Element} Botón "Editar rutina" y modal con formulario de edición.
+ */
 function AssignedRoutineEditor({ routine, routineId }) {
   const { updateRoutine } = useApp();
   const [open, setOpen] = useState(false);

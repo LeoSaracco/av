@@ -1,5 +1,5 @@
-/**
- * @file Carrito de compras. Gestiona cantidades, eliminación de ítems,
+﻿/**
+ * @file Carrito de compras. Gestiona cantidades, eliminación de íítems,
  *       muestra el resumen del pedido con total y permite confirmar
  *       la compra en modo demo.
  * @route /store/cart
@@ -11,6 +11,14 @@ import { useApp } from '../../context/AppContext';
 
 const EMOJIS = { 'Ropa': '👕', 'Suplementos': '💊', 'Accesorios': '🏋️' };
 
+/**
+ * Carrito de compras.
+ * Gestiona cantidades por producto, eliminación de íítems, muestra el resumen
+ * del pedido con total y permite confirmar la compra en modo demo
+ * con pantalla de confirmación y redirección a la tienda.
+ *
+ * @returns {JSX.Element} Vista de carrito con resumen y flujo de checkout demo.
+ */
 export default function Cart() {
   const { cart, removeFromCart, updateCartQty, clearCart, cartTotal } = useApp();
   const navigate = useNavigate();
@@ -23,11 +31,11 @@ export default function Cart() {
 
   if (checked) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 20, padding: 24, background: 'var(--color-bg)' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignIítems: 'center', justifyContent: 'center', gap: 20, padding: 24, background: 'var(--color-bg)' }}>
         <div style={{
           width: 80, height: 80, borderRadius: '50%',
           background: 'var(--color-accent-dim)', color: 'var(--color-accent)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36,
+          display: 'flex', alignIítems: 'center', justifyContent: 'center', fontSize: 36,
           border: '2px solid var(--color-accent)',
         }}>✓</div>
         <h2 style={{ fontSize: 24, fontFamily: 'var(--font-main)' }}>¡Pedido confirmado!</h2>
@@ -42,12 +50,13 @@ export default function Cart() {
     );
   }
 
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
       {/* Navbar */}
       <nav style={{
         position: 'sticky', top: 0, zIndex: 100, height: 64,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        display: 'flex', alignIítems: 'center', justifyContent: 'space-between',
         padding: '0 20px', background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(12px)',
         borderBottom: '1px solid var(--color-border)',
       }}>
@@ -71,10 +80,10 @@ export default function Cart() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
             {cart.map(item => (
-              <div key={item.key} className="card" style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: '14px 16px' }}>
+              <div key={item.key} className="card" style={{ flexDirection: 'row', alignIítems: 'center', gap: 14, padding: '14px 16px' }}>
                 <div style={{
                   width: 56, height: 56, borderRadius: 'var(--radius-md)', flexShrink: 0,
-                  background: 'var(--color-bg-3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28,
+                  background: 'var(--color-bg-3)', display: 'flex', alignIítems: 'center', justifyContent: 'center', fontSize: 28,
                 }}>
                   {EMOJIS[item.product.category] || '📦'}
                 </div>
@@ -92,7 +101,7 @@ export default function Cart() {
                 </div>
 
                 {/* Qty */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ display: 'flex', alignIítems: 'center', gap: 8 }}>
                   <button
                     onClick={() => updateCartQty(item.key, item.qty - 1)}
                     style={{ width: 28, height: 28, borderRadius: 'var(--radius-sm)', background: 'var(--color-bg-3)', border: '1px solid var(--color-border)', color: 'var(--color-text)', cursor: 'pointer', fontSize: 14 }}>
@@ -117,7 +126,7 @@ export default function Cart() {
 
         {cart.length > 0 && (
           <div className="card" style={{ gap: 16 }}>
-            <h3 style={{ fontSize: 16 }}>Resumen del pedido</h3>
+            <h3 style={{ fontSize: 16 }}>resumen del pedido</h3>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {cart.map(item => (

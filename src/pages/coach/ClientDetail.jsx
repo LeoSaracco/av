@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file Vista detallada de un cliente con pestañas: resumen, rutina,
  *       nutrición (con chat Q&A y asignación/edición de dieta), notas y
  *       progreso de peso.
@@ -11,6 +11,14 @@ import { useApp } from '../../context/AppContext';
 import { CoachLayout } from '../../components/layout/CoachLayout';
 import { Modal, ConfirmModal } from '../../components/ui/Modals';
 
+/**
+ * Vista detallada de un cliente con pestañas.
+ * Incluye secciones de resumen, rutina asignada, plan nutricional
+ * (con chat Q&A y asignación/edición de dieta), observaciones del coach
+ * y registro histórico de progreso de peso.
+ *
+ * @returns {JSX.Element} Detalle completo del cliente con navegación por pestañas.
+ */
 export default function ClientDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -83,6 +91,7 @@ export default function ClientDetail() {
   const firstWeight = progress.length > 0 ? progress[0].weight : null;
   const weightDiff = lastWeight && firstWeight ? (lastWeight - firstWeight).toFixed(1) : null;
 
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <CoachLayout>
       {/* Back */}
@@ -91,12 +100,12 @@ export default function ClientDetail() {
       </button>
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 28, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignIítems: 'flex-start', gap: 16, marginBottom: 28, flexWrap: 'wrap' }}>
         <div className="avatar avatar-xl">
           {client.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
         </div>
         <div style={{ flex: 1 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignIítems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <h1 style={{ fontSize: 26 }}>{client.name}</h1>
             <span className={`badge ${client.status === 'activo' ? 'badge-success' : 'badge-warning'}`}>{client.status}</span>
           </div>
@@ -176,12 +185,12 @@ export default function ClientDetail() {
           <div className="card" style={{ gap: 12 }}>
             <h3 style={{ fontSize: 15 }}>📞 Contacto</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: 8, alignIítems: 'center' }}>
                 <span style={{ fontSize: 13, color: 'var(--color-text-3)', width: 60 }}>Email:</span>
                 <span style={{ fontSize: 13 }}>{client.email}</span>
               </div>
               {client.phone && (
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: 8, alignIítems: 'center' }}>
                   <span style={{ fontSize: 13, color: 'var(--color-text-3)', width: 60 }}>Tel:</span>
                   <span style={{ fontSize: 13 }}>{client.phone}</span>
                 </div>
@@ -202,7 +211,7 @@ export default function ClientDetail() {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+              <div style={{ display: 'flex', alignIítems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
                 <div>
                   <h2 style={{ fontSize: 20 }}>{routine.name}</h2>
                   <p style={{ color: 'var(--color-text-2)', fontSize: 13 }}>{routine.goal}</p>
@@ -212,8 +221,8 @@ export default function ClientDetail() {
               {routine.exercises?.map((ex, i) => (
                 <div key={ex.id} className="exercise-card">
                   <div className="exercise-header">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'var(--color-accent-dim)', color: 'var(--color-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700 }}>{i + 1}</div>
+                    <div style={{ display: 'flex', alignIítems: 'center', gap: 10 }}>
+                      <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'var(--color-accent-dim)', color: 'var(--color-accent)', display: 'flex', alignIítems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700 }}>{i + 1}</div>
                       <span className="exercise-name">{ex.name}</span>
                     </div>
                   </div>
@@ -243,7 +252,7 @@ export default function ClientDetail() {
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+                <div style={{ display: 'flex', alignIítems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
                   <div>
                     <h2 style={{ fontSize: 20 }}>{diet.name}</h2>
                     <p style={{ color: 'var(--color-text-2)', fontSize: 13 }}>{diet.goal}</p>
@@ -267,8 +276,8 @@ export default function ClientDetail() {
                 <h4 style={{ fontSize: 16, marginTop: 8 }}>Comidas / Bloques</h4>
                 {diet.meals?.map((m, i) => (
                   <div key={m.id} className="card" style={{ gap: 8 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--color-surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700 }}>{i + 1}</div>
+                    <div style={{ display: 'flex', alignIítems: 'center', gap: 10 }}>
+                      <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--color-surface)', display: 'flex', alignIítems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700 }}>{i + 1}</div>
                       <span style={{ fontWeight: 600, fontSize: 15 }}>{m.name}</span>
                     </div>
                     <p style={{ fontSize: 14, color: 'var(--color-text-2)', paddingLeft: 34, lineHeight: 1.6 }}>{m.content}</p>
@@ -282,7 +291,7 @@ export default function ClientDetail() {
           {diet && (
             <div className="card" style={{ height: 'fit-content', padding: 0, overflow: 'hidden' }}>
               <div style={{ padding: '16px', borderBottom: '1px solid var(--color-border)', background: 'var(--color-bg-3)' }}>
-                <h3 style={{ fontSize: 16, display: 'flex', alignItems: 'center', gap: 8 }}>💬 Consultas</h3>
+                <h3 style={{ fontSize: 16, display: 'flex', alignIítems: 'center', gap: 8 }}>💬 Consultas</h3>
                 <p style={{ fontSize: 12, color: 'var(--color-text-3)' }}>Historial de seguimiento</p>
               </div>
               
@@ -344,7 +353,7 @@ export default function ClientDetail() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {notes.map(n => (
                 <div key={n.id} className="card" style={{ gap: 10 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignIítems: 'center' }}>
                     <span style={{ fontSize: 12, color: 'var(--color-text-3)' }}>{n.createdAt}</span>
                     <div style={{ display: 'flex', gap: 6 }}>
                       <button className="btn btn-sm btn-ghost" onClick={() => openEditNote(n)}>Editar</button>
@@ -370,7 +379,7 @@ export default function ClientDetail() {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {[...progress].reverse().map(p => (
-                <div key={p.id} className="card" style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+                <div key={p.id} className="card" style={{ flexDirection: 'row', alignIítems: 'center', gap: 16 }}>
                   <div style={{ textAlign: 'center', minWidth: 60 }}>
                     <div style={{ fontSize: 20, fontWeight: 800, fontFamily: 'var(--font-main)', color: 'var(--color-accent)' }}>{p.weight}</div>
                     <div style={{ fontSize: 11, color: 'var(--color-text-3)' }}>kg</div>

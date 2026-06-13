@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file Tienda oficial de Adrián Vila. Lista productos con filtros por
  *       categoría y búsqueda textual. Permite agregar al carrito y
  *       navegar al detalle de cada producto.
@@ -11,6 +11,13 @@ import { useApp } from '../../context/AppContext';
 
 const NAV_HEIGHT = 64;
 
+/**
+ * Tienda oficial de Adrián Vila.
+ * Lista productos con filtros por categoría y búsqueda textual. Cada producto
+ * muestra emoji de categoría, nombre, precio y botón para agregar al carrito.
+ *
+ * @returns {JSX.Element} Vista de tienda con grilla de productos y filtros.
+ */
 export default function Store() {
   const { products, addToCart, cartCount } = useApp();
   const navigate = useNavigate();
@@ -25,12 +32,13 @@ export default function Store() {
 
   const EMOJIS = { 'Ropa': '👕', 'Suplementos': '💊', 'Accesorios': '🏋️' };
 
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
       {/* Navbar */}
       <nav style={{
         position: 'sticky', top: 0, zIndex: 100,
-        height: NAV_HEIGHT, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        height: NAV_HEIGHT, display: 'flex', alignIítems: 'center', justifyContent: 'space-between',
         padding: '0 20px', background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(12px)',
         borderBottom: '1px solid var(--color-border)',
       }}>
@@ -47,7 +55,7 @@ export default function Store() {
               position: 'absolute', top: -6, right: -6,
               background: 'var(--color-accent)', color: '#000',
               width: 18, height: 18, borderRadius: '50%',
-              fontSize: 10, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 10, fontWeight: 800, display: 'flex', alignIítems: 'center', justifyContent: 'center',
             }}>{cartCount}</span>
           )}
         </button>
@@ -68,7 +76,7 @@ export default function Store() {
 
       <div className="container" style={{ paddingBottom: 48 }}>
         {/* Filters */}
-        <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignIítems: 'center' }}>
           <div className="tabs" style={{ flex: 1, minWidth: 240 }}>
             {categories.map(c => (
               <button key={c} className={`tab-btn ${category === c ? 'active' : ''}`} onClick={() => setCategory(c)}>{c}</button>
@@ -90,7 +98,7 @@ export default function Store() {
               <div className="product-info">
                 <div className="product-category">{p.category}</div>
                 <div className="product-name">{p.name}</div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}>
+                <div style={{ display: 'flex', alignIítems: 'center', justifyContent: 'space-between', marginTop: 10 }}>
                   <div className="product-price">${p.price.toLocaleString('es-AR')}</div>
                   <button
                     className="btn btn-primary btn-sm"

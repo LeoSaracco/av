@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file Gestión de observaciones por cliente. Presenta un selector lateral
  *       de clientes y un panel central con el listado de notas (CRUD).
  * @route /coach/notes
@@ -9,6 +9,14 @@ import { useApp } from '../../context/AppContext';
 import { CoachLayout } from '../../components/layout/CoachLayout';
 import { Modal, ConfirmModal } from '../../components/ui/Modals';
 
+/**
+ * Gestión de observaciones por cliente.
+ * Presenta un selector lateral con la lista de clientes y un panel central
+ * con todas las observaciones del cliente seleccionado, con opciones de
+ * crear, editar y eliminar notas.
+ *
+ * @returns {JSX.Element} Vista de observaciones con selector de cliente y panel CRUD.
+ */
 export default function Notes() {
   const { clients, notes, addNote, updateNote, deleteNote, getNotesForClient } = useApp();
   const [selectedClient, setSelectedClient] = useState(clients[0]?.id || '');
@@ -29,6 +37,7 @@ export default function Notes() {
     setModal(false);
   };
 
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <CoachLayout>
       <div className="page-header">
@@ -52,7 +61,7 @@ export default function Notes() {
                 key={c.id}
                 onClick={() => setSelectedClient(c.id)}
                 style={{
-                  display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
+                  display: 'flex', alignIítems: 'center', gap: 12, padding: '12px 14px',
                   borderRadius: 'var(--radius-md)', background: selectedClient === c.id ? 'var(--color-accent-dim2)' : 'var(--color-bg-3)',
                   border: `1px solid ${selectedClient === c.id ? 'rgba(0,255,0,0.2)' : 'var(--color-border)'}`,
                   cursor: 'pointer', transition: 'var(--transition)', textAlign: 'left', width: '100%',
@@ -79,7 +88,7 @@ export default function Notes() {
             </div>
           ) : (
             <>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignIítems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                 <div>
                   <h3 style={{ fontSize: 16 }}>{currentClient?.name}</h3>
                   <p style={{ fontSize: 13, color: 'var(--color-text-2)' }}>{clientNotes.length} observaciones</p>
@@ -98,8 +107,8 @@ export default function Notes() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   {clientNotes.map(n => (
                     <div key={n.id} className="card" style={{ gap: 10 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignIítems: 'center' }}>
+                        <div style={{ display: 'flex', alignIítems: 'center', gap: 8 }}>
                           <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-accent)', display: 'inline-block' }} />
                           <span style={{ fontSize: 12, color: 'var(--color-text-3)', fontWeight: 500 }}>{n.createdAt}</span>
                         </div>

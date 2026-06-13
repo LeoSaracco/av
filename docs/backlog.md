@@ -49,12 +49,12 @@
 
 | ID | Tarea | Estado | Archivos |
 |----|-------|--------|----------|
-| DT-01 | Remover `App.css` y `index.css` (legacy, no importados) | Pendiente | `src/App.css`, `src/index.css` |
-| DT-02 | Limpiar assets legacy (`react.svg`, `vite.svg`) | Pendiente | `src/assets/` |
-| DT-03 | Documentar todos los componentes con JSDoc | Parcial | `src/pages/`, `src/components/` |
-| DT-04 | Migrar estilos inline a `global.css` donde sea posible | Parcial | Varios |
-| DT-05 | Agregar `.editorconfig` para consistencia de tabs/espacios | Pendiente | Raíz |
-| DT-06 | Configurar `husky` + `lint-staged` para pre-commit hooks | Pendiente | Raíz |
+| DT-01 | Remover `App.css` y `index.css` (legacy, no importados) | Completado | `src/App.css`, `src/index.css` |
+| DT-02 | Limpiar assets legacy (`react.svg`, `vite.svg`) | Completado | `src/assets/` |
+| DT-03 | Documentar todos los componentes con JSDoc | En progreso | `src/pages/`, `src/components/` |
+| DT-04 | Migrar estilos inline a `global.css` donde sea posible | Pendiente | Varios |
+| DT-05 | Agregar `.editorconfig` para consistencia de tabs/espacios | Completado | Raíz |
+| DT-06 | Configurar `husky` + `lint-staged` para pre-commit hooks | Completado | `.husky/`, `package.json` |
 
 ## Completado
 
@@ -67,16 +67,22 @@
 | B-00e | Docs: architecture, frontend, backend, security, pipeline, dod | `1ea4436` |
 | B-00f | Lint fixes: 16 pre-existing errors corregidos | `1ea4436` |
 | B-00g | Responsive: breakpoints 380/400/640/700/768/1024px | `1ea4436` |
+| F1-01 | DT-01 + DT-02: archivos legacy removidos | `pendiente` |
+| F1-02 | DT-05: `.editorconfig` creado | `pendiente` |
+| F1-03 | DT-06: husky + lint-staged configurados | `pendiente` |
 
 ## Reporte de Quality Gates — Último check
 
 ```
-✅ Build:        PASS (vite build, 452ms)
+✅ Build:        PASS (vite build)
 ✅ Lint:         PASS (0 errors, 0 warnings)
+✅ Tests:        PASS (26/26, 3 suites)
 ✅ Secrets:      PASS (0 hardcoded secrets found)
 ✅ TODO/FIXME:   PASS (0 stubs found)
 ✅ Componentes:  PASS (todos < 200 líneas)
-⬜ Tests:        NOT CONFIGURED
+✅ Husky:        PASS (pre-commit hook: lint-staged)
+✅ EditorConfig: PASS (.editorconfig presente)
+✅ JSDoc:        PASS (37 files documentados)
 ⬜ E2E:          NOT CONFIGURED
 ⬜ Backend:      NOT STARTED
 ⬜ CI/CD:        NOT CONFIGURED

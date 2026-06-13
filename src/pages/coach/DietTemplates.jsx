@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file Gestión de plantillas de dieta base (CRUD). Cada plantilla
  *       contiene nombre, objetivo, indicaciones y comidas/bloques.
  *       Luego pueden asignarse a clientes.
@@ -10,6 +10,13 @@ import { useApp } from '../../context/AppContext';
 import { CoachLayout } from '../../components/layout/CoachLayout';
 import { Modal, ConfirmModal } from '../../components/ui/Modals';
 
+/**
+ * Gestión de plantillas de dieta base (CRUD).
+ * Cada plantilla contiene nombre, objetivo, indicaciones generales y
+ * comidas/bloques que luego pueden asignarse a clientes como dieta.
+ *
+ * @returns {JSX.Element} Panel de administración de dietas base con modal CRUD.
+ */
 export default function DietTemplates() {
   const { dietTemplates, addDietTemplate, updateDietTemplate, deleteDietTemplate, uid } = useApp();
   const [modalOpen, setModalOpen] = useState(false);
@@ -61,6 +68,7 @@ export default function DietTemplates() {
     setFormData(prev => ({ ...prev, meals: prev.meals.filter(m => m.id !== id) }));
   };
 
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <CoachLayout>
       <div className="page-header">
@@ -74,7 +82,7 @@ export default function DietTemplates() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
         {dietTemplates.map(t => (
           <div key={t.id} className="card" style={{ gap: '12px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignIítems: 'flex-start' }}>
               <h3 style={{ fontSize: '18px', paddingRight: '12px' }}>{t.name}</h3>
               <div style={{ display: 'flex', gap: '6px' }}>
                 <button className="btn btn-ghost btn-sm" onClick={() => openEdit(t)}>Editar</button>
@@ -129,7 +137,7 @@ export default function DietTemplates() {
           </div>
 
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignIítems: 'center', marginBottom: '12px' }}>
               <label className="form-label" style={{ marginBottom: 0 }}>Comidas / Bloques</label>
               <button className="btn btn-sm btn-ghost" onClick={handleAddMeal}>+ Agregar comida</button>
             </div>
@@ -140,7 +148,7 @@ export default function DietTemplates() {
               {formData.meals.map((m, i) => (
                 <div key={m.id} style={{ background: 'var(--color-bg-3)', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
                   <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
-                    <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--color-surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700 }}>
+                    <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--color-surface)', display: 'flex', alignIítems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700 }}>
                       {i + 1}
                     </div>
                     <input className="form-input form-input-sm" style={{ flex: 1 }} value={m.name} onChange={e => updateMeal(m.id, 'name', e.target.value)} placeholder="Ej: Almuerzo" />

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file Página de detalle de producto. Muestra información completa,
  *       selección de variantes (talle, color, sabor), botón de agregar
  *       al carrito y productos relacionados de la misma categoría.
@@ -11,6 +11,14 @@ import { useApp } from '../../context/AppContext';
 
 const EMOJIS = { 'Ropa': '👕', 'Suplementos': '💊', 'Accesorios': '🏋️' };
 
+/**
+ * Página de detalle de producto.
+ * Muestra información completa del producto, selección de variantes
+ * (talle, color, sabor), botón de agregar al carrito con feedback
+ * visual y productos relacionados de la misma categoría.
+ *
+ * @returns {JSX.Element} Vista de detalle de producto con variantes y relacionados.
+ */
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -23,7 +31,7 @@ export default function ProductDetail() {
   const [added, setAdded] = useState(false);
 
   if (!product) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignIítems: 'center', justifyContent: 'center' }}>
       <div className="empty-state">
         <h3>Producto no encontrado</h3>
         <button className="btn btn-primary" onClick={() => navigate('/store')}>Volver a tienda</button>
@@ -43,12 +51,13 @@ export default function ProductDetail() {
 
   const related = products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 3);
 
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
       {/* Navbar */}
       <nav style={{
         position: 'sticky', top: 0, zIndex: 100, height: 64,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        display: 'flex', alignIítems: 'center', justifyContent: 'space-between',
         padding: '0 20px', background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(12px)',
         borderBottom: '1px solid var(--color-border)',
       }}>
@@ -66,7 +75,7 @@ export default function ProductDetail() {
           <div style={{
             aspectRatio: '1', background: 'var(--color-surface)',
             border: '1px solid var(--color-border)', borderRadius: 'var(--radius-xl)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 80,
+            display: 'flex', alignIítems: 'center', justifyContent: 'center', fontSize: 80,
           }}>
             {EMOJIS[product.category] || '📦'}
           </div>
@@ -167,7 +176,7 @@ export default function ProductDetail() {
                 { icon: '↩️', text: 'Devolución en 30 días' },
                 { icon: '✅', text: 'Calidad garantizada' },
               ].map(f => (
-                <div key={f.text} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--color-text-2)' }}>
+                <div key={f.text} style={{ display: 'flex', alignIítems: 'center', gap: 6, fontSize: 12, color: 'var(--color-text-2)' }}>
                   <span>{f.icon}</span><span>{f.text}</span>
                 </div>
               ))}

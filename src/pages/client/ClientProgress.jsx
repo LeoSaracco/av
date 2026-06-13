@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file Registro y seguimiento del progreso de peso del cliente. Incluye
  *       gráfico de evolución (Recharts), estadísticas de resumen,
  *       historial cronológico y alta/baja de registros.
@@ -12,6 +12,15 @@ import { ClientLayout } from '../../components/layout/ClientLayout';
 import { Modal } from '../../components/ui/Modals';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
+/**
+ * Componente de tooltip personalizado para el gráfico de peso.
+ *
+ * @param {object}   props
+ * @param {boolean}  props.active - Si el tooltip está activo.
+ * @param {Array}    props.payload - Datos del punto en el gráfico.
+ * @param {string}   props.label - Etiqueta del eje X (fecha).
+ * @returns {JSX.Element|null} Tooltip con fecha y peso formateados.
+ */
 function CustomTooltip({ active, payload, label }) {
   if (active && payload?.length) {
     return (
@@ -24,6 +33,14 @@ function CustomTooltip({ active, payload, label }) {
   return null;
 }
 
+/**
+ * Registro y seguimiento del progreso de peso del cliente.
+ * Incluye gráfico de evolución con Recharts, estadísticas de resumen
+ * (peso inicial, actual, cambio), historial cronológico y modal para
+ * alta y baja de registros de peso.
+ *
+ * @returns {JSX.Element} Vista de progreso con gráfico, estadísticas e historial.
+ */
 export default function ClientProgress() {
   const { user } = useAuth();
   const { getClient, getProgressForClient, addProgress, deleteProgress } = useApp();
@@ -48,9 +65,10 @@ export default function ClientProgress() {
 
   const chartData = progress.map(p => ({ ...p, date: p.date.slice(5) })); // MM-DD format
 
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <ClientLayout>
-      <div style={{ marginBottom: 24, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+      <div style={{ marginBottom: 24, display: 'flex', alignIítems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
         <div>
           <div style={{ fontSize: 12, color: 'var(--color-text-3)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 6 }}>Mi evolución</div>
           <h1 style={{ fontSize: 22 }}>Progreso de peso</h1>
@@ -66,7 +84,7 @@ export default function ClientProgress() {
             { label: 'Actual', value: `${lastWeight} kg`, color: 'var(--color-accent)' },
             { label: 'Cambio', value: `${parseFloat(weightDiff) > 0 ? '+' : ''}${weightDiff} kg`, color: parseFloat(weightDiff) < 0 ? 'var(--color-accent)' : 'var(--color-warning)' },
           ].map(s => (
-            <div key={s.label} className="stat-card" style={{ padding: '14px 12px', gap: 6, alignItems: 'center', textAlign: 'center' }}>
+            <div key={s.label} className="stat-card" style={{ padding: '14px 12px', gap: 6, alignIítems: 'center', textAlign: 'center' }}>
               <div style={{ fontSize: 16, fontWeight: 800, fontFamily: 'var(--font-main)', color: s.color }}>{s.value}</div>
               <div className="stat-label" style={{ fontSize: 10 }}>{s.label}</div>
             </div>
@@ -111,7 +129,7 @@ export default function ClientProgress() {
               const prev = progress[progress.length - 2 - i];
               const diff = prev ? (p.weight - prev.weight).toFixed(1) : null;
               return (
-                <div key={p.id} className="card" style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: '14px 16px' }}>
+                <div key={p.id} className="card" style={{ flexDirection: 'row', alignIítems: 'center', gap: 14, padding: '14px 16px' }}>
                   <div style={{ textAlign: 'center', minWidth: 56 }}>
                     <div style={{ fontSize: 20, fontWeight: 800, fontFamily: 'var(--font-main)', color: 'var(--color-accent)' }}>{p.weight}</div>
                     <div style={{ fontSize: 10, color: 'var(--color-text-3)' }}>kg</div>

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file Dashboard del cliente. Muestra rutina activa, dieta asignada,
  *       última observación del coach, acceso al asistente IA y registro
  *       de progreso.
@@ -11,6 +11,13 @@ import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
 import { ClientLayout } from '../../components/layout/ClientLayout';
 
+/**
+ * Dashboard del cliente.
+ * Muestra un resumen con la rutina activa, dieta asignada, última observación
+ * del coach, acceso rápido al asistente IA y sección de registro de progreso.
+ *
+ * @returns {JSX.Element} Vista principal del panel de cliente.
+ */
 export default function ClientDashboard() {
   const { user } = useAuth();
   const { getClient, getAssignmentForClient, getRoutine, getNotesForClient, getProgressForClient, getDietAssignmentForClient, getDiet } = useApp();
@@ -29,6 +36,7 @@ export default function ClientDashboard() {
   const firstWeight = progress.length > 0 ? progress[0] : null;
   const weightDiff = lastWeight && firstWeight ? (lastWeight.weight - firstWeight.weight).toFixed(1) : null;
 
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <ClientLayout>
       {/* Header */}
@@ -71,7 +79,7 @@ export default function ClientDashboard() {
         style={{ gap: 14, marginBottom: 16, cursor: 'pointer' }}
         onClick={() => navigate('/client/routine')}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignIítems: 'center', justifyContent: 'space-between' }}>
           <h3 style={{ fontSize: 15 }}>💪 Mi rutina</h3>
           <span style={{ color: 'var(--color-accent)', fontSize: 18 }}>→</span>
         </div>
@@ -107,7 +115,7 @@ export default function ClientDashboard() {
         style={{ gap: 14, marginBottom: 16, cursor: 'pointer' }}
         onClick={() => navigate('/client/nutrition')}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignIítems: 'center', justifyContent: 'space-between' }}>
           <h3 style={{ fontSize: 15 }}>🥗 Mi dieta</h3>
           <span style={{ color: 'var(--color-accent)', fontSize: 18 }}>→</span>
         </div>
@@ -132,7 +140,7 @@ export default function ClientDashboard() {
       {/* Latest note */}
       {latestNote && (
         <div className="card" style={{ gap: 10, marginBottom: 16, cursor: 'pointer' }} onClick={() => navigate('/client/notes')}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignIítems: 'center', justifyContent: 'space-between' }}>
             <h3 style={{ fontSize: 15 }}>📝 Última observación del coach</h3>
             <span style={{ color: 'var(--color-accent)', fontSize: 16 }}>→</span>
           </div>
@@ -149,8 +157,8 @@ export default function ClientDashboard() {
         style={{ gap: 12, marginBottom: 16, cursor: 'pointer', background: 'linear-gradient(135deg, rgba(138, 43, 226, 0.15), transparent)', border: '1px solid rgba(138, 43, 226, 0.3)' }}
         onClick={() => navigate('/client/ai-assistant')}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <h3 style={{ fontSize: 15, color: '#b180ff', display: 'flex', alignItems: 'center', gap: 6 }}>✨ Lluvia de Ideas IA</h3>
+        <div style={{ display: 'flex', alignIítems: 'center', justifyContent: 'space-between' }}>
+          <h3 style={{ fontSize: 15, color: '#b180ff', display: 'flex', alignIítems: 'center', gap: 6 }}>✨ Lluvia de Ideas IA</h3>
           <span style={{ color: '#b180ff', fontSize: 16 }}>→</span>
         </div>
         <p style={{ fontSize: 13, color: 'var(--color-text-2)' }}>
@@ -165,7 +173,7 @@ export default function ClientDashboard() {
         style={{ gap: 12, cursor: 'pointer', background: 'linear-gradient(135deg, rgba(0,255,0,0.08), transparent)', border: '1px solid rgba(0,255,0,0.2)' }}
         onClick={() => navigate('/client/progress')}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignIítems: 'center', justifyContent: 'space-between' }}>
           <h3 style={{ fontSize: 15 }}>📊 Registrar progreso</h3>
           <span style={{ color: 'var(--color-accent)', fontSize: 16 }}>→</span>
         </div>

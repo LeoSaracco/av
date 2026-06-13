@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file Visualización de la rutina activa asignada al cliente. Muestra
  *       cada ejercicio con sets, reps y descanso en tarjetas expandibles
  *       que revelan detalles adicionales y notas del coach.
@@ -10,6 +10,14 @@ import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
 import { ClientLayout } from '../../components/layout/ClientLayout';
 
+/**
+ * Visualización de la rutina activa asignada al cliente.
+ * Muestra cada ejercicio con sets, reps y descanso en tarjetas expandibles
+ * que revelan detalles adicionales, notas del coach y enlace al video
+ * de demostración del ejercicio.
+ *
+ * @returns {JSX.Element} Vista de rutina con ejercicios expandibles.
+ */
 export default function ClientRoutine() {
   const { user } = useAuth();
   const { getClient, getAssignmentForClient, getRoutine } = useApp();
@@ -29,6 +37,7 @@ export default function ClientRoutine() {
     </ClientLayout>
   );
 
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <ClientLayout>
       {/* Header */}
@@ -59,14 +68,14 @@ export default function ClientRoutine() {
           >
             {/* Exercise header — always visible */}
             <div
-              style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', cursor: 'pointer' }}
+              style={{ display: 'flex', alignIítems: 'center', gap: 14, padding: '14px 16px', cursor: 'pointer' }}
               onClick={() => setExpanded(expanded === i ? null : i)}
             >
               <div style={{
                 width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
                 background: expanded === i ? 'var(--color-accent)' : 'var(--color-accent-dim2)',
                 color: expanded === i ? '#000' : 'var(--color-accent)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                display: 'flex', alignIítems: 'center', justifyContent: 'center',
                 fontWeight: 800, fontSize: 14, fontFamily: 'var(--font-main)',
                 transition: 'var(--transition)',
               }}>{i + 1}</div>

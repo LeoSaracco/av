@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file Gestión de clientes (ABM). Permite listar, buscar, crear, editar
  *       y eliminar clientes con tabla responsive y modal de formulario.
  * @route /coach/clients
@@ -12,6 +12,13 @@ import { Modal, ConfirmModal } from '../../components/ui/Modals';
 
 const EMPTY_CLIENT = { name: '', email: '', phone: '', goal: '', status: 'activo' };
 
+/**
+ * Panel de gestión de clientes (ABM).
+ * Permite listar, buscar, crear, editar y eliminar clientes mediante
+ * una tabla responsive y un modal de formulario.
+ *
+ * @returns {JSX.Element} Vista de administración de clientes con tabla y modales.
+ */
 export default function Clients() {
   const { clients, addClient, updateClient, deleteClient, assignments, routines } = useApp();
   const navigate = useNavigate();
@@ -40,6 +47,7 @@ export default function Clients() {
     return a ? routines.find(r => r.id === a.routineId) : null;
   };
 
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <CoachLayout>
       <div className="page-header">
@@ -86,7 +94,7 @@ export default function Clients() {
                   return (
                     <tr key={c.id}>
                       <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{ display: 'flex', alignIítems: 'center', gap: 10 }}>
                           <div className="avatar" style={{ width: 34, height: 34, fontSize: 12 }}>
                             {c.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                           </div>
@@ -121,8 +129,8 @@ export default function Clients() {
               const routine = getRoutineForClient(c.id);
               return (
                 <div key={c.id} className="card" style={{ gap: 12 }}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ display: 'flex', alignIítems: 'flex-start', gap: 12, justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignIítems: 'center', gap: 10 }}>
                       <div className="avatar">
                         {c.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                       </div>

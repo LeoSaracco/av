@@ -195,5 +195,19 @@ export default defineConfig([
 |-------|--------|---------|
 | Lint | 0 errors, 0 warnings | `npm run lint` |
 | Build | Success | `npm run build` |
+| Unit Tests | 26/26 passed (3 suites) | `npm test` |
 | react-refresh warnings | Suppressed with eslint-disable in context files | — |
 | Unused vars | Cleaned (all pre-existing fixed) | — |
+| Husky pre-commit | Configured (lint-staged) | `.husky/pre-commit` |
+| EditorConfig | Present | `.editorconfig` |
+
+### Test Coverage (current)
+
+| Suite | Tests | Status |
+|-------|-------|--------|
+| `FormPrimitives.test.jsx` | 12 | Pass |
+| `StepsTrack.test.jsx` | 5 | Pass |
+| `AuthContext.test.jsx` | 9 | Pass |
+| **Total** | **26** | **26 passed** |
+
+Tested areas: FieldError, FormGroup, RadioGroup (selection + aria), ToggleGroup, StepsTrack (6 pasos, ARIA), registerUser, login, demo access, logout. Not yet tested: pages, layouts, AppContext CRUD, onboarding form flow.

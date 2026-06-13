@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file Dashboard principal del coach. Muestra estadísticas de dietas,
  *       rutinas, templates y asignaciones, junto con los últimos clientes,
  *       observaciones recientes y accesos rápidos a acciones frecuentes.
@@ -11,6 +11,14 @@ import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import { CoachLayout } from '../../components/layout/CoachLayout';
 
+/**
+ * Dashboard principal del coach.
+ * Muestra estadísticas resumidas (dietas, rutinas, templates, asignaciones),
+ * los últimos clientes, observaciones recientes y accesos rápidos a las
+ * acciones más frecuentes desde el panel de coach.
+ *
+ * @returns {JSX.Element} Vista completa del dashboard del coach.
+ */
 export default function CoachDashboard() {
   const { clients, routines, templates, assignments, notes, dietTemplates } = useApp();
   const { user } = useAuth();
@@ -26,6 +34,7 @@ export default function CoachDashboard() {
     { label: 'Asignadas', value: assignedCount, icon: '🔗', path: '/coach/assign' },
   ];
 
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <CoachLayout>
       <div className="page-header">
@@ -42,7 +51,7 @@ export default function CoachDashboard() {
       <div className="stats-grid">
         {stats.map(s => (
           <div key={s.label} className="stat-card" style={{ cursor: 'pointer' }} onClick={() => navigate(s.path)}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignIítems: 'center', justifyContent: 'space-between' }}>
               <span style={{ fontSize: 28 }}>{s.icon}</span>
               {s.active !== undefined && (
                 <span className="badge badge-success">{s.active} activos</span>
@@ -57,7 +66,7 @@ export default function CoachDashboard() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
         {/* Recent clients */}
         <div className="card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignIítems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
             <h3 style={{ fontSize: 16 }}>Clientes recientes</h3>
             <button className="btn btn-ghost btn-sm" onClick={() => navigate('/coach/clients')}>Ver todos</button>
           </div>
@@ -69,7 +78,7 @@ export default function CoachDashboard() {
                 <div key={c.id}
                   onClick={() => navigate(`/coach/clients/${c.id}`)}
                   style={{
-                    display: 'flex', alignItems: 'center', gap: 12,
+                    display: 'flex', alignIítems: 'center', gap: 12,
                     padding: '10px 12px', borderRadius: 'var(--radius-md)',
                     background: 'var(--color-bg-3)', cursor: 'pointer',
                     transition: 'var(--transition)',
@@ -95,8 +104,8 @@ export default function CoachDashboard() {
 
         {/* Recent notes */}
         <div className="card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-            <h3 style={{ fontSize: 16 }}>Últimas observaciones</h3>
+          <div style={{ display: 'flex', alignIítems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <h3 style={{ fontSize: 16 }}>Úúúltimas observaciones</h3>
             <button className="btn btn-ghost btn-sm" onClick={() => navigate('/coach/notes')}>Ver todas</button>
           </div>
           {recentNotes.length === 0 ? (
@@ -113,7 +122,7 @@ export default function CoachDashboard() {
                     background: 'var(--color-bg-3)', borderRadius: 'var(--radius-md)',
                     padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 6,
                   }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignIítems: 'center' }}>
                       <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-accent)' }}>{client?.name}</span>
                       <span style={{ fontSize: 11, color: 'var(--color-text-3)' }}>{n.createdAt}</span>
                     </div>
@@ -141,7 +150,7 @@ export default function CoachDashboard() {
               <button key={a.label}
                 onClick={() => navigate(a.path)}
                 style={{
-                  display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
+                  display: 'flex', alignIítems: 'center', gap: 12, padding: '12px 14px',
                   background: 'var(--color-bg-3)', border: '1px solid var(--color-border)',
                   borderRadius: 'var(--radius-md)', cursor: 'pointer', transition: 'var(--transition)',
                   color: 'var(--color-text)', fontFamily: 'var(--font-body)', textAlign: 'left',

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file Gestión de templates de rutina (CRUD). Los templates sirven como
  *       base reutilizable para crear rutinas asignables a clientes.
  * @route /coach/templates
@@ -12,6 +12,14 @@ import { Modal, ConfirmModal } from '../../components/ui/Modals';
 const EMPTY_EX = { name: '', sets: 3, reps: 10, rest: '60s', notes: '', videoUrl: '' };
 const EMPTY_TPL = { name: '', goal: '', description: '', exercises: [] };
 
+/**
+ * Gestión de templates de rutina (CRUD).
+ * Los templates sirven como base reutilizable para crear rutinas
+ * asignables a clientes. Incluye vista detallada en modal y
+ * editor de ejercicios con parámetros configurables.
+ *
+ * @returns {JSX.Element} Panel de administración de templates con modales CRUD.
+ */
 export default function Templates() {
   const { templates, addTemplate, updateTemplate, deleteTemplate } = useApp();
   const [search, setSearch] = useState('');
@@ -49,6 +57,7 @@ export default function Templates() {
 
   const viewTemplate = templates.find(t => t.id === viewId);
 
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <CoachLayout>
       <div className="page-header">
@@ -77,7 +86,7 @@ export default function Templates() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
           {filtered.map(t => (
             <div key={t.id} className="card card-hover" style={{ gap: 14, cursor: 'pointer' }} onClick={() => openView(t)}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignIítems: 'flex-start' }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontWeight: 700, fontFamily: 'var(--font-main)', fontSize: 16, marginBottom: 4 }}>{t.name}</div>
                   <div style={{ fontSize: 12, color: 'var(--color-accent)', fontWeight: 600 }}>{t.goal}</div>
@@ -128,8 +137,8 @@ export default function Templates() {
             {viewTemplate.exercises.map((ex, i) => (
               <div key={ex.id} className="exercise-card">
                 <div className="exercise-header">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--color-accent-dim)', color: 'var(--color-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700 }}>{i + 1}</div>
+                  <div style={{ display: 'flex', alignIítems: 'center', gap: 10 }}>
+                    <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--color-accent-dim)', color: 'var(--color-accent)', display: 'flex', alignIítems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700 }}>{i + 1}</div>
                     <span className="exercise-name">{ex.name}</span>
                   </div>
                 </div>
@@ -169,7 +178,7 @@ export default function Templates() {
           </div>
 
           <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 16 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignIítems: 'center', marginBottom: 12 }}>
               <span style={{ fontWeight: 600, fontSize: 14 }}>Ejercicios ({form.exercises.length})</span>
               <button className="btn btn-sm btn-secondary" onClick={addExercise}>+ Agregar ejercicio</button>
             </div>

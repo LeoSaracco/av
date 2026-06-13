@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file Página de plan nutricional del cliente. Muestra la dieta asignada
  *       con indicaciones y comidas diarias, junto con un chat de consultas
  *       (Q&A) bidireccional con el coach.
@@ -10,6 +10,14 @@ import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import { ClientLayout } from '../../components/layout/ClientLayout';
 
+/**
+ * Página de plan nutricional del cliente.
+ * Muestra la dieta asignada con indicaciones del coach y comidas diarias,
+ * junto con un chat de consultas (Q&A) bidireccional donde el cliente
+ * puede hacer preguntas y recibir respuestas del coach.
+ *
+ * @returns {JSX.Element} Vista de nutrición con plan alimentario y chat de consultas.
+ */
 export default function ClientNutrition() {
   const { user } = useAuth();
   const { getDietAssignmentForClient, getDiet, getNutritionThreadForClient, addNutritionMessage } = useApp();
@@ -33,6 +41,7 @@ export default function ClientNutrition() {
     }
   };
 
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <ClientLayout>
       <div className="page-header" style={{ marginBottom: 20 }}>
@@ -53,7 +62,7 @@ export default function ClientNutrition() {
           {/* Diet Info */}
           <div className="card" style={{ gap: 16 }}>
             <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: 16 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignIítems: 'flex-start' }}>
                 <h2 style={{ fontSize: 24, margin: 0 }}>{diet.name}</h2>
                 <span className="badge badge-success">Activo</span>
               </div>
@@ -72,8 +81,8 @@ export default function ClientNutrition() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {diet.meals?.map((m, i) => (
                   <div key={m.id} style={{ background: 'var(--color-bg-3)', padding: 14, borderRadius: 'var(--radius-md)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-                      <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'var(--color-surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'var(--color-text-2)' }}>{i + 1}</div>
+                    <div style={{ display: 'flex', alignIítems: 'center', gap: 10, marginBottom: 6 }}>
+                      <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'var(--color-surface)', display: 'flex', alignIítems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'var(--color-text-2)' }}>{i + 1}</div>
                       <span style={{ fontWeight: 600, fontSize: 16 }}>{m.name}</span>
                     </div>
                     <p style={{ fontSize: 15, paddingLeft: 32, lineHeight: 1.5 }}>{m.content}</p>
