@@ -1,6 +1,10 @@
 // ─── SEED DATA ────────────────────────────────────────────────────────────────
 // Datos mock reales y coherentes para demo comercial
 
+/**
+ * Clientes de prueba.
+ * @type {{ id: string, name: string, email: string, phone: string, goal: string, status: string, joinDate: string, avatar: string|null }[]}
+ */
 export const SEED_CLIENTS = [
   {
     id: 'c1',
@@ -44,6 +48,10 @@ export const SEED_CLIENTS = [
   },
 ];
 
+/**
+ * Plantillas de rutina predefinidas.
+ * @type {{ id: string, name: string, goal: string, description: string, exercises: { id: string, name: string, sets: number, reps: number, rest: string, notes: string, videoUrl: string }[], createdAt: string }[]}
+ */
 export const SEED_TEMPLATES = [
   {
     id: 't1',
@@ -91,6 +99,10 @@ export const SEED_TEMPLATES = [
   },
 ];
 
+/**
+ * Rutinas de entrenamiento asignables a clientes.
+ * @type {{ id: string, name: string, goal: string, templateId: string, exercises: { id: string, name: string, sets: number, reps: number, rest: string, notes: string, videoUrl: string }[], createdAt: string }[]}
+ */
 export const SEED_ROUTINES = [
   {
     id: 'r1',
@@ -131,12 +143,20 @@ export const SEED_ROUTINES = [
   },
 ];
 
+/**
+ * Asignaciones de rutina a cliente.
+ * @type {{ id: string, clientId: string, routineId: string, assignedAt: string, active: boolean }[]}
+ */
 export const SEED_ASSIGNMENTS = [
   { id: 'a1', clientId: 'c1', routineId: 'r1', assignedAt: '2025-09-20', active: true },
   { id: 'a2', clientId: 'c2', routineId: 'r2', assignedAt: '2025-10-05', active: true },
   { id: 'a3', clientId: 'c3', routineId: 'r3', assignedAt: '2025-11-15', active: true },
 ];
 
+/**
+ * Notas del coach sobre cada cliente.
+ * @type {{ id: string, clientId: string, text: string, createdAt: string, updatedAt: string }[]}
+ */
 export const SEED_NOTES = [
   {
     id: 'n1',
@@ -175,6 +195,10 @@ export const SEED_NOTES = [
   },
 ];
 
+/**
+ * Registro de progreso (peso) de los clientes.
+ * @type {{ id: string, clientId: string, date: string, weight: number, comment: string }[]}
+ */
 export const SEED_PROGRESS = [
   // Martina
   { id: 'p1', clientId: 'c1', date: '2025-09-15', weight: 67.5, comment: 'Inicio del programa.' },
@@ -194,6 +218,10 @@ export const SEED_PROGRESS = [
   { id: 'p13', clientId: 'c3', date: '2025-11-24', weight: 57.3, comment: '10k en 51 min. Bajando!' },
 ];
 
+/**
+ * Productos de la tienda (ropa, suplementos, accesorios).
+ * @type {{ id: string, category: string, name: string, description: string, price: number, image: string|null, sizes?: string[], colors?: string[], flavors?: string[], stock: number }[]}
+ */
 export const SEED_PRODUCTS = [
   {
     id: 'prod1',
@@ -280,6 +308,10 @@ export const SEED_PRODUCTS = [
   },
 ];
 
+/**
+ * Plantillas de dieta predefinidas.
+ * @type {{ id: string, name: string, goal: string, description: string, indications: string, meals: { id: string, name: string, content: string }[], createdAt: string }[]}
+ */
 export const SEED_DIET_TEMPLATES = [
   {
     id: 'dt1',
@@ -312,6 +344,10 @@ export const SEED_DIET_TEMPLATES = [
   }
 ];
 
+/**
+ * Dietas personalizadas asignables a clientes.
+ * @type {{ id: string, name: string, goal: string, templateId: string, indications: string, meals: { id: string, name: string, content: string }[], createdAt: string }[]}
+ */
 export const SEED_DIETS = [
   {
     id: 'd1',
@@ -339,11 +375,19 @@ export const SEED_DIETS = [
   }
 ];
 
+/**
+ * Asignaciones de dieta a cliente.
+ * @type {{ id: string, clientId: string, dietId: string, assignedAt: string, active: boolean }[]}
+ */
 export const SEED_DIET_ASSIGNMENTS = [
   { id: 'da1', clientId: 'c1', dietId: 'd1', assignedAt: '2025-09-21', active: true },
   { id: 'da2', clientId: 'c2', dietId: 'd2', assignedAt: '2025-10-06', active: true },
 ];
 
+/**
+ * Hilos de conversación coach-cliente sobre nutrición.
+ * @type {{ id: string, clientId: string, messages: { id: string, sender: string, text: string, date: string }[] }[]}
+ */
 export const SEED_NUTRITION_THREADS = [
   {
     id: 'th1',
@@ -365,7 +409,66 @@ export const SEED_NUTRITION_THREADS = [
   }
 ];
 
+// ── PLANS ──────────────────────────────────────────────────────────────────────
+/**
+ * Planes de suscripción disponibles.
+ * @type {{ id: string, name: string, subtitle: string, price: number, currency: string, features: string[], featured: boolean }[]}
+ */
+export const SEED_PLANS = [
+  {
+    id: 'plan1',
+    name: 'Plan Entrenamiento',
+    subtitle: 'Rutina + seguimiento',
+    price: 9900,
+    currency: 'ARS',
+    features: [
+      'Rutina personalizada según tu nivel',
+      'App de tracking de ejercicios',
+      'Seguimiento de peso y evolución',
+      'Observaciones mensuales del coach',
+      'Acceso a la tienda premium',
+    ],
+    featured: false,
+  },
+  {
+    id: 'plan2',
+    name: 'Método 90/90',
+    subtitle: 'Entrenamiento + Nutrición',
+    price: 14900,
+    currency: 'ARS',
+    features: [
+      'Todo lo del Plan Entrenamiento',
+      'Plan nutricional personalizado',
+      'Chat directo con tu coach',
+      'Compromiso mínimo: 90 días / 90 min',
+      'Ajustes cada 15 días',
+      'Recetario digital incluido',
+    ],
+    featured: true,
+  },
+  {
+    id: 'plan3',
+    name: 'Plan Personalizado',
+    subtitle: '1-on-1 con Adrián',
+    price: 24900,
+    currency: 'ARS',
+    features: [
+      'Todo lo del Método 90/90',
+      'Sesión 1-on-1 semanal',
+      'Ajustes diarios de rutina y dieta',
+      'Nutrición deportiva experta',
+      'Prioridad en respuestas (máx 2h)',
+      'Plan de suplementación incluido',
+    ],
+    featured: false,
+  },
+];
+
 // ── MOCK USERS ─────────────────────────────────────────────────────────────────
+/**
+ * Usuarios mock para pruebas de login (coach y clientes).
+ * @type {{ id: string, role: string, name: string, email: string, password: string, clientId?: string }[]}
+ */
 export const MOCK_USERS = [
   { id: 'coach1', role: 'coach', name: 'Adrián Vila', email: 'adrian@av.com', password: 'coach123' },
   { id: 'c1', role: 'client', name: 'Martina Gómez', email: 'martina@gmail.com', password: '1234', clientId: 'c1' },

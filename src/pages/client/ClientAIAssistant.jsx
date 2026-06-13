@@ -1,3 +1,10 @@
+/**
+ * @file Asistente nutricional con IA (NutriBot). Chat interactivo que
+ *       sugiere comidas e ideas según el objetivo del cliente. Usa
+ *       respuestas simuladas basadas en el contexto del plan asignado.
+ * @route /client/ai-assistant
+ * @auth Requiere rol "client".
+ */
 import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
@@ -15,23 +22,14 @@ export default function ClientAIAssistant() {
   const dietGoal = diet?.goal || 'Mejorar hábitos alimenticios';
 
   const [inputMsg, setInputMsg] = useState('');
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(() => [{
+    id: 'initial',
+    sender: 'ai',
+    date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    text: `¡Hola ${user?.name?.split(' ')[0]}! Soy tu asistente nutricional de IA. Vi que tu coach te asignó el objetivo: "${dietGoal}". ¿En qué comida necesitas ideas hoy?`
+  }]);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
-
-  // Initial AI greeting
-  useEffect(() => {
-    if (messages.length === 0) {
-      setMessages([
-        {
-          id: 'initial',
-          sender: 'ai',
-          date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          text: `¡Hola ${user?.name?.split(' ')[0]}! Soy tu asistente nutricional de IA. Vi que tu coach te asignó el objetivo: "${dietGoal}". ¿En qué comida necesitas ideas hoy?`
-        }
-      ]);
-    }
-  }, [dietGoal, messages.length, user]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

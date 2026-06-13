@@ -1,3 +1,9 @@
+/**
+ * @file Gestión de observaciones por cliente. Presenta un selector lateral
+ *       de clientes y un panel central con el listado de notas (CRUD).
+ * @route /coach/notes
+ * @auth Requiere rol "coach".
+ */
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { CoachLayout } from '../../components/layout/CoachLayout';

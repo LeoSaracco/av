@@ -1,6 +1,18 @@
+/**
+ * @file Modals.jsx
+ * @description Componentes de UI reutilizables para notificaciones toast,
+ *              ventanas modales genéricas y modales de confirmación de eliminación.
+ */
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 
+/**
+ * Componente de notificación toast.
+ * Se suscribe al contexto global y muestra un mensaje temporal
+ * con ícono según el tipo (success, error, info).
+ *
+ * @returns {JSX.Element|null} Elemento toast o null si no hay mensaje activo
+ */
 export function Toast() {
   const { toast } = useApp();
   if (!toast) return null;
@@ -12,6 +24,18 @@ export function Toast() {
   );
 }
 
+/**
+ * Modal genérico con overlay, cabecera con título y botón de cierre,
+ * cuerpo de contenido y pie de modal opcional.
+ *
+ * @param {Object} props
+ * @param {boolean} props.open - Controla la visibilidad del modal
+ * @param {() => void} props.onClose - Callback al cerrar (overlay click o botón X)
+ * @param {string} props.title - Título del modal
+ * @param {React.ReactNode} props.children - Contenido del cuerpo del modal
+ * @param {React.ReactNode} [props.footer] - Contenido opcional del pie del modal
+ * @returns {JSX.Element|null} Elemento modal o null si no está abierto
+ */
 export function Modal({ open, onClose, title, children, footer }) {
   if (!open) return null;
   return (
@@ -32,6 +56,18 @@ export function Modal({ open, onClose, title, children, footer }) {
   );
 }
 
+/**
+ * Modal de confirmación para acciones destructivas (eliminar).
+ * Extiende {@link Modal} con botones Cancelar/Eliminar predefinidos.
+ *
+ * @param {Object} props
+ * @param {boolean} props.open - Controla la visibilidad del modal
+ * @param {() => void} props.onClose - Callback al cerrar
+ * @param {() => void} props.onConfirm - Callback al confirmar la acción
+ * @param {string} [props.title='Confirmar acción'] - Título del modal
+ * @param {string} [props.message] - Mensaje de advertencia
+ * @returns {JSX.Element} Modal de confirmación
+ */
 export function ConfirmModal({ open, onClose, onConfirm, title, message }) {
   return (
     <Modal open={open} onClose={onClose} title={title || 'Confirmar acción'}

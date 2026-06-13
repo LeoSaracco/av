@@ -1,10 +1,17 @@
+/**
+ * @file Gestión de rutinas completas (CRUD). Permite crear rutinas desde
+ *       cero o a partir de un template, con ejercicios ordenables,
+ *       duplicación y visualización detallada.
+ * @route /coach/routines
+ * @auth Requiere rol "coach".
+ */
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { CoachLayout } from '../../components/layout/CoachLayout';
 import { Modal, ConfirmModal } from '../../components/ui/Modals';
 
 export default function Routines() {
-  const { routines, templates, addRoutine, updateRoutine, deleteRoutine, duplicateRoutine, createRoutineFromTemplate } = useApp();
+  const { routines, templates, addRoutine, updateRoutine, deleteRoutine, duplicateRoutine } = useApp();
   const [search, setSearch] = useState('');
   const [modal, setModal] = useState(null);
   const [form, setForm] = useState({ name: '', goal: '', exercises: [] });

@@ -32,6 +32,10 @@ import Store from './pages/store/Store';
 import ProductDetail from './pages/store/ProductDetail';
 import Cart from './pages/store/Cart';
 
+// Onboarding
+import PaymentSimulator from './pages/PaymentSimulator';
+import Onboarding from './pages/Onboarding';
+
 // ── Route guards ──────────────────────────────────────────────────────────────
 function CoachRoute({ children }) {
   const { user, isCoach } = useAuth();
@@ -91,6 +95,10 @@ export default function App() {
             <Route path="/store" element={<Store />} />
             <Route path="/store/:id" element={<ProductDetail />} />
             <Route path="/store/cart" element={<Cart />} />
+
+            {/* Onboarding flow — public */}
+            <Route path="/pago" element={<PaymentSimulator />} />
+            <Route path="/onboarding" element={<Onboarding />} />
 
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />

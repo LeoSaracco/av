@@ -1,8 +1,21 @@
+/**
+ * @file Pantalla de inicio de sesión. Ofrece un modo demo con perfiles
+ *       predefinidos (coach y clientes) y un formulario tradicional
+ *       para credenciales.
+ * @route /login
+ * @auth Público — no requiere autenticación.
+ */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { MOCK_USERS } from '../data/seed';
 
+/**
+ * Pantalla de inicio de sesión con dos modos: acceso demo (perfiles
+ * predefinidos de coach y clientes) y formulario de credenciales.
+ *
+ * @returns {JSX.Element} Vista de login centrada con pestañas.
+ */
 export default function Login() {
   const [mode, setMode] = useState('demo'); // 'demo' | 'form'
   const [email, setEmail] = useState('');
@@ -11,6 +24,7 @@ export default function Login() {
   const { login, loginAsDemo } = useAuth();
   const navigate = useNavigate();
 
+  // ── Manejo del formulario tradicional ──
   const handleForm = (e) => {
     e.preventDefault();
     setError('');
@@ -22,6 +36,7 @@ export default function Login() {
     }
   };
 
+  // ── Acceso rápido con perfil demo ──
   const handleDemo = (role, clientId) => {
     const user = loginAsDemo(role, clientId);
     if (user) navigate(user.role === 'coach' ? '/coach' : '/client');
@@ -35,7 +50,7 @@ export default function Login() {
       alignItems: 'center', justifyContent: 'center', padding: '24px',
       background: 'radial-gradient(ellipse 70% 50% at 50% 0%, rgba(0,255,0,0.07) 0%, transparent 60%)',
     }}>
-      {/* Logo */}
+      {/* ── Logo ── */}
       <div style={{ marginBottom: 40, textAlign: 'center' }}>
         <div style={{ fontFamily: 'var(--font-main)', fontSize: 28, fontWeight: 900, letterSpacing: '-1px' }}>
           Adrián <span style={{ color: 'var(--color-accent)' }}>Vila</span>
@@ -51,7 +66,7 @@ export default function Login() {
         overflow: 'hidden',
         boxShadow: '0 24px 60px rgba(0,0,0,0.7)',
       }}>
-        {/* Tabs */}
+        {/* ── Pestañas demo / form ── */}
         <div style={{ display: 'flex', borderBottom: '1px solid var(--color-border)' }}>
           {[{ id: 'demo', label: 'Acceso Demo' }, { id: 'form', label: 'Iniciar Sesión' }].map(tab => (
             <button key={tab.id} onClick={() => setMode(tab.id)}
@@ -71,12 +86,13 @@ export default function Login() {
 
         <div style={{ padding: 28 }}>
           {mode === 'demo' ? (
+            // ── Modo demo ──
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <p style={{ fontSize: 13, color: 'var(--color-text-2)', marginBottom: 8, lineHeight: 1.6 }}>
                 Elegí un perfil para explorar la plataforma como demo:
               </p>
 
-              {/* Coach */}
+              {/* ── Perfil coach ── */}
               <button
                 onClick={() => handleDemo('coach')}
                 style={{
@@ -103,11 +119,13 @@ export default function Login() {
                 <div style={{ marginLeft: 'auto', color: 'var(--color-accent)' }}>→</div>
               </button>
 
+              {/* ── Separador ── */}
               <div style={{ height: 1, background: 'var(--color-border)', margin: '4px 0' }} />
               <p style={{ fontSize: 12, color: 'var(--color-text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.8px' }}>
                 Clientes demo
               </p>
 
+              {/* ── Lista de clientes demo ── */}
               {clients.map(client => (
                 <button
                   key={client.id}
@@ -138,6 +156,7 @@ export default function Login() {
               ))}
             </div>
           ) : (
+            // ── Formulario de credenciales ──
             <form onSubmit={handleForm} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
               <div className="form-group">
                 <label className="form-label">Email</label>

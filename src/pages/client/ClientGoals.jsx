@@ -1,3 +1,10 @@
+/**
+ * @file Página de objetivos y metas del cliente. Muestra el objetivo
+ *       principal con barra de progreso, objetivos secundarios con
+ *       checkboxes y una línea de tiempo con hitos del programa.
+ * @route /client/goals
+ * @auth Requiere rol "client".
+ */
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';

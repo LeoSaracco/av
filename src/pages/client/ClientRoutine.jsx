@@ -1,3 +1,10 @@
+/**
+ * @file Visualización de la rutina activa asignada al cliente. Muestra
+ *       cada ejercicio con sets, reps y descanso en tarjetas expandibles
+ *       que revelan detalles adicionales y notas del coach.
+ * @route /client/routine
+ * @auth Requiere rol "client".
+ */
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';

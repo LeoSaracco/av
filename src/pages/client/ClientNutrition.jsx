@@ -1,3 +1,10 @@
+/**
+ * @file Página de plan nutricional del cliente. Muestra la dieta asignada
+ *       con indicaciones y comidas diarias, junto con un chat de consultas
+ *       (Q&A) bidireccional con el coach.
+ * @route /client/nutrition
+ * @auth Requiere rol "client".
+ */
 import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';

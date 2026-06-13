@@ -1,3 +1,9 @@
+/**
+ * @file Gestión de templates de rutina (CRUD). Los templates sirven como
+ *       base reutilizable para crear rutinas asignables a clientes.
+ * @route /coach/templates
+ * @auth Requiere rol "coach".
+ */
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { CoachLayout } from '../../components/layout/CoachLayout';

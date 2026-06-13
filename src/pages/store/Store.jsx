@@ -1,3 +1,10 @@
+/**
+ * @file Tienda oficial de Adrián Vila. Lista productos con filtros por
+ *       categoría y búsqueda textual. Permite agregar al carrito y
+ *       navegar al detalle de cada producto.
+ * @route /store
+ * @auth Público — no requiere autenticación.
+ */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';

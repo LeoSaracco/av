@@ -1,3 +1,10 @@
+/**
+ * @file Vista detallada de un cliente con pestañas: resumen, rutina,
+ *       nutrición (con chat Q&A y asignación/edición de dieta), notas y
+ *       progreso de peso.
+ * @route /coach/clients/:id
+ * @auth Requiere rol "coach".
+ */
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
@@ -8,7 +15,7 @@ export default function ClientDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const {
-    getClient, updateClient, getAssignmentForClient, getRoutine,
+    getClient, getAssignmentForClient, getRoutine,
     getNotesForClient, addNote, updateNote, deleteNote,
     getProgressForClient,
     dietTemplates, getDietAssignmentForClient, getDiet, createDietFromTemplate, getNutritionThreadForClient, addNutritionMessage, updateDiet, assignDiet

@@ -1,9 +1,28 @@
+/**
+ * @file Registro y seguimiento del progreso de peso del cliente. Incluye
+ *       gráfico de evolución (Recharts), estadísticas de resumen,
+ *       historial cronológico y alta/baja de registros.
+ * @route /client/progress
+ * @auth Requiere rol "client".
+ */
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
 import { ClientLayout } from '../../components/layout/ClientLayout';
 import { Modal } from '../../components/ui/Modals';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+function CustomTooltip({ active, payload, label }) {
+  if (active && payload?.length) {
+    return (
+      <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '8px 12px', fontSize: 12 }}>
+        <p style={{ color: 'var(--color-text-2)' }}>{label}</p>
+        <p style={{ color: 'var(--color-accent)', fontWeight: 700, fontSize: 15 }}>{payload[0].value} kg</p>
+      </div>
+    );
+  }
+  return null;
+}
 
 export default function ClientProgress() {
   const { user } = useAuth();
@@ -28,18 +47,6 @@ export default function ClientProgress() {
   const maxW = progress.length > 0 ? Math.max(...progress.map(p => p.weight)) : 0;
 
   const chartData = progress.map(p => ({ ...p, date: p.date.slice(5) })); // MM-DD format
-
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload?.length) {
-      return (
-        <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '8px 12px', fontSize: 12 }}>
-          <p style={{ color: 'var(--color-text-2)' }}>{label}</p>
-          <p style={{ color: 'var(--color-accent)', fontWeight: 700, fontSize: 15 }}>{payload[0].value} kg</p>
-        </div>
-      );
-    }
-    return null;
-  };
 
   return (
     <ClientLayout>

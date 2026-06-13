@@ -1,3 +1,11 @@
+/**
+ * @file AppContext.jsx
+ * @description Contexto global de la aplicación que centraliza el estado
+ *              y las operaciones CRUD para clientes, plantillas, rutinas,
+ *              asignaciones, observaciones, progreso, nutrición, carrito
+ *              de compras y envíos de onboarding.
+ *              Todos los datos se persisten automáticamente en localStorage.
+ */
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import {
   SEED_CLIENTS, SEED_TEMPLATES, SEED_ROUTINES,
@@ -7,6 +15,14 @@ import {
 
 const AppContext = createContext(null);
 
+// ── Utilidades de persistencia ─────────────────────────────────────────────────
+
+/**
+ * Carga datos desde localStorage o inicializa con datos semilla.
+ * @param {string} key - Clave de localStorage
+ * @param {Array|Object} seed - Datos semilla para inicializar si no hay datos
+ * @returns {Array|Object} Datos cargados o semilla
+ */
 function loadOrSeed(key, seed) {
   try {
     const stored = localStorage.getItem(key);
@@ -16,14 +32,32 @@ function loadOrSeed(key, seed) {
   return seed;
 }
 
+/**
+ * Persiste datos en localStorage.
+ * @param {string} key - Clave de localStorage
+ * @param {Array|Object} data - Datos a guardar
+ */
 function save(key, data) {
   localStorage.setItem(key, JSON.stringify(data));
 }
 
+/**
+ * Genera un identificador único.
+ * @returns {string} ID único
+ */
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2);
 }
 
+/**
+ * Proveedor del contexto global de la aplicación.
+ * Centraliza todo el estado de negocio y expone funciones CRUD
+ * para cada entidad del sistema.
+ *
+ * @param {Object} props
+ * @param {React.ReactNode} props.children - Componentes hijos
+ * @returns {JSX.Element} Provider con el contexto de aplicación
+ */
 export function AppProvider({ children }) {
   const [clients, setClients] = useState(() => loadOrSeed('av_clients', SEED_CLIENTS));
   const [templates, setTemplates] = useState(() => loadOrSeed('av_templates', SEED_TEMPLATES));
@@ -56,60 +90,122 @@ export function AppProvider({ children }) {
   useEffect(() => { save('av_nutrition_threads', nutritionThreads); }, [nutritionThreads]);
 
   // Toast helper
+  /**
+   * Muestra una notificación toast temporal.
+   * @param {string} message - Mensaje a mostrar
+   * @param {'success'|'error'|'info'} [type='success'] - Tipo de toast
+   */
   const showToast = useCallback((message, type = 'success') => {
     setToast({ message, type, id: uid() });
     setTimeout(() => setToast(null), 3000);
   }, []);
 
-  // ── CLIENTS ────────────────────────────────────────────────────────────────
+  // ── CLIENTES ──────────────────────────────────────────────────────────────────
+  /**
+   * Crea un nuevo cliente.
+   * @param {Object} data - Datos del cliente
+   * @returns {Object} Cliente creado con ID generado
+   */
   const addClient = (data) => {
     const client = { ...data, id: uid(), joinDate: new Date().toISOString().slice(0, 10) };
     setClients(prev => [...prev, client]);
     showToast('Cliente creado correctamente');
     return client;
   };
+  /**
+   * Actualiza los datos de un cliente existente.
+   * @param {string} id - ID del cliente
+   * @param {Object} data - Datos a actualizar (merge parcial)
+   */
   const updateClient = (id, data) => {
     setClients(prev => prev.map(c => c.id === id ? { ...c, ...data } : c));
     showToast('Cliente actualizado');
   };
+  /**
+   * Elimina un cliente por ID.
+   * @param {string} id - ID del cliente a eliminar
+   */
   const deleteClient = (id) => {
     setClients(prev => prev.filter(c => c.id !== id));
     showToast('Cliente eliminado', 'info');
   };
+  /**
+   * Obtiene un cliente por su ID.
+   * @param {string} id - ID del cliente
+   * @returns {Object|undefined} Cliente encontrado o undefined
+   */
   const getClient = (id) => clients.find(c => c.id === id);
 
-  // ── TEMPLATES ──────────────────────────────────────────────────────────────
+  // ── PLANTILLAS ────────────────────────────────────────────────────────────────
+  /**
+   * Crea una nueva plantilla de rutina.
+   * @param {Object} data - Datos de la plantilla
+   * @returns {Object} Plantilla creada con ID generado
+   */
   const addTemplate = (data) => {
     const t = { ...data, id: uid(), createdAt: new Date().toISOString().slice(0, 10) };
     setTemplates(prev => [...prev, t]);
     showToast('Template creado');
     return t;
   };
+  /**
+   * Actualiza una plantilla existente.
+   * @param {string} id - ID de la plantilla
+   * @param {Object} data - Datos a actualizar
+   */
   const updateTemplate = (id, data) => {
     setTemplates(prev => prev.map(t => t.id === id ? { ...t, ...data } : t));
     showToast('Template actualizado');
   };
+  /**
+   * Elimina una plantilla por ID.
+   * @param {string} id - ID de la plantilla
+   */
   const deleteTemplate = (id) => {
     setTemplates(prev => prev.filter(t => t.id !== id));
     showToast('Template eliminado', 'info');
   };
+  /**
+   * Obtiene una plantilla por ID.
+   * @param {string} id - ID de la plantilla
+   * @returns {Object|undefined} Plantilla encontrada
+   */
   const getTemplate = (id) => templates.find(t => t.id === id);
 
-  // ── ROUTINES ───────────────────────────────────────────────────────────────
+  // ── RUTINAS ───────────────────────────────────────────────────────────────────
+  /**
+   * Crea una nueva rutina.
+   * @param {Object} data - Datos de la rutina
+   * @returns {Object} Rutina creada con ID generado
+   */
   const addRoutine = (data) => {
     const r = { ...data, id: uid(), createdAt: new Date().toISOString().slice(0, 10) };
     setRoutines(prev => [...prev, r]);
     showToast('Rutina creada');
     return r;
   };
+  /**
+   * Actualiza una rutina existente.
+   * @param {string} id - ID de la rutina
+   * @param {Object} data - Datos a actualizar
+   */
   const updateRoutine = (id, data) => {
     setRoutines(prev => prev.map(r => r.id === id ? { ...r, ...data } : r));
     showToast('Rutina actualizada');
   };
+  /**
+   * Elimina una rutina por ID.
+   * @param {string} id - ID de la rutina
+   */
   const deleteRoutine = (id) => {
     setRoutines(prev => prev.filter(r => r.id !== id));
     showToast('Rutina eliminada', 'info');
   };
+  /**
+   * Duplica una rutina existente con un nuevo ID.
+   * @param {string} id - ID de la rutina a duplicar
+   * @returns {Object|undefined} Copia de la rutina o undefined si no existe
+   */
   const duplicateRoutine = (id) => {
     const original = routines.find(r => r.id === id);
     if (!original) return;
@@ -275,11 +371,23 @@ export function AppProvider({ children }) {
   const cartTotal = cart.reduce((sum, i) => sum + i.product.price * i.qty, 0);
   const cartCount = cart.reduce((sum, i) => sum + i.qty, 0);
 
+  // ── ONBOARDING ──────────────────────────────────────────────────────────────
+  const [onboardingSubmissions, setOnboardingSubmissions] = useState(() => loadOrSeed('av_onboarding', []));
+  useEffect(() => { save('av_onboarding', onboardingSubmissions); }, [onboardingSubmissions]);
+
+  const createOnboardingSubmission = (data) => {
+    const submission = { ...data, id: uid(), submittedAt: new Date().toISOString().slice(0, 10) };
+    setOnboardingSubmissions(prev => [...prev, submission]);
+    return submission;
+  };
+  const getOnboardingByEmail = (email) => onboardingSubmissions.find(s => s.email === email);
+
   return (
     <AppContext.Provider value={{
       // data
       clients, templates, routines, assignments, notes, progress, products, cart,
       dietTemplates, diets, dietAssignments, nutritionThreads,
+      onboardingSubmissions,
       // clients
       addClient, updateClient, deleteClient, getClient,
       // templates
@@ -299,6 +407,8 @@ export function AppProvider({ children }) {
       getNutritionThreadForClient, addNutritionMessage,
       // cart
       addToCart, removeFromCart, updateCartQty, clearCart, cartTotal, cartCount,
+      // onboarding
+      createOnboardingSubmission, getOnboardingByEmail,
       // utils
       toast, showToast, uid,
     }}>
@@ -307,6 +417,7 @@ export function AppProvider({ children }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useApp() {
   const ctx = useContext(AppContext);
   if (!ctx) throw new Error('useApp must be inside AppProvider');

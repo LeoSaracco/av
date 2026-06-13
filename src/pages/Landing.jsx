@@ -1,13 +1,28 @@
+/**
+ * @file Página de aterrizaje principal de la plataforma Adrián Vila.
+ *       Muestra los servicios, planes de entrenamiento, sección "Sobre mí",
+ *       testimonios y llamado a la acción (CTA).
+ * @route /
+ * @auth Público — no requiere autenticación.
+ */
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { SEED_PLANS } from '../data/seed';
 
+/**
+ * Componente principal de la landing page.
+ * Renderiza navegación responsive, secciones ancladas (hero, servicios,
+ * planes, sobre mí, testimonios, CTA y contacto) y redirige al login.
+ *
+ * @returns {JSX.Element} Página completa de aterrizaje.
+ */
 export default function Landing() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
-      {/* NAV */}
+      {/* ── Navegación ── */}
       <nav style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 200,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -22,6 +37,7 @@ export default function Landing() {
         {/* Desktop nav */}
         <div className="landing-nav-links" style={{ display: 'flex', gap: 28, alignItems: 'center' }}>
           <a href="#servicios" style={{ color: 'var(--color-text-2)', fontSize: 14 }}>Servicios</a>
+          <a href="#planes" style={{ color: 'var(--color-text-2)', fontSize: 14 }}>Planes</a>
           <a href="#sobre-mi" style={{ color: 'var(--color-text-2)', fontSize: 14 }}>Sobre mí</a>
           <a href="#testimonios" style={{ color: 'var(--color-text-2)', fontSize: 14 }}>Testimonios</a>
           <Link to="/store" style={{ color: 'var(--color-text-2)', fontSize: 14 }}>Tienda</Link>
@@ -40,7 +56,7 @@ export default function Landing() {
         </button>
       </nav>
 
-      {/* Mobile menu */}
+      {/* ── Menú mobile ── */}
       {menuOpen && (
         <div style={{
           position: 'fixed', top: 64, left: 0, right: 0, zIndex: 199,
@@ -48,6 +64,7 @@ export default function Landing() {
           padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16,
         }}>
           <a href="#servicios" style={{ color: 'var(--color-text-2)' }} onClick={() => setMenuOpen(false)}>Servicios</a>
+          <a href="#planes" style={{ color: 'var(--color-text-2)' }} onClick={() => setMenuOpen(false)}>Planes</a>
           <a href="#sobre-mi" style={{ color: 'var(--color-text-2)' }} onClick={() => setMenuOpen(false)}>Sobre mí</a>
           <a href="#testimonios" style={{ color: 'var(--color-text-2)' }} onClick={() => setMenuOpen(false)}>Testimonios</a>
           <Link to="/store" style={{ color: 'var(--color-text-2)' }} onClick={() => setMenuOpen(false)}>Tienda</Link>
@@ -55,7 +72,7 @@ export default function Landing() {
         </div>
       )}
 
-      {/* HERO */}
+      {/* ── Hero ── */}
       <section style={{
         minHeight: '100vh', display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center', textAlign: 'center',
@@ -63,7 +80,7 @@ export default function Landing() {
         background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,255,0,0.06) 0%, transparent 70%)',
         position: 'relative', overflow: 'hidden',
       }}>
-        {/* Decorative lines */}
+        {/* ── Líneas decorativas ── */}
         <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
           {[...Array(5)].map((_, i) => (
             <div key={i} style={{
@@ -112,7 +129,7 @@ export default function Landing() {
           </a>
         </div>
 
-        {/* Stats row */}
+        {/* ── Estadísticas ── */}
         <div style={{
           display: 'flex', gap: 40, marginTop: 60, flexWrap: 'wrap', justifyContent: 'center',
         }}>
@@ -130,7 +147,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* SERVICES */}
+      {/* ── Servicios ── */}
       <section id="servicios" style={{ padding: '100px 24px', background: 'var(--color-bg-2)' }}>
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: 60 }}>
@@ -159,11 +176,73 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ABOUT */}
+      {/* ── Planes ── */}
+      <section id="planes" className="plan-section">
+        <div className="container">
+          <div style={{ textAlign: 'center', marginBottom: 60 }}>
+            <div style={{ fontSize: 12, color: 'var(--color-accent)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '2px', marginBottom: 12 }}>Planes</div>
+            <h2 style={{ fontSize: 'clamp(30px, 5vw, 48px)', fontWeight: 800 }}>Elegí tu camino</h2>
+            <p style={{ color: 'var(--color-text-2)', marginTop: 12, maxWidth: 500, margin: '12px auto 0' }}>
+              Tres planes diseñados para distintas necesidades. Todos con acompañamiento real.
+            </p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24, alignItems: 'stretch' }}>
+            {SEED_PLANS.map(plan => (
+              <div key={plan.id} className={`plan-card${plan.featured ? ' featured' : ''}`}>
+                {plan.featured && <div className="plan-badge">Más elegido</div>}
+
+                <div className="plan-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    {plan.id === 'plan1' ? (
+                      <><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></>
+                    ) : plan.id === 'plan2' ? (
+                      <><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></>
+                    ) : (
+                      <><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></>
+                    )}
+                  </svg>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <div className="plan-name">{plan.name}</div>
+                  <div className="plan-subtitle">{plan.subtitle}</div>
+                </div>
+
+                <div className="plan-price">
+                  <span className="plan-price-currency">$</span>
+                  <span className="plan-price-value">{plan.price.toLocaleString('es-AR')}</span>
+                  <span className="plan-price-period">/mes ARS</span>
+                </div>
+
+                <div className="plan-features">
+                  {plan.features.map((f, i) => (
+                    <div key={i} className="plan-feature">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      <span>{f}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  className={`btn ${plan.featured ? 'btn-primary' : 'btn-secondary'}`}
+                  style={{ width: '100%', justifyContent: 'center', marginTop: 'auto', padding: '13px 20px' }}
+                  onClick={() => { window.location.href = `#/pago?plan=${plan.id}`; }}
+                >
+                  Lo quiero
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Sobre mí ── */}
       <section id="sobre-mi" style={{ padding: '100px 24px' }}>
         <div className="container">
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 60, alignItems: 'center' }}>
-            {/* Image placeholder */}
+            {/* ── Imagen placeholder ── */}
             <div style={{
               aspectRatio: '4/5', background: 'linear-gradient(135deg, var(--color-bg-3) 0%, var(--color-surface) 100%)',
               borderRadius: 'var(--radius-xl)', border: '1px solid var(--color-border)',
@@ -212,7 +291,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
+      {/* ── Testimonios ── */}
       <section id="testimonios" style={{ padding: '100px 24px', background: 'var(--color-bg-2)' }}>
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: 60 }}>
@@ -241,7 +320,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* ── CTA ── */}
       <section style={{
         padding: '100px 24px', textAlign: 'center',
         background: 'radial-gradient(ellipse 60% 80% at 50% 50%, rgba(0,255,0,0.08) 0%, transparent 70%)',
@@ -259,7 +338,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* CONTACT */}
+      {/* ── Contacto ── */}
       <section id="contacto" style={{ padding: '60px 24px', background: 'var(--color-bg-2)', borderTop: '1px solid var(--color-border)' }}>
         <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 24 }}>
           <div>

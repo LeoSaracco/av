@@ -1,3 +1,8 @@
+/**
+ * Configuración de ESLint para el proyecto AV.
+ * Usa reglas recomendadas de JS, react-hooks y react-refresh.
+ * Ignora el directorio `dist` y permite constantes en UPPER_SNAKE sin uso.
+ */
 import js from '@eslint/js'
 import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'

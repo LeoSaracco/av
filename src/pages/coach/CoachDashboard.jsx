@@ -1,3 +1,10 @@
+/**
+ * @file Dashboard principal del coach. Muestra estadísticas de dietas,
+ *       rutinas, templates y asignaciones, junto con los últimos clientes,
+ *       observaciones recientes y accesos rápidos a acciones frecuentes.
+ * @route /coach
+ * @auth Requiere rol "coach".
+ */
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
@@ -9,7 +16,6 @@ export default function CoachDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const activeClients = clients.filter(c => c.status === 'activo').length;
   const assignedCount = assignments.filter(a => a.active).length;
   const recentNotes = notes.slice(-3).reverse();
 

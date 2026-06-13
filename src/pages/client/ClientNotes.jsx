@@ -1,3 +1,9 @@
+/**
+ * @file Vista de observaciones del coach para el cliente. Lista todas las
+ *       notas y feedback que Adrián Vila registró sobre su entrenamiento.
+ * @route /client/notes
+ * @auth Requiere rol "client".
+ */
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';

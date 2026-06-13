@@ -1,7 +1,14 @@
+/**
+ * @file CoachLayout.jsx
+ * @description Layout principal del panel de coach con sidebar de navegación,
+ *              barra superior móvil y área de contenido principal.
+ *              Adaptable a dispositivos móviles con sidebar colapsable.
+ */
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
+// ── Navegación ─────────────────────────────────────────────────────────────────
 const navItems = [
   { label: 'Dashboard', path: '/coach', icon: HomeIcon, exact: true },
   { label: 'Clientes', path: '/coach/clients', icon: UsersIcon },
@@ -12,6 +19,15 @@ const navItems = [
   { label: 'Observaciones', path: '/coach/notes', icon: NotesIcon },
 ];
 
+/**
+ * Layout del panel de coach.
+ * Provee sidebar con navegación, barra superior para móviles y
+ * área de contenido principal con animación de entrada.
+ *
+ * @param {Object} props
+ * @param {React.ReactNode} props.children - Contenido a renderizar dentro del layout
+ * @returns {JSX.Element} Estructura completa del layout de coach
+ */
 export function CoachLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout } = useAuth();
@@ -85,7 +101,14 @@ export function CoachLayout({ children }) {
   );
 }
 
-// ── ICONS ──────────────────────────────────────────────────────────────────────
+// ── Íconos SVG inline ──────────────────────────────────────────────────────────
+/**
+ * Componente base para íconos SVG.
+ * @param {Object} props
+ * @param {number} [props.size=20] - Tamaño del ícono en píxeles
+ * @param {React.ReactNode} props.children - Elementos SVG internos (paths, circles, etc.)
+ * @returns {JSX.Element} Elemento SVG
+ */
 function Icon({ size = 20, children }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{children}</svg>;
 }

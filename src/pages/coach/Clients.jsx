@@ -1,3 +1,9 @@
+/**
+ * @file Gestión de clientes (ABM). Permite listar, buscar, crear, editar
+ *       y eliminar clientes con tabla responsive y modal de formulario.
+ * @route /coach/clients
+ * @auth Requiere rol "coach".
+ */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';

@@ -1,3 +1,10 @@
+/**
+ * @file Dashboard del cliente. Muestra rutina activa, dieta asignada,
+ *       última observación del coach, acceso al asistente IA y registro
+ *       de progreso.
+ * @route /client
+ * @auth Requiere rol "client".
+ */
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';

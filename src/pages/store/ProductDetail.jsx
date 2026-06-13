@@ -1,3 +1,10 @@
+/**
+ * @file Página de detalle de producto. Muestra información completa,
+ *       selección de variantes (talle, color, sabor), botón de agregar
+ *       al carrito y productos relacionados de la misma categoría.
+ * @route /store/:id
+ * @auth Público — no requiere autenticación.
+ */
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';

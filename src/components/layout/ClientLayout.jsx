@@ -1,7 +1,21 @@
+/**
+ * @file ClientLayout.jsx
+ * @description Layout principal del panel de cliente con barra de navegación
+ *              superior, contenido central y barra de navegación inferior fija.
+ */
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
+/**
+ * Layout del panel de cliente.
+ * Incluye navbar superior con avatar y logout, área de contenido
+ * y barra de navegación inferior con accesos rápidos.
+ *
+ * @param {Object} props
+ * @param {React.ReactNode} props.children - Contenido a renderizar dentro del layout
+ * @returns {JSX.Element} Estructura completa del layout de cliente
+ */
 export function ClientLayout({ children }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -55,6 +69,8 @@ export function ClientLayout({ children }) {
   );
 }
 
+// ── Íconos SVG inline ──────────────────────────────────────────────────────────
+/** @param {Object} props @param {number} [props.size=20] @param {React.ReactNode} props.children @returns {JSX.Element} */
 function Icon({ size = 20, children }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{children}</svg>;
 }

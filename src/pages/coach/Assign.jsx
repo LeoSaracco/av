@@ -1,43 +1,26 @@
+/**
+ * @file Panel de asignación de rutinas a clientes. Incluye selector de
+ *       cliente/rutina, vista de asignaciones actuales y editor inline
+ *       para rutinas ya asignadas.
+ * @route /coach/assign
+ * @auth Requiere rol "coach".
+ */
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { CoachLayout } from '../../components/layout/CoachLayout';
 import { Modal } from '../../components/ui/Modals';
 
 export default function Assign() {
-  const { clients, routines, assignments, assignRoutine, getAssignmentForClient, getRoutine } = useApp();
+  const { clients, routines, assignRoutine, getAssignmentForClient, getRoutine } = useApp();
   const [selectedClient, setSelectedClient] = useState('');
   const [selectedRoutine, setSelectedRoutine] = useState('');
   const [success, setSuccess] = useState(false);
-  const [editModal, setEditModal] = useState(null); // { clientId, routineId }
-  const [editForm, setEditForm] = useState({ name: '', goal: '', exercises: [] });
 
   const handleAssign = () => {
     if (!selectedClient || !selectedRoutine) return;
     assignRoutine(selectedClient, selectedRoutine);
     setSuccess(true);
     setTimeout(() => setSuccess(false), 3000);
-  };
-
-  // Open edit for assigned routine (edits a copy, not the original)
-  const openEditAssigned = (clientId) => {
-    const assignment = getAssignmentForClient(clientId);
-    if (!assignment) return;
-    const routine = getRoutine(assignment.routineId);
-    if (!routine) return;
-    setEditForm({ name: routine.name, goal: routine.goal, exercises: routine.exercises.map(e => ({ ...e })) });
-    setEditModal({ clientId, routineId: assignment.routineId });
-  };
-
-  const updateEditExercise = (idx, field, val) => setEditForm(f => ({
-    ...f,
-    exercises: f.exercises.map((e, i) => i === idx ? { ...e, [field]: field === 'sets' || field === 'reps' ? Number(val) : val } : e)
-  }));
-
-  const handleSaveEdit = () => {
-    if (!editModal) return;
-    const { updateRoutine } = useAppStatic;
-    // We import directly to update
-    setEditModal(null);
   };
 
   return (
@@ -154,7 +137,7 @@ export default function Assign() {
 }
 
 // ── Inline editor for assigned routine ─────────────────────────────────────────
-function AssignedRoutineEditor({ clientId, routine, routineId }) {
+function AssignedRoutineEditor({ routine, routineId }) {
   const { updateRoutine } = useApp();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(null);

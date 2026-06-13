@@ -1,3 +1,10 @@
+/**
+ * @file Carrito de compras. Gestiona cantidades, eliminación de ítems,
+ *       muestra el resumen del pedido con total y permite confirmar
+ *       la compra en modo demo.
+ * @route /store/cart
+ * @auth Público — no requiere autenticación.
+ */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';

@@ -1,3 +1,10 @@
+/**
+ * @file Gestión de plantillas de dieta base (CRUD). Cada plantilla
+ *       contiene nombre, objetivo, indicaciones y comidas/bloques.
+ *       Luego pueden asignarse a clientes.
+ * @route /coach/diet-templates
+ * @auth Requiere rol "coach".
+ */
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { CoachLayout } from '../../components/layout/CoachLayout';

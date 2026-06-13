@@ -1,3 +1,7 @@
+/**
+ * Punto de entrada de la aplicación.
+ * Monta el componente raíz {@link App} en el DOM dentro de StrictMode.
+ */
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './styles/global.css'
