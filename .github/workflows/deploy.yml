@@ -32,9 +32,14 @@ jobs:
         with:
           java-version: 21
           distribution: 'temurin'
-      - name: Build jar
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+      - name: Maven build
         working-directory: backend
-        run: ./gradlew build -x test --no-daemon
+        run: ./mvnw package -DskipTests --batch-mode
       - uses: railwayapp/railway-deploy@v1
         with:
           service: av-backend

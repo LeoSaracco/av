@@ -40,10 +40,16 @@ public class ClientJpaEntity {
     @Column
     private String avatar;
 
+    @Column
+    private String roles;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public ClientJpaEntity() {}
+
+    public String getRoles() { return roles; }
+    public void setRoles(String roles) { this.roles = roles; }
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }

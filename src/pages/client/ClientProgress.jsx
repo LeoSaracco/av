@@ -5,7 +5,7 @@
  * @route /client/progress
  * @auth Requiere rol "client".
  */
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
 import { ClientLayout } from '../../components/layout/ClientLayout';
@@ -65,6 +65,11 @@ export default function ClientProgress() {
 
   const chartData = progress.map(p => ({ ...p, date: p.date.slice(5) })); // MM-DD format
 
+  /** Ejecuta window.print() para exportar el progreso como PDF. */
+  const handleExport = useCallback(() => {
+    window.print();
+  }, []);
+
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <ClientLayout>
@@ -73,7 +78,10 @@ export default function ClientProgress() {
           <div style={{ fontSize: 12, color: 'var(--color-text-3)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 6 }}>Mi evolución</div>
           <h1 style={{ fontSize: 22 }}>Progreso de peso</h1>
         </div>
-        <button className="btn btn-primary btn-sm" onClick={() => setModal(true)}>+ Registrar</button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn btn-secondary btn-sm" onClick={handleExport}>Exportar</button>
+          <button className="btn btn-primary btn-sm" onClick={() => setModal(true)}>+ Registrar</button>
+        </div>
       </div>
 
       {/* Summary stats */}

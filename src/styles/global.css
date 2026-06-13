@@ -1402,6 +1402,82 @@ tbody tr:hover { background: var(--color-surface); }
    .mp-card-row { grid-template-columns: 1fr !important; }
  }
 
+/* ─── PRINT STYLES ──────────────────────────────────────────────────────────── */
+@media print {
+  /* Ocultar navegación, barras laterales y elementos interactivos */
+  .client-navbar,
+  .client-bottom-nav,
+  .coach-sidebar,
+  .coach-topbar,
+  .sidebar-overlay,
+  .toast,
+  .modal-overlay,
+  .btn,
+  .empty-state .btn,
+  .page-header .btn,
+  [style*="marginBottom: 24px"] .btn {
+    display: none !important;
+  }
+
+  /* Ocultar botones "Exportar" y "+ Registrar" */
+  .btn-secondary,
+  .btn-primary.btn-sm {
+    display: none !important;
+  }
+
+  /* Ajustar layout para impresión */
+  .client-layout {
+    min-height: auto;
+  }
+
+  .client-content {
+    padding: 0 !important;
+  }
+
+  .coach-main {
+    margin-left: 0 !important;
+  }
+
+  .coach-content {
+    padding: 0 !important;
+  }
+
+  /* Forzar texto negro sobre fondo blanco */
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 12pt;
+  }
+
+  #root {
+    box-shadow: none !important;
+    border: none !important;
+    max-width: 100% !important;
+  }
+
+  /* Tarjetas con bordes tenues */
+  .card,
+  .stat-card {
+    background: #fff !important;
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+
+  /* Gráficos */
+  .recharts-responsive-container {
+    max-width: 100% !important;
+  }
+
+  /* Cabeceras */
+  h1, h2, h3 {
+    color: #000 !important;
+  }
+
+  /* Scrollbar innecesario en impresión */
+  ::-webkit-scrollbar { display: none; }
+}
+
 /* ─── THEME TOGGLE ──────────────────────────────────────────────────────────── */
 .theme-toggle-btn {
   background: transparent;

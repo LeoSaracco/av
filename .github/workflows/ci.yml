@@ -15,24 +15,44 @@ jobs:
           node-version: 22
           cache: 'npm'
       - run: npm ci
-      - run: npm run lint
-      - run: npm run build
-      - run: npm test
+      - run: npm run lint       # Quality Gate: 0 errors 0 warnings
+      - run: npm run build      # Quality Gate: build success
+      - run: npm test           # Quality Gate: 26/26 tests
 
   backend:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: av_fitness
+          POSTGRES_USER: av_user
+          POSTGRES_PASSWORD: av_pass_2026
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
           java-version: 21
           distribution: 'temurin'
-      - name: Build and test
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Maven test
         working-directory: backend
-        run: ./gradlew check --no-daemon
-      - name: Build jar
+        run: ./mvnw test --batch-mode
+      - name: Maven build
         working-directory: backend
-        run: ./gradlew build -x test --no-daemon
+        run: ./mvnw package -DskipTests --batch-mode
 
   security:
     runs-on: ubuntu-latest

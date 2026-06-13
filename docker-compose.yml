@@ -1,0 +1,38 @@
+# ── Docker Compose — AV Fitness App ──────────────────────────────────────────
+# Desarrollo local: PostgreSQL 16 + pgAdmin
+# Levantar: docker compose up -d
+# Bajar:    docker compose down -v
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: av-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: av_fitness
+      POSTGRES_USER: av_user
+      POSTGRES_PASSWORD: av_pass_2026
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U av_user -d av_fitness"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: av-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@av.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+
+volumes:
+  pgdata:

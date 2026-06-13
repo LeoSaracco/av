@@ -22,7 +22,13 @@ public class CoachJpaEntity {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
+    @Column
+    private String roles;
+
     public CoachJpaEntity() {}
+
+    public String getRoles() { return roles; }
+    public void setRoles(String roles) { this.roles = roles; }
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
