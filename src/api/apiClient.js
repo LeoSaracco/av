@@ -2,6 +2,7 @@
  * @file Cliente HTTP para la API del backend.
  *       Reemplaza las llamadas directas a localStorage por fetch a la API real.
  *       Configurable mediante variable de entorno VITE_API_URL.
+ *       Cubre 47 endpoints del backend.
  */
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
@@ -107,9 +108,13 @@ export async function apiSendMessage(text) {
   return request('POST', '/me/thread', { text });
 }
 
-// ── Coach ─────────────────────────────────────────────────────────────────────
+// ── Coach: Clients ────────────────────────────────────────────────────────────
 export async function apiGetClients() {
   return request('GET', '/coach/clients');
+}
+
+export async function apiGetClient(id) {
+  return request('GET', `/coach/clients/${id}`);
 }
 
 export async function apiCreateClient(data) {
@@ -124,6 +129,28 @@ export async function apiDeleteClient(id) {
   return request('DELETE', `/coach/clients/${id}`);
 }
 
+export async function apiGetClientProgress(clientId) {
+  return request('GET', `/coach/clients/${clientId}/progress`);
+}
+
+// ── Coach: Templates ──────────────────────────────────────────────────────────
+export async function apiGetTemplates() {
+  return request('GET', '/coach/templates');
+}
+
+export async function apiCreateTemplate(data) {
+  return request('POST', '/coach/templates', data);
+}
+
+export async function apiUpdateTemplate(id, data) {
+  return request('PUT', `/coach/templates/${id}`, data);
+}
+
+export async function apiDeleteTemplate(id) {
+  return request('DELETE', `/coach/templates/${id}`);
+}
+
+// ── Coach: Routines ───────────────────────────────────────────────────────────
 export async function apiGetRoutines() {
   return request('GET', '/coach/routines');
 }
@@ -132,18 +159,104 @@ export async function apiCreateRoutine(data) {
   return request('POST', '/coach/routines', data);
 }
 
-export async function apiGetTemplates() {
-  return request('GET', '/coach/templates');
+export async function apiUpdateRoutine(id, data) {
+  return request('PUT', `/coach/routines/${id}`, data);
 }
 
-export async function apiAssignRoutine(clientId, routineId) {
-  return request('POST', '/coach/assign', { clientId, routineId });
+export async function apiDeleteRoutine(id) {
+  return request('DELETE', `/coach/routines/${id}`);
 }
 
+export async function apiCreateRoutineFromTemplate(templateId, name, goal) {
+  return request('POST', '/coach/routines/from-template', { templateId, name, goal });
+}
+
+// ── Coach: Assignments ────────────────────────────────────────────────────────
+export async function apiAssignRoutine(clientId, routineId, dietId) {
+  return request('POST', '/coach/assign', { clientId, routineId, dietId });
+}
+
+export async function apiGetAssignments() {
+  return request('GET', '/coach/assignments');
+}
+
+// ── Coach: Notes ──────────────────────────────────────────────────────────────
 export async function apiGetCoachNotes(clientId) {
   return request('GET', `/coach/notes/${clientId}`);
 }
 
+export async function apiGetAllNotes() {
+  return request('GET', '/coach/notes');
+}
+
 export async function apiCreateNote(clientId, text) {
   return request('POST', '/coach/notes', { clientId, text });
+}
+
+export async function apiUpdateNote(id, text) {
+  return request('PUT', `/coach/notes/${id}`, { text });
+}
+
+export async function apiDeleteNote(id) {
+  return request('DELETE', `/coach/notes/${id}`);
+}
+
+// ── Coach: Diet Templates ─────────────────────────────────────────────────────
+export async function apiGetDietTemplates() {
+  return request('GET', '/coach/diet-templates');
+}
+
+export async function apiCreateDietTemplate(data) {
+  return request('POST', '/coach/diet-templates', data);
+}
+
+export async function apiUpdateDietTemplate(id, data) {
+  return request('PUT', `/coach/diet-templates/${id}`, data);
+}
+
+export async function apiDeleteDietTemplate(id) {
+  return request('DELETE', `/coach/diet-templates/${id}`);
+}
+
+// ── Coach: Diets ──────────────────────────────────────────────────────────────
+export async function apiGetDiets() {
+  return request('GET', '/coach/diets');
+}
+
+export async function apiCreateDiet(data) {
+  return request('POST', '/coach/diets', data);
+}
+
+export async function apiUpdateDiet(id, data) {
+  return request('PUT', `/coach/diets/${id}`, data);
+}
+
+export async function apiDeleteDiet(id) {
+  return request('DELETE', `/coach/diets/${id}`);
+}
+
+export async function apiCreateDietFromTemplate(templateId, name, goal) {
+  return request('POST', '/coach/diets/from-template', { templateId, name, goal });
+}
+
+// ── Coach: Nutrition Thread ───────────────────────────────────────────────────
+export async function apiGetClientThread(clientId) {
+  return request('GET', `/coach/clients/${clientId}/thread`);
+}
+
+export async function apiSendCoachMessage(clientId, text) {
+  return request('POST', `/coach/clients/${clientId}/thread`, { text });
+}
+
+// ── Store ─────────────────────────────────────────────────────────────────────
+export async function apiGetProducts() {
+  return request('GET', '/store/products');
+}
+
+export async function apiGetProduct(id) {
+  return request('GET', `/store/products/${id}`);
+}
+
+export async function apiCheckout(items) {
+  return request('POST', '/store/checkout', { items });
 }
