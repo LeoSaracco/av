@@ -26,7 +26,7 @@ indent_size = 2
 [*.{js,jsx}]
 indent_size = 2
 
-[*.{java,gradle}]
+[*.java]
 indent_size = 4
 
 [.gitignore]

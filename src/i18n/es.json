@@ -22,5 +22,475 @@
   },
   "common": {
     "loading": "Cargando..."
+  },
+  "stats": {
+    "clients": "Clientes transformados",
+    "experience": "Años de experiencia",
+    "retention": "Tasa de retención",
+    "motivation": "Motivación incluida"
+  },
+  "services": {
+    "label": "Servicios",
+    "title": "¿Qué incluye tu plan?",
+    "subtitle": "Todo lo que necesitás para transformar tu cuerpo y hábitos, en un solo lugar.",
+    "items": {
+      "routines": {
+        "title": "Rutinas Personalizadas",
+        "desc": "Planes diseñados específicamente para tus objetivos, historial y disponibilidad. Sin copiar y pegar."
+      },
+      "tracking": {
+        "title": "Seguimiento de Evolución",
+        "desc": "Control de peso, medidas y performance con gráficos de progreso. Ves tu avance en tiempo real."
+      },
+      "feedback": {
+        "title": "Feedback Permanente",
+        "desc": "Observaciones semanales del coach. Ajustes en tu plan cuando los necesitás."
+      },
+      "app": {
+        "title": "App en Tu Bolsillo",
+        "desc": "Accedé a tu rutina desde el celular, tablet o PC. Siempre disponible, siempre actualizada."
+      },
+      "goals": {
+        "title": "Objetivos Claros",
+        "desc": "Definimos metas reales y medibles juntos. Sin promesas vacías - resultados concretos."
+      },
+      "shop": {
+        "title": "Tienda Premium",
+        "desc": "Ropa, suplementos y accesorios seleccionados. Todo lo que necesitás para entrenar a tope."
+      }
+    }
+  },
+  "plans": {
+    "label": "Planes",
+    "title": "Elegí tu camino",
+    "subtitle": "Tres planes diseñados para distintas necesidades. Todos con acompañamiento real.",
+    "badge": "Más elegido",
+    "priceCurrency": "$",
+    "pricePeriod": "/mes ARS",
+    "cta": "Lo quiero",
+    "items": {
+      "plan1": {
+        "name": "Plan Entrenamiento",
+        "subtitle": "Rutina + seguimiento"
+      },
+      "plan2": {
+        "name": "Método 90/90",
+        "subtitle": "Entrenamiento + Nutrición"
+      },
+      "plan3": {
+        "name": "Plan Personalizado",
+        "subtitle": "1-on-1 con Adrián"
+      }
+    },
+    "features": {
+      "plan1": [
+        "Rutina personalizada según tu nivel",
+        "App de tracking de ejercicios",
+        "Seguimiento de peso y evolución",
+        "Observaciones mensuales del coach",
+        "Acceso a la tienda premium"
+      ],
+      "plan2": [
+        "Todo lo del Plan Entrenamiento",
+        "Plan nutricional personalizado",
+        "Chat directo con tu coach",
+        "Compromiso mínimo: 90 días / 90 min",
+        "Ajustes cada 15 días",
+        "Recetario digital incluido"
+      ],
+      "plan3": [
+        "Todo lo del Método 90/90",
+        "Sesión 1-on-1 semanal",
+        "Ajustes diarios de rutina y dieta",
+        "Nutrición deportiva experta",
+        "Prioridad en respuestas (máx 2h)",
+        "Plan de suplementación incluido"
+      ]
+    }
+  },
+  "about": {
+    "label": "Sobre mí",
+    "heading1": "Más de 6 años",
+    "heading2": "transformando vidas.",
+    "bio1": "Soy Adrián Vila, preparador físico certificado con especialización en hipertrofia, pérdida de grasa y rendimiento deportivo. Trabajo con atletas y personas comunes que quieren resultados reales.",
+    "bio2": "Cada plan es único. Cada cliente importa. No creo en las soluciones genéricas ni en los milagros rápidos. Creo en el trabajo constante, la metodología y el acompañamiento real.",
+    "cta": "Empezar entrenamiento →",
+    "certs": [
+      "Preparador Físico Certificado",
+      "Especialista en Hipertrofia",
+      "Coach Nutricional",
+      "Entrenador Funcional"
+    ]
+  },
+  "testimonials": {
+    "label": "Testimonios",
+    "title": "Lo que dicen mis clientes"
+  },
+  "cta": {
+    "heading": "¿Listo para cambiar?",
+    "subtitle": "El mejor momento para empezar fue ayer. El segundo mejor momento es ahora.",
+    "button": "Acceder a la plataforma →"
+  },
+  "contact": {
+    "subtitle": "Preparador Físico Personalizado"
+  },
+  "onboarding": {
+    "headerPrefix": "Cuestionario",
+    "headerSub": "Completá tus datos para que Adrián pueda armar tu plan a medida",
+    "steps": {
+      "1": { "title": "Datos personales", "sub": "Información básica para conocerte mejor" },
+      "2": { "title": "Actividad y hábitos", "sub": "Tu estilo de vida y rutina actual" },
+      "3": { "title": "Salud y aptitud física", "sub": "Estado de salud y nivel de entrenamiento" },
+      "4": { "title": "Perfil y motivación", "sub": "Contanos qué te motiva y cómo te sentís" },
+      "5": { "title": "Revisar datos", "sub": "Verificá que todo esté correcto antes de continuar" },
+      "6": { "title": "Creá tu cuenta", "sub": "Último paso: elegí tu contraseña" }
+    },
+    "trackLabels": {
+      "step1": "Datos",
+      "step2": "Hábitos",
+      "step3": "Salud",
+      "step4": "Perfil",
+      "step5": "Revisar",
+      "step6": "Cuenta"
+    },
+    "labels": {
+      "name": "Nombre y apellido *",
+      "email": "Correo Electrónico *",
+      "whatsapp": "WhatsApp *",
+      "age": "Edad *",
+      "height": "Altura (cm) *",
+      "weight": "Peso (kg) *",
+      "sex": "Sexo *",
+      "sexOptions": { "Femenino": "Femenino", "Masculino": "Masculino", "Otro": "Otro" },
+      "activity": "Tipo de actividad / ocupación *",
+      "activityOptions": {
+        "sedentaria": { "title": "Sedentaria", "desc": "No realizás actividad física estructurada. Mayormente sentado." },
+        "poco_activa": { "title": "Poco activa", "desc": "Actividad física de baja intensidad 1-2 veces por semana." },
+        "activa": { "title": "Activa", "desc": "Trabajo de pie o actividad planificada 3-5 veces por semana." },
+        "muy_activa": { "title": "Muy activa", "desc": "Trabajo físico intenso o entrenamiento 6-7 días por semana." }
+      },
+      "steps": "¿Cuántos pasos diarios das? *",
+      "stepsOptions": {
+        "menos_5000": "Menos de 5.000",
+        "5000_8000": "Entre 5.000 y 8.000",
+        "mas_10000": "Más de 10.000"
+      },
+      "sleep": "Horas de sueño *",
+      "pathology": "¿Presentás alguna patología preexistente? *",
+      "pathologyDesc": "Describí la patología *",
+      "medical": "¿Estás apto/a médico? *",
+      "level": "Nivel de aptitud física *",
+      "levelOptions": {
+        "principiante": { "title": "Principiante", "desc": "Hace más de un año que no entreno seguido. Necesito empezar de cero." },
+        "intermedio": { "title": "Intermedio", "desc": "Tengo base pero necesito método. Entreno pero no veo los resultados que quiero." },
+        "avanzado": { "title": "Avanzado", "desc": "Entreno firme pero toqué un techo. Busco sobrecarga progresiva y siguientes niveles." }
+      },
+      "commitment": "¿Asumís el compromiso mínimo de 90 días y 90 min? *",
+      "frequency": "¿Cuántas veces por semana te comprometés a entrenar? *",
+      "frequencyUnit": "veces",
+      "body": "¿Cómo te sentís con tu cuerpo hoy? *",
+      "bodyPlaceholder": "Describí tu relación con el espejo en una frase...",
+      "purpose": "Propósito mayor (no estético) para entrenar *",
+      "purposePlaceholder": "¿Qué beneficio no estético te motiva más hoy?",
+      "complexes": "¿Sentís que tenés alguna distorsión con tu imagen corporal o complejos?",
+      "complexesPlaceholder": "Contanos si algo te condiciona...",
+      "injuries": "Lesiones o condiciones físicas a considerar",
+      "injuriesPlaceholder": "¿Alguna lesión actual o pasada que debamos saber?",
+      "city": "¿Desde qué ciudad entrenás? *",
+      "cityPlaceholder": "Ej: Buenos Aires",
+      "community": "¿Conectar con la comunidad?",
+      "password": "Contraseña *",
+      "passwordPlaceholder": "Mínimo 6 caracteres",
+      "confirmPassword": "Confirmar contraseña *",
+      "confirmPlaceholder": "Repetí la contraseña",
+      "code": "Código de verificación *",
+      "codePlaceholder": "123456"
+    },
+    "toggleOptions": {
+      "si": "Sí",
+      "no": "No",
+      "siCommitment": "Sí, me comprometo"
+    },
+    "account": {
+      "emailLabel": "Email",
+      "verifyPrompt": "Vamos a enviar un código de verificación a",
+      "sendCode": "Enviar código de verificación",
+      "demoHint": "Demo: el código es 123456",
+      "codeSentHint": "Te enviamos un código a",
+      "terms": "Acepto los términos y condiciones y la política de privacidad",
+      "termsShort": "Acepto los términos y condiciones y la política de privacidad *"
+    },
+    "buttons": {
+      "prev": "← Anterior",
+      "next": "Siguiente →",
+      "summaryContinue": "Todo OK, continuar →",
+      "createAccount": "Crear cuenta ✓",
+      "creating": "Creando cuenta..."
+    },
+    "stepCounter": "Paso {step} de {total}",
+    "validation": {
+      "required": "Este campo es obligatorio",
+      "name": "Ingresá tu nombre y apellido",
+      "email": "Ingresá tu email",
+      "emailInvalid": "Email no válido",
+      "whatsapp": "Ingresá tu número de WhatsApp",
+      "whatsappInvalid": "Solo números, espacios y +",
+      "age": "Ingresá tu edad",
+      "ageRange": "Edad entre 14 y 99",
+      "height": "Ingresá tu altura",
+      "heightRange": "Altura entre 100 y 250 cm",
+      "weight": "Ingresá tu peso",
+      "weightRange": "Peso entre 30 y 300 kg",
+      "sex": "Seleccioná tu sexo",
+      "activity": "Seleccioná tu tipo de actividad",
+      "steps": "Seleccioná tus pasos diarios",
+      "sleep": "Seleccioná tus horas de sueño",
+      "pathology": "Indicá si tenés patologías",
+      "pathologyDesc": "Describí la patología",
+      "medical": "Indicá si estás apto médico",
+      "level": "Seleccioná tu nivel físico",
+      "commitment": "Indicá tu compromiso",
+      "frequency": "Seleccioná la frecuencia semanal",
+      "body": "Contanos cómo te sentís con tu cuerpo",
+      "purpose": "Contanos tu propósito",
+      "city": "Indicá desde qué ciudad entrenás",
+      "password": "Creá una contraseña",
+      "passwordMin": "Mínimo 6 caracteres",
+      "passwordMatch": "Las contraseñas no coinciden",
+      "code": "Ingresá el código de verificación",
+      "codeInvalid": "Código incorrecto (probá con {code})",
+      "terms": "Debés aceptar los términos"
+    },
+    "summary": {
+      "intro": "Revisá que todos los datos sean correctos. Si necesitás ajustar algo, podés editar cada sección.",
+      "edit": "Editar",
+      "sections": {
+        "step1": "Datos personales",
+        "step2": "Actividad y hábitos",
+        "step3": "Salud y aptitud",
+        "step4": "Perfil y motivación"
+      },
+      "fieldLabels": {
+        "step1_name": "Nombre y apellido",
+        "step1_email": "Correo electrónico",
+        "step1_whatsapp": "WhatsApp",
+        "step1_age": "Edad",
+        "step1_height": "Altura",
+        "step1_weight": "Peso",
+        "step1_sex": "Sexo",
+        "step2_activity": "Tipo de actividad",
+        "step2_steps": "Pasos diarios",
+        "step2_sleep": "Horas de sueño",
+        "step3_pathology": "Patología preexistente",
+        "step3_pathology_desc": "Descripción de patología",
+        "step3_medical": "Apto médico",
+        "step3_level": "Nivel físico",
+        "step3_commitment": "Compromiso 90/90",
+        "step3_frequency": "Frecuencia semanal",
+        "step4_body": "Relación con el espejo",
+        "step4_purpose": "Propósito no estético",
+        "step4_complexes": "Complejos corporales",
+        "step4_injuries": "Lesiones",
+        "step4_city": "Ciudad",
+        "step4_community": "Conectar con comunidad"
+      },
+      "formatUnits": {
+        "years": "años",
+        "cm": "cm",
+        "kg": "kg",
+        "hours": "horas",
+        "timesPerWeek": "veces por semana",
+        "yes": "Sí",
+        "no": "No",
+        "siCommitment": "Sí, me comprometo"
+      },
+      "activityMap": {
+        "sedentaria": "Sedentaria",
+        "poco_activa": "Poco activa",
+        "activa": "Activa",
+        "muy_activa": "Muy activa"
+      },
+      "stepsMap": {
+        "menos_5000": "Menos de 5.000",
+        "5000_8000": "Entre 5.000 y 8.000",
+        "mas_10000": "Más de 10.000"
+      },
+      "levelMap": {
+        "principiante": "Principiante",
+        "intermedio": "Intermedio",
+        "avanzado": "Avanzado"
+      }
+    },
+    "success": {
+      "title": "¡Todo listo!",
+      "message": "Tu cuenta fue creada y tus datos quedaron registrados. Adrián va a revisar tu cuestionario y preparar tu plan a medida.",
+      "cta": "Ir a mi dashboard →"
+    }
+  },
+  "payment": {
+    "step": "Paso 2 de 2: Pagá con tarjeta",
+    "secureEnv": "Entorno seguro",
+    "cardTitle": "Tarjeta de crédito o débito",
+    "cardNumber": "Número de tarjeta",
+    "cardNumberPlaceholder": "1234 5678 9012 3456",
+    "cardName": "Nombre del titular",
+    "cardNamePlaceholder": "Como aparece en la tarjeta",
+    "expiry": "Vencimiento",
+    "expiryPlaceholder": "MM/AA",
+    "cvv": "CVV",
+    "cvvPlaceholder": "123",
+    "payButton": "Pagar {price}",
+    "demoDisclaimer": "Demo — No se realiza ningún cobro real. Datos de tarjeta simulados.",
+    "cancel": "← Cancelar y volver",
+    "summary": {
+      "title": "Resumen de compra",
+      "total": "Total mensual",
+      "secureNote": "Pago seguro con Mercado Pago",
+      "renewalNote": "La suscripción se renueva automáticamente cada mes. Podés cancelar cuando quieras."
+    },
+    "processing": {
+      "title": "Procesando tu pago",
+      "message": "Estamos validando los datos de tu tarjeta con Mercado Pago..."
+    },
+    "approved": {
+      "title": "Pago aprobado",
+      "message": "Tu pago de {price} fue procesado correctamente.",
+      "redirecting": "Redirigiendo al formulario en {count}..."
+    },
+    "rejected": {
+      "title": "Pago rechazado",
+      "message": "No se pudo procesar el pago. Revisá los datos e intentá de nuevo.",
+      "retry": "Intentar de nuevo"
+    }
+  },
+  "store": {
+    "title": "Tienda",
+    "searchPlaceholder": "Buscar productos...",
+    "categories": {
+      "all": "Todos",
+      "Ropa": "Ropa",
+      "Suplementos": "Suplementos",
+      "Accesorios": "Accesorios"
+    },
+    "product": {
+      "addToCart": "Agregar al carrito",
+      "outOfStock": "Sin stock",
+      "size": "Talle",
+      "color": "Color",
+      "flavor": "Sabor"
+    },
+    "cart": {
+      "title": "Carrito",
+      "empty": "Tu carrito está vacío",
+      "clear": "Vaciar carrito",
+      "total": "Total",
+      "checkout": "Finalizar compra",
+      "remove": "Eliminar"
+    }
+  },
+  "coach": {
+    "dashboard": {
+      "title": "Panel del Coach",
+      "activeClients": "Clientes activos",
+      "monthlyRevenue": "Ingresos mensuales",
+      "pendingTasks": "Tareas pendientes",
+      "recentActivity": "Actividad reciente"
+    },
+    "clients": {
+      "title": "Clientes",
+      "addClient": "Agregar cliente",
+      "searchPlaceholder": "Buscar cliente...",
+      "status": {
+        "active": "Activo",
+        "paused": "Pausado",
+        "inactive": "Inactivo"
+      },
+      "assignRoutine": "Asignar rutina",
+      "assignDiet": "Asignar dieta",
+      "viewProgress": "Ver progreso",
+      "addNote": "Agregar nota"
+    },
+    "templates": {
+      "title": "Plantillas",
+      "createTemplate": "Crear plantilla",
+      "useTemplate": "Usar plantilla",
+      "exercisesCount": "{count} ejercicios"
+    },
+    "actions": {
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "delete": "Eliminar",
+      "edit": "Editar",
+      "duplicate": "Duplicar",
+      "assign": "Asignar"
+    },
+    "routine": {
+      "exercise": "Ejercicio",
+      "sets": "Series",
+      "reps": "Repeticiones",
+      "rest": "Descanso",
+      "notes": "Notas",
+      "addExercise": "Agregar ejercicio"
+    },
+    "nutrition": {
+      "title": "Planes nutricionales",
+      "createDiet": "Crear plan nutricional",
+      "meal": "Comida",
+      "addMeal": "Agregar comida",
+      "indications": "Indicaciones"
+    }
+  },
+  "client": {
+    "dashboard": {
+      "title": "Mi Panel",
+      "welcome": "Hola, {name}",
+      "currentRoutine": "Mi rutina actual",
+      "currentDiet": "Mi plan nutricional",
+      "nextSession": "Próxima sesión",
+      "noRoutine": "Aún no tenés una rutina asignada",
+      "noDiet": "Aún no tenés un plan nutricional"
+    },
+    "routine": {
+      "title": "Mi Rutina",
+      "exercise": "Ejercicio",
+      "sets": "Series",
+      "reps": "Repeticiones",
+      "rest": "Descanso",
+      "notes": "Notas",
+      "video": "Ver video",
+      "complete": "Completar",
+      "completed": "Completado"
+    },
+    "progress": {
+      "title": "Mi Progreso",
+      "weight": "Peso",
+      "date": "Fecha",
+      "comment": "Comentario",
+      "noData": "Aún no hay datos de progreso",
+      "addEntry": "Agregar registro",
+      "chart": "Gráfico de evolución"
+    },
+    "nutrition": {
+      "title": "Plan Nutricional",
+      "breakfast": "Desayuno",
+      "lunch": "Almuerzo",
+      "snack": "Merienda",
+      "dinner": "Cena",
+      "midMorning": "Media Mañana",
+      "postWorkout": "Merienda (Post-entreno)",
+      "indications": "Indicaciones",
+      "noPlan": "Aún no tenés un plan nutricional asignado"
+    },
+    "notes": {
+      "title": "Notas del Coach",
+      "noNotes": "No hay notas todavía",
+      "fromCoach": "De tu coach"
+    },
+    "ai": {
+      "title": "Asistente AV",
+      "placeholder": "Preguntale a tu asistente...",
+      "send": "Enviar",
+      "thinking": "Pensando..."
+    }
   }
 }

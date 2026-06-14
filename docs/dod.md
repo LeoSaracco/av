@@ -63,17 +63,17 @@ Exceptions are **only valid** when ALL of the following conditions are met:
 ### Backend Gates (`docs/backend.md`)
 | Gate | Command | Pass Criteria |
 |------|---------|--------------|
-| Build | `./gradlew build` | Success, 0 warnings |
-| Unit tests | `./gradlew test` | 90% line, 85% branch |
-| Architecture tests | `./gradlew test` | 100% ArchUnit passing |
-| Integration tests | `./gradlew integrationTest` | 90% line coverage |
+| Build | `./mvnw package` | Success, 0 warnings |
+| Unit tests | `./mvnw test` | 90% line, 85% branch |
+| Architecture tests | `./mvnw test` | 100% ArchUnit passing |
+| Integration tests | `./mvnw verify` | 90% line coverage |
 | Complexity limits | Sonar/ArchUnit | Per-method max 8 CC, 10 cognitive |
 
 ### Security Gates (`docs/security.md`)
 | Gate | Tool | Pass Criteria |
 |------|------|--------------|
 | SAST | CodeQL | 0 blocker/critical/high/medium |
-| SCA | `npm audit`, Gradle dependency check | 0 critical/high CVEs |
+| SCA | `npm audit`, Maven dependency check | 0 critical/high CVEs |
 | Secrets | Gitleaks | 0 exposed secrets |
 | No hardcoded credentials | Manual + SAST | 0 findings |
 | Secure headers | Spring Security config | All required headers present |
@@ -125,10 +125,10 @@ npm run build       # Vite build: success required
 
 # Backend (future)
 cd backend
-./gradlew check     # Tests + lint
-./gradlew build     # Full build
-./gradlew test      # Unit tests with coverage
-./gradlew integrationTest  # Integration tests
+./mvnw verify       # Tests + lint
+./mvnw package      # Full build
+./mvnw test         # Unit tests with coverage
+./mvnw verify       # Integration tests
 
 # Railway CLI (future)
 railway up           # Deploy

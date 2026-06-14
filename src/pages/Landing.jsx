@@ -135,14 +135,14 @@ export default function Landing() {
           display: 'flex', gap: 40, marginTop: 60, flexWrap: 'wrap', justifyContent: 'center',
         }}>
           {[
-            { value: '+200', label: 'Clientes transformados' },
-            { value: '6+', label: 'Años de experiencia' },
-            { value: '98%', label: 'Tasa de retención' },
-            { value: '∞', label: 'Motivación incluida' },
+            { value: '+200', labelKey: 'stats.clients' },
+            { value: '6+', labelKey: 'stats.experience' },
+            { value: '98%', labelKey: 'stats.retention' },
+            { value: '∞', labelKey: 'stats.motivation' },
           ].map(s => (
-            <div key={s.label} style={{ textAlign: 'center' }}>
+            <div key={s.labelKey} style={{ textAlign: 'center' }}>
               <div style={{ fontFamily: 'var(--font-main)', fontSize: 'clamp(28px, 5vw, 40px)', fontWeight: 900, color: 'var(--color-accent)' }}>{s.value}</div>
-              <div style={{ fontSize: 13, color: 'var(--color-text-2)', marginTop: 2 }}>{s.label}</div>
+              <div style={{ fontSize: 13, color: 'var(--color-text-2)', marginTop: 2 }}>{t(s.labelKey)}</div>
             </div>
           ))}
         </div>
@@ -152,25 +152,25 @@ export default function Landing() {
       <section id="servicios" style={{ padding: '100px 24px', background: 'var(--color-bg-2)' }}>
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: 60 }}>
-            <div style={{ fontSize: 12, color: 'var(--color-accent)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '2px', marginBottom: 12 }}>Servicios</div>
-            <h2 style={{ fontSize: 'clamp(30px, 5vw, 48px)', fontWeight: 800 }}>¿Qué incluye tu plan?</h2>
+            <div style={{ fontSize: 12, color: 'var(--color-accent)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '2px', marginBottom: 12 }}>{t('services.label')}</div>
+            <h2 style={{ fontSize: 'clamp(30px, 5vw, 48px)', fontWeight: 800 }}>{t('services.title')}</h2>
             <p style={{ color: 'var(--color-text-2)', marginTop: 12, maxWidth: 500, margin: '12px auto 0' }}>
-              Todo lo que necesitás para transformar tu cuerpo y hábitos, en un solo lugar.
+              {t('services.subtitle')}
             </p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
             {[
-              { emoji: '🏋️', title: 'Rutinas Personalizadas', desc: 'Planes diseñados específicamente para tus objetivos, historial y disponibilidad. Sin copiar y pegar.' },
-              { emoji: '📊', title: 'Seguimiento de Evolución', desc: 'Control de peso, medidas y performance con gráficos de progreso. Ves tu avance en tiempo real.' },
-              { emoji: '💬', title: 'Feedback Permanente', desc: 'Observaciones semanales del coach. Ajustes en tu plan cuando los necesitás.' },
-              { emoji: '📱', title: 'App en Tu Bolsillo', desc: 'Accedé a tu rutina desde el celular, tablet o PC. Siempre disponible, siempre actualizada.' },
-              { emoji: '🎯', title: 'Objetivos Claros', desc: 'Definimos metas reales y medibles juntos. Sin promesas vacías - resultados concretos.' },
-              { emoji: '🛒', title: 'Tienda Premium', desc: 'Ropa, suplementos y accesorios seleccionados. Todo lo que necesitás para entrenar a tope.' },
+              { emoji: '🏋️', key: 'services.items.routines' },
+              { emoji: '📊', key: 'services.items.tracking' },
+              { emoji: '💬', key: 'services.items.feedback' },
+              { emoji: '📱', key: 'services.items.app' },
+              { emoji: '🎯', key: 'services.items.goals' },
+              { emoji: '🛒', key: 'services.items.shop' },
             ].map(s => (
-              <div key={s.title} className="card card-hover" style={{ gap: 16, padding: 28 }}>
+              <div key={s.key} className="card card-hover" style={{ gap: 16, padding: 28 }}>
                 <div style={{ fontSize: 36 }}>{s.emoji}</div>
-                <h3 style={{ fontSize: 18 }}>{s.title}</h3>
-                <p style={{ color: 'var(--color-text-2)', fontSize: 14, lineHeight: 1.7 }}>{s.desc}</p>
+                <h3 style={{ fontSize: 18 }}>{t(s.key + '.title')}</h3>
+                <p style={{ color: 'var(--color-text-2)', fontSize: 14, lineHeight: 1.7 }}>{t(s.key + '.desc')}</p>
               </div>
             ))}
           </div>
@@ -181,16 +181,16 @@ export default function Landing() {
       <section id="planes" className="plan-section">
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: 60 }}>
-            <div style={{ fontSize: 12, color: 'var(--color-accent)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '2px', marginBottom: 12 }}>Planes</div>
-            <h2 style={{ fontSize: 'clamp(30px, 5vw, 48px)', fontWeight: 800 }}>Elegí tu camino</h2>
+            <div style={{ fontSize: 12, color: 'var(--color-accent)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '2px', marginBottom: 12 }}>{t('plans.label')}</div>
+            <h2 style={{ fontSize: 'clamp(30px, 5vw, 48px)', fontWeight: 800 }}>{t('plans.title')}</h2>
             <p style={{ color: 'var(--color-text-2)', marginTop: 12, maxWidth: 500, margin: '12px auto 0' }}>
-              Tres planes diseñados para distintas necesidades. Todos con acompañamiento real.
+              {t('plans.subtitle')}
             </p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24, alignItems: 'stretch' }}>
             {SEED_PLANS.map(plan => (
               <div key={plan.id} className={`plan-card${plan.featured ? ' featured' : ''}`}>
-                {plan.featured && <div className="plan-badge">Más elegido</div>}
+                {plan.featured && <div className="plan-badge">{t('plans.badge')}</div>}
 
                 <div className="plan-icon">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -205,14 +205,14 @@ export default function Landing() {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <div className="plan-name">{plan.name}</div>
-                  <div className="plan-subtitle">{plan.subtitle}</div>
+                  <div className="plan-name">{t(`plans.items.${plan.id}.name`)}</div>
+                  <div className="plan-subtitle">{t(`plans.items.${plan.id}.subtitle`)}</div>
                 </div>
 
                 <div className="plan-price">
-                  <span className="plan-price-currency">$</span>
+                  <span className="plan-price-currency">{t('plans.priceCurrency')}</span>
                   <span className="plan-price-value">{plan.price.toLocaleString('es-AR')}</span>
-                  <span className="plan-price-period">/mes ARS</span>
+                  <span className="plan-price-period">{t('plans.pricePeriod')}</span>
                 </div>
 
                 <div className="plan-features">
@@ -231,7 +231,7 @@ export default function Landing() {
                   style={{ width: '100%', justifyContent: 'center', marginTop: 'auto', padding: '13px 20px' }}
                   onClick={() => { window.location.href = `#/pago?plan=${plan.id}`; }}
                 >
-                  Lo quiero
+                  {t('plans.cta')}
                 </button>
               </div>
             ))}
@@ -259,33 +259,29 @@ export default function Landing() {
             </div>
 
             <div>
-              <div style={{ fontSize: 12, color: 'var(--color-accent)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '2px', marginBottom: 16 }}>Sobre mí</div>
+              <div style={{ fontSize: 12, color: 'var(--color-accent)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '2px', marginBottom: 16 }}>{t('about.label')}</div>
               <h2 style={{ fontSize: 'clamp(28px, 4vw, 42px)', fontWeight: 800, marginBottom: 20, lineHeight: 1.1 }}>
-                Más de 6 años<br/>transformando vidas.
+                {t('about.heading1')}<br/>{t('about.heading2')}
               </h2>
               <p style={{ color: 'var(--color-text-2)', lineHeight: 1.8, marginBottom: 20, fontSize: 15 }}>
-                Soy <strong style={{ color: 'var(--color-text)' }}>Adrián Vila</strong>, preparador físico certificado con especialización en
-                hipertrofia, pérdida de grasa y rendimiento deportivo. Trabajo con atletas
-                y personas comunes que quieren resultados reales.
+                {t('about.bio1')}
               </p>
               <p style={{ color: 'var(--color-text-2)', lineHeight: 1.8, marginBottom: 32, fontSize: 15 }}>
-                Cada plan es único. Cada cliente importa. No creo en las soluciones genéricas
-                ni en los milagros rápidos. Creo en el trabajo constante, la metodología
-                y el acompañamiento real.
+                {t('about.bio2')}
               </p>
 
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 32 }}>
-                {['Preparador Físico Certificado', 'Especialista en Hipertrofia', 'Coach Nutricional', 'Entrenador Funcional'].map(cert => (
-                  <span key={cert} style={{
+                {['about.certs.0', 'about.certs.1', 'about.certs.2', 'about.certs.3'].map(certKey => (
+                  <span key={certKey} style={{
                     background: 'var(--color-accent-dim2)', border: '1px solid rgba(0,255,0,0.15)',
                     borderRadius: 'var(--radius-full)', padding: '6px 14px', fontSize: 12,
                     color: 'var(--color-accent)', fontWeight: 600,
-                  }}>{cert}</span>
+                  }}>{t(certKey)}</span>
                 ))}
               </div>
 
               <button className="btn btn-primary" onClick={() => navigate('/login')}>
-                Empezar entrenamiento →
+                {t('about.cta')}
               </button>
             </div>
           </div>
@@ -296,8 +292,8 @@ export default function Landing() {
       <section id="testimonios" style={{ padding: '100px 24px', background: 'var(--color-bg-2)' }}>
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: 60 }}>
-            <div style={{ fontSize: 12, color: 'var(--color-accent)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '2px', marginBottom: 12 }}>Testimonios</div>
-            <h2 style={{ fontSize: 'clamp(28px, 4vw, 42px)', fontWeight: 800 }}>Lo que dicen mis clientes</h2>
+            <div style={{ fontSize: 12, color: 'var(--color-accent)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '2px', marginBottom: 12 }}>{t('testimonials.label')}</div>
+            <h2 style={{ fontSize: 'clamp(28px, 4vw, 42px)', fontWeight: 800 }}>{t('testimonials.title')}</h2>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
             {[
@@ -328,13 +324,13 @@ export default function Landing() {
       }}>
         <div className="container-sm">
           <h2 style={{ fontSize: 'clamp(32px, 6vw, 56px)', fontWeight: 900, marginBottom: 20, lineHeight: 1.1 }}>
-            ¿Listo para cambiar?
+            {t('cta.heading')}
           </h2>
           <p style={{ color: 'var(--color-text-2)', fontSize: 'clamp(15px, 2vw, 18px)', marginBottom: 40, lineHeight: 1.7 }}>
-            El mejor momento para empezar fue ayer. El segundo mejor momento es ahora.
+            {t('cta.subtitle')}
           </p>
           <button className="btn btn-primary" style={{ fontSize: 18, padding: '16px 40px' }} onClick={() => navigate('/login')}>
-            Acceder a la plataforma →
+            {t('cta.button')}
           </button>
         </div>
       </section>
@@ -344,14 +340,14 @@ export default function Landing() {
         <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 24 }}>
           <div>
             <div style={{ fontFamily: 'var(--font-main)', fontWeight: 800, fontSize: 20 }}>Adrián <span style={{ color: 'var(--color-accent)' }}>Vila</span></div>
-            <div style={{ fontSize: 13, color: 'var(--color-text-3)', marginTop: 4 }}>Preparador Físico Personalizado</div>
+            <div style={{ fontSize: 13, color: 'var(--color-text-3)', marginTop: 4 }}>{t('footer.subtitle')}</div>
           </div>
           <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
             <a href="mailto:adrian@av.com" style={{ color: 'var(--color-text-2)', fontSize: 14 }}>adrian@av.com</a>
             <a href="https://instagram.com" style={{ color: 'var(--color-text-2)', fontSize: 14 }}>@adrianvila</a>
-            <Link to="/store" style={{ color: 'var(--color-text-2)', fontSize: 14 }}>Tienda</Link>
+            <Link to="/store" style={{ color: 'var(--color-text-2)', fontSize: 14 }}>{t('nav.store')}</Link>
           </div>
-          <div style={{ fontSize: 13, color: 'var(--color-text-3)' }}>© 2026 Adrián Vila. Todos los derechos reservados.</div>
+          <div style={{ fontSize: 13, color: 'var(--color-text-3)' }}>{t('footer.copyright')}</div>
         </div>
       </section>
 

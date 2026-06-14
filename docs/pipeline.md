@@ -42,33 +42,26 @@ The AV Fitness App will be deployed on **Railway** with continuous deployment fr
 
 **Backend (`railway.toml`):**
 ```toml
+# El backend usa builder DOCKERFILE. El Dockerfile se encarga
+# de compilar con Maven (./mvnw package) y empaquetar la app.
 [build]
-builder = "nixpacks"
-buildCommand = "./gradlew build -x test"
+builder = "DOCKERFILE"
 
 [deploy]
-startCommand = "java -jar build/libs/av-api-0.0.1-SNAPSHOT.jar"
-healthcheckPath = "/actuator/health"
+healthcheckPath = "/api/actuator/health"
+restartPolicyType = "ALWAYS"
 restartPolicyMaxRetries = 3
-
-[service]
-port = 8080
-
-[variable]
-SPRING_PROFILES_ACTIVE = "production"
 ```
 
 **Frontend (`railway.toml`):**
 ```toml
 [build]
-builder = "nixpacks"
+builder = "NIXPACKS"
 buildCommand = "npm ci && npm run build"
 
 [deploy]
-startCommand = "npx serve -s dist -l 3000"
-
-[service]
-port = 3000
+startCommand = "npx serve -s dist -l $PORT"
+healthcheckPath = "/"
 ```
 
 ## CI/CD Pipeline (GitHub Actions)
@@ -103,8 +96,8 @@ jobs:
         with:
           java-version: 21
           distribution: 'temurin'
-      - run: ./gradlew check     # Quality Gate: tests pass
-      - run: ./gradlew build -x test
+      - run: ./mvnw test --batch-mode     # Quality Gate: tests pass
+      - run: ./mvnw package -DskipTests --batch-mode
 
   security:
     runs-on: ubuntu-latest
@@ -133,20 +126,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: npm ci && npm run build
-      - uses: railwayapp/railway-deploy@v1
-        with:
-          service: av-frontend
-          railway_token: ${{ secrets.RAILWAY_TOKEN }}
+      - name: Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          npm i -g @railway/cli
+          railway up --service=av-frontend --detach
 
   deploy-backend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: ./gradlew build -x test
-      - uses: railwayapp/railway-deploy@v1
-        with:
-          service: av-backend
-          railway_token: ${{ secrets.RAILWAY_TOKEN }}
+      - run: ./mvnw package -DskipTests --batch-mode
+      - name: Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          npm i -g @railway/cli
+          railway up --service=av-backend --detach
 ```
 
 ## Environment Variables on Railway
@@ -221,7 +218,7 @@ av/
 ├── backend/             # Future Spring Boot app
 │   ├── src/main/java/
 │   ├── src/test/java/
-│   ├── build.gradle
+│   ├── pom.xml
 │   └── Dockerfile
 ├── docs/                # Context files (this directory)
 │   ├── architecture.md
@@ -236,27 +233,37 @@ av/
 
 ### Railway Monorepo Config
 
-```toml
-# railway.toml (root)
-[build]
-builder = "nixpacks"
+Railway maneja monorepos configurando el **Root Directory** de cada servicio
+desde el dashboard, no desde `railway.toml`. Cada servicio tiene su propio
+archivo `railway.toml` en su directorio raíz:
 
-[monorepo]
-root = "."
+- **Frontend:** `railway.toml` (raíz del repo) — builder `NIXPACKS`
+- **Backend:** `backend/railway.toml` — builder `DOCKERFILE`
 
-[[services]]
-name = "av-frontend"
-path = "frontend"
-
-[[services]]
-name = "av-backend"
-path = "backend"
+Configuración en el dashboard de Railway:
+```
+Servicio        Root Directory    Builder
+av-frontend     .                 NIXPACKS
+av-backend      backend           DOCKERFILE
 ```
 
 ## GitHub Secrets Required
 
 | Secret | Purpose |
 |--------|---------|
-| `RAILWAY_TOKEN` | Railway CLI authentication |
+| `RAILWAY_TOKEN` | Project Token del proyecto `av-fitness` (ver abajo) |
 | `GITLEAKS_LICENSE` | Gitleaks license (optional) |
 | `CODECOV_TOKEN` | Code coverage reporting (optional) |
+
+### Project Token vs Account Token
+
+Railway ofrece dos tipos de tokens:
+
+| Tipo | Alcance | Recomendación |
+|------|---------|---------------|
+| **Account Token** | Todos los proyectos de la cuenta | Solo para desarrollo local |
+| **Project Token** | Un solo proyecto específico | **Usar en CI/CD** (GitHub Secrets) |
+
+Para GitHub Actions, crear un **Project Token** desde el dashboard de Railway
+(**Project → Settings → Tokens**) y agregarlo como `RAILWAY_TOKEN` en los secrets
+del repositorio. Esto limita el acceso únicamente al proyecto `av-fitness`.

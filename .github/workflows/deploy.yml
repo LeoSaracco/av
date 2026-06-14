@@ -19,10 +19,12 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run build
-      - uses: railwayapp/railway-deploy@v1
-        with:
-          service: av-frontend
-          railway_token: ${{ secrets.RAILWAY_TOKEN }}
+      - name: Install Railway CLI
+        run: npm i -g @railway/cli
+      - name: Deploy frontend
+        run: railway up --service=av-frontend --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
   deploy-backend:
     runs-on: ubuntu-latest
@@ -40,7 +42,9 @@ jobs:
       - name: Maven build
         working-directory: backend
         run: ./mvnw package -DskipTests --batch-mode
-      - uses: railwayapp/railway-deploy@v1
-        with:
-          service: av-backend
-          railway_token: ${{ secrets.RAILWAY_TOKEN }}
+      - name: Install Railway CLI
+        run: npm i -g @railway/cli
+      - name: Deploy backend
+        run: railway up --service=av-backend --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

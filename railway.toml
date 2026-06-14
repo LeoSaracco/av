@@ -1,18 +1,11 @@
+# ── Railway Config-as-Code — Frontend (React + Vite) ─────────────────────────
+# Docs: https://docs.railway.com/reference/config-as-code
+# Schema: https://railway.com/railway.schema.json
+
 [build]
-builder = "nixpacks"
-
-[monorepo]
-root = "."
-
-[[services]]
-name = "av-frontend"
-path = "."
+builder = "NIXPACKS"
 buildCommand = "npm ci && npm run build"
-startCommand = "npx serve -s dist -l $PORT"
 
-[[services]]
-name = "av-backend"
-path = "backend"
-  buildCommand = "./mvnw package -DskipTests --batch-mode"
-  startCommand = "java -jar target/av-fitness-api-0.1.0-SNAPSHOT.jar"
-  healthcheckPath = "/api/actuator/health"
+[deploy]
+startCommand = "npx serve -s dist -l $PORT"
+healthcheckPath = "/"

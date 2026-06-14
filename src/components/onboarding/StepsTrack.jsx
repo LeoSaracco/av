@@ -5,17 +5,11 @@
  *              el paso actual, los completados y los pendientes.
  */
 import React from 'react';
+import { useI18n } from '../../i18n';
 import { StepIcon, IconCheck } from './StepIcons';
 
 // ── Definición de pasos ────────────────────────────────────────────────────────
-const STEPS = [
-  { id: 1, label: 'Datos', icon: 'user' },
-  { id: 2, label: 'Hábitos', icon: 'activity' },
-  { id: 3, label: 'Salud', icon: 'health' },
-  { id: 4, label: 'Perfil', icon: 'mind' },
-  { id: 5, label: 'Revisar', icon: 'eye' },
-  { id: 6, label: 'Cuenta', icon: 'lock' },
-];
+const STEP_ICONS = ['user', 'activity', 'health', 'mind', 'eye', 'lock'];
 
 /**
  * Indicador de pasos del onboarding.
@@ -28,12 +22,19 @@ const STEPS = [
  * @returns {JSX.Element} Barra de progreso de pasos
  */
 export default function StepsTrack({ currentStep, totalSteps }) {
+  const { t } = useI18n();
+  const steps = STEP_ICONS.map((icon, i) => ({
+    id: i + 1,
+    label: t(`onboarding.trackLabels.step${i + 1}`),
+    icon,
+  }));
+
   return (
     <div className="steps-track" role="progressbar" aria-valuenow={currentStep} aria-valuemin={1} aria-valuemax={totalSteps} aria-label={`Paso ${currentStep} de ${totalSteps}`}>
-      {STEPS.map((s, i) => {
+      {steps.map((s, i) => {
         const isActive = currentStep === s.id;
         const isDone = currentStep > s.id;
-        const isLast = i === STEPS.length - 1;
+        const isLast = i === steps.length - 1;
 
         return (
           <React.Fragment key={s.id}>

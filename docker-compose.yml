@@ -1,7 +1,8 @@
 # ── Docker Compose — AV Fitness App ──────────────────────────────────────────
-# Desarrollo local: PostgreSQL 16 + pgAdmin
-# Levantar: docker compose up -d
-# Bajar:    docker compose down -v
+# Desarrollo local completo: PostgreSQL 16 + Backend + Frontend
+# Levantar todo:  docker compose up -d
+# Solo DB:        docker compose up -d postgres
+# Bajar:          docker compose down -v
 
 services:
   postgres:
@@ -21,6 +22,26 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: av-backend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/av_fitness
+      SPRING_DATASOURCE_USERNAME: av_user
+      SPRING_DATASOURCE_PASSWORD: av_pass_2026
+      JWT_SECRET: dev-secret-change-in-production
+      MP_ACCESS_TOKEN: TEST-123456789
+      MP_WEBHOOK_SECRET: test-secret
+      RESEND_API_KEY: re_test_123456
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   pgadmin:
     image: dpage/pgadmin4:latest

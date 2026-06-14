@@ -8,6 +8,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
+import { useI18n } from '../i18n';
 import { SEED_PLANS } from '../data/seed';
 import { StepIcon } from '../components/onboarding/StepIcons';
 import StepsTrack from '../components/onboarding/StepsTrack';
@@ -31,15 +32,6 @@ const INITIAL_FORM = {
   step4_injuries: '', step4_city: '', step4_community: '',
   step5_password: '', step5_confirm: '', step5_code: '', step5_terms: false,
 };
-
-const STEP_META = [
-  { title: 'Datos personales', sub: 'Información básica para conocerte mejor' },
-  { title: 'Actividad y hábitos', sub: 'Tu estilo de vida y rutina actual' },
-  { title: 'Salud y aptitud física', sub: 'Estado de salud y nivel de entrenamiento' },
-  { title: 'Perfil y motivación', sub: 'Contanos qué te motiva y cómo te sentís' },
-  { title: 'Revisar datos', sub: 'Verificá que todo esté correcto antes de continuar' },
-  { title: 'Creá tu cuenta', sub: 'Último paso: elegí tu contraseña' },
-];
 
 const TOTAL_STEPS = 6;
 const DEMO_CODE = '123456';
@@ -72,6 +64,7 @@ export default function Onboarding() {
   const [searchParams] = useSearchParams();
   const { registerUser } = useAuth();
   const { createOnboardingSubmission, showToast } = useApp();
+  const { t } = useI18n();
 
   const planId = searchParams.get('plan') || 'plan1';
   const plan = SEED_PLANS.find(p => p.id === planId) || SEED_PLANS[0];
@@ -91,55 +84,55 @@ export default function Onboarding() {
   const validateStep = useCallback((s) => {
     const e = {};
     const required = (field, msg) => {
-      if (!form[field]?.toString().trim()) e[field] = msg || 'Este campo es obligatorio';
+      if (!form[field]?.toString().trim()) e[field] = msg || t('onboarding.validation.required');
     };
 
     if (s === 1) {
-      required('step1_name', 'Ingresá tu nombre y apellido');
-      if (!form.step1_email?.trim()) e.step1_email = 'Ingresá tu email';
-      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.step1_email)) e.step1_email = 'Email no válido';
-      required('step1_whatsapp', 'Ingresá tu número de WhatsApp');
-      if (!/^[\d\s\-+()]+$/.test(form.step1_whatsapp || '')) e.step1_whatsapp = 'Solo números, espacios y +';
-      required('step1_age', 'Ingresá tu edad');
+      required('step1_name', t('onboarding.validation.name'));
+      if (!form.step1_email?.trim()) e.step1_email = t('onboarding.validation.email');
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.step1_email)) e.step1_email = t('onboarding.validation.emailInvalid');
+      required('step1_whatsapp', t('onboarding.validation.whatsapp'));
+      if (!/^[\d\s\-+()]+$/.test(form.step1_whatsapp || '')) e.step1_whatsapp = t('onboarding.validation.whatsappInvalid');
+      required('step1_age', t('onboarding.validation.age'));
       const age = Number(form.step1_age);
-      if (isNaN(age) || age < 14 || age > 99) e.step1_age = 'Edad entre 14 y 99';
-      required('step1_height', 'Ingresá tu altura');
+      if (isNaN(age) || age < 14 || age > 99) e.step1_age = t('onboarding.validation.ageRange');
+      required('step1_height', t('onboarding.validation.height'));
       const h = Number(form.step1_height);
-      if (isNaN(h) || h < 100 || h > 250) e.step1_height = 'Altura entre 100 y 250 cm';
-      required('step1_weight', 'Ingresá tu peso');
+      if (isNaN(h) || h < 100 || h > 250) e.step1_height = t('onboarding.validation.heightRange');
+      required('step1_weight', t('onboarding.validation.weight'));
       const w = Number(form.step1_weight);
-      if (isNaN(w) || w < 30 || w > 300) e.step1_weight = 'Peso entre 30 y 300 kg';
-      required('step1_sex', 'Seleccioná tu sexo');
+      if (isNaN(w) || w < 30 || w > 300) e.step1_weight = t('onboarding.validation.weightRange');
+      required('step1_sex', t('onboarding.validation.sex'));
     }
     if (s === 2) {
-      required('step2_activity', 'Seleccioná tu tipo de actividad');
-      required('step2_steps', 'Seleccioná tus pasos diarios');
-      required('step2_sleep', 'Seleccioná tus horas de sueño');
+      required('step2_activity', t('onboarding.validation.activity'));
+      required('step2_steps', t('onboarding.validation.steps'));
+      required('step2_sleep', t('onboarding.validation.sleep'));
     }
     if (s === 3) {
-      required('step3_pathology', 'Indicá si tenés patologías');
-      if (form.step3_pathology === 'si') required('step3_pathology_desc', 'Describí la patología');
-      required('step3_medical', 'Indicá si estás apto médico');
-      required('step3_level', 'Seleccioná tu nivel físico');
-      if (planId === 'plan2') required('step3_commitment', 'Indicá tu compromiso');
-      required('step3_frequency', 'Seleccioná la frecuencia semanal');
+      required('step3_pathology', t('onboarding.validation.pathology'));
+      if (form.step3_pathology === 'si') required('step3_pathology_desc', t('onboarding.validation.pathologyDesc'));
+      required('step3_medical', t('onboarding.validation.medical'));
+      required('step3_level', t('onboarding.validation.level'));
+      if (planId === 'plan2') required('step3_commitment', t('onboarding.validation.commitment'));
+      required('step3_frequency', t('onboarding.validation.frequency'));
     }
     if (s === 4) {
-      required('step4_body', 'Contanos cómo te sentís con tu cuerpo');
-      required('step4_purpose', 'Contanos tu propósito');
-      required('step4_city', 'Indicá desde qué ciudad entrenás');
+      required('step4_body', t('onboarding.validation.body'));
+      required('step4_purpose', t('onboarding.validation.purpose'));
+      required('step4_city', t('onboarding.validation.city'));
     }
     if (s === 6) {
-      required('step5_password', 'Creá una contraseña');
-      if (form.step5_password?.length < 6) e.step5_password = 'Mínimo 6 caracteres';
-      if (form.step5_password !== form.step5_confirm) e.step5_confirm = 'Las contraseñas no coinciden';
-      required('step5_code', 'Ingresá el código de verificación');
-      if (form.step5_code !== DEMO_CODE) e.step5_code = `Código incorrecto (probá con ${DEMO_CODE})`;
-      if (!form.step5_terms) e.step5_terms = 'Debés aceptar los términos';
+      required('step5_password', t('onboarding.validation.password'));
+      if (form.step5_password?.length < 6) e.step5_password = t('onboarding.validation.passwordMin');
+      if (form.step5_password !== form.step5_confirm) e.step5_confirm = t('onboarding.validation.passwordMatch');
+      required('step5_code', t('onboarding.validation.code'));
+      if (form.step5_code !== DEMO_CODE) e.step5_code = t('onboarding.validation.codeInvalid').replace('{code}', DEMO_CODE);
+      if (!form.step5_terms) e.step5_terms = t('onboarding.validation.terms');
     }
     setErrors(e);
     return Object.keys(e).length === 0;
-  }, [form, planId]);
+  }, [form, planId, t]);
 
   // ── Navegación entre pasos ─────────────────────────────────────────────────
   const nextStep = () => {
@@ -196,7 +189,7 @@ export default function Onboarding() {
     });
 
     clearDraft();
-    showToast('Cuenta creada correctamente');
+    showToast(t('onboarding.success.title'));
     setDone(true);
     setSubmitting(false);
   };
@@ -218,13 +211,13 @@ export default function Onboarding() {
   if (done) return <OnboardingSuccess onGoToDashboard={() => navigate('/client')} />;
 
   // ── Vista principal ────────────────────────────────────────────────────────
-  const meta = STEP_META[step - 1];
+  const meta = { title: t(`onboarding.steps.${step}.title`), sub: t(`onboarding.steps.${step}.sub`) };
 
   return (
     <div className="onboarding-page">
       <div className="onboarding-header">
-        <h1>Cuestionario {plan.name}</h1>
-        <p>Completá tus datos para que Adrián pueda armar tu plan a medida</p>
+        <h1>{t('onboarding.headerPrefix')} {plan.name}</h1>
+        <p>{t('onboarding.headerSub')}</p>
       </div>
 
       <StepsTrack currentStep={step} totalSteps={TOTAL_STEPS} />
@@ -247,15 +240,15 @@ export default function Onboarding() {
         {/* Navegación inferior */}
         <div className="step-footer">
           <div>
-            {step > 1 && <button className="btn btn-ghost" onClick={prevStep}>← Anterior</button>}
+            {step > 1 && <button className="btn btn-ghost" onClick={prevStep}>{t('onboarding.buttons.prev')}</button>}
           </div>
           <div className="step-footer-right">
-            <span className="step-counter">Paso {step} de {TOTAL_STEPS}</span>
+            <span className="step-counter">{t('onboarding.stepCounter').replace('{step}', step).replace('{total}', TOTAL_STEPS)}</span>
             {step < TOTAL_STEPS ? (
-              <button className="btn btn-primary" onClick={nextStep}>{step === 5 ? 'Todo OK, continuar →' : 'Siguiente →'}</button>
+              <button className="btn btn-primary" onClick={nextStep}>{step === 5 ? t('onboarding.buttons.summaryContinue') : t('onboarding.buttons.next')}</button>
             ) : (
               <button className="btn btn-primary" onClick={handleSubmit} disabled={submitting}>
-                {submitting ? 'Creando cuenta...' : 'Crear cuenta ✓'}
+                {submitting ? t('onboarding.buttons.creating') : t('onboarding.buttons.createAccount')}
               </button>
             )}
           </div>
@@ -274,6 +267,7 @@ export default function Onboarding() {
  * @returns {JSX.Element} Vista de éxito con check animado y botón de acceso.
  */
 function OnboardingSuccess({ onGoToDashboard }) {
+  const { t } = useI18n();
   return (
     <div className="onboarding-page">
       <div className="success-screen">
@@ -282,10 +276,10 @@ function OnboardingSuccess({ onGoToDashboard }) {
             <polyline points="20 6 9 17 4 12"/>
           </svg>
         </div>
-        <h2>Todo listo</h2>
-        <p>Tu cuenta fue creada y tus datos quedaron registrados. Adrián va a revisar tu cuestionario y preparar tu plan a medida.</p>
+        <h2>{t('onboarding.success.title')}</h2>
+        <p>{t('onboarding.success.message')}</p>
         <button className="btn btn-primary" onClick={onGoToDashboard}>
-          Ir a mi dashboard →
+          {t('onboarding.success.cta')}
         </button>
       </div>
     </div>
