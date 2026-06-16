@@ -44,9 +44,24 @@ public class AuthController {
         return withAuthCookies(response);
     }
 
+    @PostMapping("/send-verification")
+    public ResponseEntity<MessageResponse> sendVerification(@Valid @RequestBody SendVerificationRequest request) {
+        return ResponseEntity.ok(authService.sendVerificationEmail(request));
+    }
+
     @PostMapping("/verify-email")
     public ResponseEntity<MessageResponse> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
         return ResponseEntity.ok(authService.verifyEmail(request));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<MessageResponse> forgotPassword(@Valid @RequestBody PasswordResetRequest request) {
+        return ResponseEntity.ok(authService.forgotPassword(request));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<MessageResponse> resetPassword(@Valid @RequestBody PasswordResetConfirmRequest request) {
+        return ResponseEntity.ok(authService.resetPassword(request));
     }
 
     @PostMapping("/logout")

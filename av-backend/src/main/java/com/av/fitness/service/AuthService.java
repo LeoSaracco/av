@@ -8,5 +8,8 @@ public interface AuthService {
     TokenResponse login(LoginRequest request);
     TokenResponse refresh(RefreshRequest request);
     MessageResponse verifyEmail(VerifyEmailRequest request);
+    MessageResponse sendVerificationEmail(SendVerificationRequest request);
+    MessageResponse forgotPassword(PasswordResetRequest request);
+    MessageResponse resetPassword(PasswordResetConfirmRequest request);
     void logout(String refreshToken);
 }

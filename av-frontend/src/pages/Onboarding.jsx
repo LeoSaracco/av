@@ -40,7 +40,6 @@ const STEP_META = [
 ];
 
 const TOTAL_STEPS = 6;
-const DEMO_CODE = '123456';
 
 // ── Persistencia local del borrador ────────────────────────────────────────────
 // ── Componente principal ───────────────────────────────────────────────────────
@@ -117,7 +116,6 @@ export default function Onboarding() {
       if (form.step5_password?.length < 6) e.step5_password = 'Mínimo 6 caracteres';
       if (form.step5_password !== form.step5_confirm) e.step5_confirm = 'Las contraseñas no coinciden';
       required('step5_code', 'Ingresá el código de verificación');
-      if (form.step5_code !== DEMO_CODE) e.step5_code = `Código incorrecto (probá con ${DEMO_CODE})`;
       if (!form.step5_terms) e.step5_terms = 'Debés aceptar los términos';
     }
     setErrors(e);

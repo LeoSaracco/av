@@ -83,6 +83,18 @@ export async function apiLogout() {
   try { await request('POST', '/auth/logout'); } catch { /* ignore */ }
 }
 
+export async function apiSendVerificationCode(email) {
+  return request('POST', '/auth/send-verification', { email });
+}
+
+export async function apiForgotPassword(email) {
+  return request('POST', '/auth/forgot-password', { email });
+}
+
+export async function apiResetPassword(email, code, newPassword) {
+  return request('POST', '/auth/reset-password', { email, code, newPassword });
+}
+
 // ── Plans ─────────────────────────────────────────────────────────────────────
 export async function apiGetPlans() {
   const plans = await request('GET', '/plans');

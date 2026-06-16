@@ -48,3 +48,7 @@ jwt:
 
 cors:
   allowed-origins: http://localhost:5173
+
+resend:
+  api-key: ${RESEND_API_KEY:}
+  from-email: ${RESEND_FROM_EMAIL:onboarding@resend.dev}

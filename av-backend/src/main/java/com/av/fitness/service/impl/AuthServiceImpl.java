@@ -9,6 +9,8 @@ import com.av.fitness.repository.ClientJpaRepository;
 import com.av.fitness.repository.RefreshTokenJpaRepository;
 import com.av.fitness.repository.UserJpaRepository;
 import com.av.fitness.service.AuthService;
+import com.av.fitness.service.EmailService;
+import com.av.fitness.service.EmailVerificationService;
 import com.av.fitness.utils.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,6 +31,8 @@ public class AuthServiceImpl implements AuthService {
     private final RefreshTokenJpaRepository refreshTokenJpaRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
+    private final EmailVerificationService emailVerificationService;
+    private final EmailService emailService;
 
     @Override
     public TokenResponse register(RegisterRequest request) {
@@ -71,6 +75,11 @@ public class AuthServiceImpl implements AuthService {
         rt.setExpiryDate(LocalDateTime.now().plusSeconds(
                 jwtService.getRefreshTokenExpiration() / 1000));
         refreshTokenJpaRepository.save(rt);
+
+        try {
+            emailService.sendWelcomeEmail(user.getEmail(), user.getName());
+        } catch (Exception e) {
+        }
 
         return TokenResponse.builder()
                 .accessToken(accessToken)
@@ -155,8 +164,34 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public MessageResponse verifyEmail(VerifyEmailRequest request) {
+        return emailVerificationService.validate(request.getEmail(), request.getCode());
+    }
+
+    @Override
+    public MessageResponse sendVerificationEmail(SendVerificationRequest request) {
+        return emailVerificationService.generateAndSend(request.getEmail());
+    }
+
+    @Override
+    public MessageResponse forgotPassword(PasswordResetRequest request) {
+        userJpaRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("No existe una cuenta con ese email"));
+
+        return emailVerificationService.generateAndSendPasswordReset(request.getEmail());
+    }
+
+    @Override
+    public MessageResponse resetPassword(PasswordResetConfirmRequest request) {
+        emailVerificationService.validate(request.getEmail(), request.getCode());
+
+        UserEntity user = userJpaRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        userJpaRepository.save(user);
+
         return MessageResponse.builder()
-                .message("Email verificado correctamente")
+                .message("Contrase\u00f1a actualizada correctamente")
                 .build();
     }
 

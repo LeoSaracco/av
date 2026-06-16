@@ -1,5 +1,6 @@
 package com.av.fitness.config;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -56,6 +57,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/onboarding").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products/**")
                             .permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/payment/create-preference")
+                            .permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/payment/status/**")
+                            .permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/payment/webhook")
+                            .permitAll()
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
                             .permitAll()
@@ -63,6 +70,17 @@ public class SecurityConfig {
                         .requestMatchers("/api/me/**").hasRole("CLIENT")
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll())
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((req, res, e) -> {
+                            res.setContentType("application/json");
+                            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            res.getWriter().write("{\"error\":\"No autenticado\",\"status\":401}");
+                        })
+                        .accessDeniedHandler((req, res, e) -> {
+                            res.setContentType("application/json");
+                            res.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            res.getWriter().write("{\"error\":\"Acceso denegado\",\"status\":403}");
+                        }))
                 .addFilterBefore(securityHeadersFilter,
                         UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(rateLimitFilter,
