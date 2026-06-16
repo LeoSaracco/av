@@ -58,7 +58,7 @@ public class PlanContractController {
         return ResponseCookie.from(name, value)
                 .httpOnly(true)
                 .secure(cookieSecure)
-                .sameSite("Lax")
+                .sameSite(cookieSecure ? "None" : "Lax")
                 .path("/")
                 .maxAge(maxAgeSeconds)
                 .build();
