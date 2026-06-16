@@ -63,8 +63,8 @@ Requisitos:
 
 ## Pipeline
 
-- CI corre en `push` y PR contra `main`.
-- Deploy corre en `push` a `main` y manual `workflow_dispatch`.
+- CI corre en `push` y PR contra `master`.
+- Deploy corre en `push` a `master` y manual `workflow_dispatch`.
 - Workflows usan `working-directory` correcto:
   - `av-frontend`
   - `av-backend`

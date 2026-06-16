@@ -42,8 +42,8 @@ Actualizado: 2026-06-16
   - `mvnw.cmd`
   - `.mvn/wrapper/maven-wrapper.properties`
 - CI/CD actualizado:
-  - `ci.yml` corre en `push` y PR contra `main`.
-  - `deploy-railway.yml` corre en `push` contra `main` y manual `workflow_dispatch`.
+  - `ci.yml` corre en `push` y PR contra `master`.
+  - `deploy-railway.yml` corre en `push` contra `master` y manual `workflow_dispatch`.
   - CI usa `working-directory` correcto para `av-frontend` y `av-backend`.
   - Backend CI usa `./mvnw`.
   - Deploy usa `railway up ./av-frontend --path-as-root` y `railway up ./av-backend --path-as-root`.
@@ -73,13 +73,13 @@ Actualizado: 2026-06-16
   - deploy frontend OK
   - servicios separados dentro del proyecto `av`
 - GitHub:
-  - PR de migracion a monorepo mergeado en `main`.
-  - CI remoto en `main` OK.
+  - PR de migracion a monorepo mergeado en `master`.
+  - CI remoto en `master` OK.
 
 ## Pendiente
 
-- Confirmar en GitHub que `main` sea la rama protegida y productiva.
-- Configurar branch protection para `main`:
+- Confirmar en GitHub que `master` sea la rama protegida y productiva.
+- Configurar branch protection para `master`:
   - PR obligatorio.
   - CI requerido.
   - bloqueo de push directo si aplica.

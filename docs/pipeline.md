@@ -5,7 +5,7 @@ Actualizado: 2026-06-16
 ## Repositorio
 
 - GitHub: `https://github.com/LeoSaracco/av.git`
-- Rama productiva esperada: `main`
+- Rama productiva esperada: `master`
 - Estructura: monorepo con `av-frontend/` y `av-backend/`
 
 ## Railway
@@ -81,9 +81,9 @@ Disparadores:
 ```yaml
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
-    branches: [main]
+    branches: [master]
 ```
 
 Jobs:
@@ -105,7 +105,7 @@ Archivo: `.github/workflows/deploy-railway.yml`
 
 Disparadores:
 
-- `push` a `main`
+- `push` a `master`
 - `workflow_dispatch`
 
 Pasos:
@@ -134,11 +134,11 @@ gh secret list --repo LeoSaracco/av
 ## Flujo esperado
 
 ```text
-push/PR a main
+push/PR a master
   -> CI
   -> lint/build/tests/audit frontend
   -> tests/package backend
-  -> si es push a main, deploy Railway
+  -> si es push a master, deploy Railway
   -> verificar /actuator/health y frontend
 ```
 

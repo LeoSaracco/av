@@ -81,8 +81,8 @@ cd ..\av-backend
 
 Los workflows viven en `.github/workflows/`.
 
-- `ci.yml`: corre en `push` y PR contra `main`.
-- `deploy-railway.yml`: corre en `push` contra `main` y manualmente con `workflow_dispatch`.
+- `ci.yml`: corre en `push` y PR contra `master`.
+- `deploy-railway.yml`: corre en `push` contra `master` y manualmente con `workflow_dispatch`.
 - Secret requerido en GitHub Actions: `RAILWAY_TOKEN`.
 
 Deploy Railway:

@@ -52,11 +52,11 @@ Riesgo pendiente:
 - `npm audit --audit-level=high` bloqueante en frontend.
 - Backend compila y testea con Maven Wrapper.
 - GitHub secret requerido: `RAILWAY_TOKEN`; no documentar nunca su valor.
-- Branch protection recomendada para `main`.
+- Branch protection recomendada para `master`.
 
 ## Pendientes
 
-- Activar branch protection en `main`.
+- Activar branch protection en `master`.
 - Revisar resultado remoto de `npm audit --audit-level=high` si cambian dependencias.
 - Agregar tests de autorizacion por rol en backend.
 - Definir politica productiva de Swagger.

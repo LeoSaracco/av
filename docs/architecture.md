@@ -87,7 +87,7 @@ No debe haber llamadas globales a endpoints privados al montar la app publica.
 ## CI/CD
 
 - CI y deploy corren desde `.github/workflows`.
-- Rama productiva esperada: `main`.
+- Rama productiva esperada: `master`.
 - Deploy separado por servicio Railway con `--path-as-root`.
 - GitHub Actions necesita el secret `RAILWAY_TOKEN`; no depende de la sesion local del Railway CLI.
 

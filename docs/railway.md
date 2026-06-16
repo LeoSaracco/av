@@ -66,7 +66,7 @@ Workflow:
 
 Triggers:
 
-- `push` a `main`
+- `push` a `master`
 - `workflow_dispatch`
 
 Secret requerido:
@@ -168,7 +168,7 @@ git status --short --branch
 
 El remoto esperado es `https://github.com/LeoSaracco/av`.
 
-3. Trabajar contra `main` actualizado.
+3. Trabajar contra `master` actualizado.
 4. Mantener estructura `av-frontend/` y `av-backend/`.
 5. No recrear `railway.toml` en raiz para deploy monorepo.
 6. No subir `.env`, `.env.production`, `node_modules`, `dist` ni `target`.
@@ -193,7 +193,7 @@ cd ..\av-backend
 .\mvnw.cmd package -DskipTests --batch-mode
 ```
 
-9. Despues de push a `main`, revisar:
+9. Despues de push a `master`, revisar:
 
 ```powershell
 gh run list --repo LeoSaracco/av --limit 5

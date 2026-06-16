@@ -60,7 +60,7 @@ Regla importante:
 ## CI/CD
 
 - Workflows: `.github/workflows/ci.yml` y `.github/workflows/deploy-railway.yml`.
-- Rama productiva: `main`.
+- Rama productiva: `master`.
 - Backend usa Maven Wrapper.
 - Deploy usa Railway CLI con `--path-as-root`, `--project` y `--environment production`.
 
