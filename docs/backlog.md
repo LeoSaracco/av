@@ -1,75 +1,88 @@
-# Backlog — AV Fitness App
+# Backlog - AV Fitness App
 
-## Completado (100%)
+Actualizado: 2026-06-15
 
-| ID | Tarea | Estado |
-|----|-------|--------|
-| B-00a-g | Onboarding, PaymentSimulator, Refactor, A11y, Docs, Lint, Responsive | ✅ |
-| B-07 | Vitest + Testing Library | ✅ |
-| B-08 | 26 unit tests (FormPrimitives, StepsTrack, AuthContext) | ✅ |
-| B-09 | E2E Playwright test config + onboarding spec | ✅ |
-| B-12 | Code splitting React.lazy (27 chunks) | ✅ |
-| B-13 | react-helmet-async SEO meta tags | ✅ |
-| B-14 | CoachDashboard charts (Recharts bar + status distribution) | ✅ |
-| B-20 | i18n foundation (es/en) with context + hook | ✅ |
-| B-21 | PWA service worker + manifest + offline | ✅ |
-| B-22 | Dark/light theme toggle (data-theme, localStorage) | ✅ |
-| B-23 | PDF export (ClientProgress via window.print + @media print) | ✅ |
-| B-25 | Video embeds YouTube/Vimeo in ClientRoutine | ✅ |
-| DT-01..06 | All 6 deuda técnica items | ✅ |
-| B-01 | Backend Spring Boot hexagonal scaffold (Maven) | ✅ |
-| B-06 | Railway + GitHub Actions CI/CD | ✅ |
-| B-16 | Avatar upload component | ✅ |
-| B-15 | WebSocket client stub | ✅ |
+## Hecho
 
-## Backend (implementado, requiere Java 21 + Docker)
+- Estructura monorepo normalizada:
+  - `av-frontend/`: React + Vite.
+  - `av-backend/`: Spring Boot + PostgreSQL + Flyway.
+  - raiz: docs, GitHub Actions, compose/env examples y orquestacion Railway.
+- Railway configurado en proyecto `av`:
+  - servicio `av-frontend`
+  - servicio `av-backend`
+  - servicio `Postgres`
+- Deploy productivo verificado:
+  - Frontend: `https://av-frontend-production.up.railway.app`
+  - Backend: `https://av-backend-production.up.railway.app`
+  - Health: `/actuator/health`
+- Swagger/OpenAPI agregado al backend:
+  - `/v3/api-docs`
+  - `/swagger-ui/index.html`
+- Frontend alineado con backend:
+  - `VITE_API_URL` y `VITE_WS_URL` pasan al build Docker.
+  - `vite.config.js` usa `base: '/'`.
+  - Nginx sirve `/assets/*` como archivos reales y evita fallback HTML para assets.
+  - Home carga solo `GET /api/plans`.
+  - Store carga `GET /api/products` solo al entrar a tienda.
+  - Panel coach carga `/api/coach/*` solo al entrar a rutas coach autenticadas.
+  - Panel cliente carga `/api/me/*` solo al entrar a rutas cliente autenticadas.
+- Persistencia de negocio movida al backend:
+  - Sin seed runtime de negocio en frontend.
+  - Sin `MOCK_USERS`.
+  - Auth por cookies httpOnly desde backend.
+  - `localStorage`/`sessionStorage` no se usan para auth ni datos de negocio.
+- Backend corregido para Railway:
+  - `server.port=${PORT:8080}`.
+  - datasource por variables `SPRING_DATASOURCE_*`.
+  - cookie secure configurable con `AUTH_COOKIE_SECURE`.
+  - Flyway como fuente de datos iniciales.
+- Maven Wrapper agregado en `av-backend/`:
+  - `mvnw`
+  - `mvnw.cmd`
+  - `.mvn/wrapper/maven-wrapper.properties`
+- CI/CD actualizado:
+  - `ci.yml` corre en `push` y PR contra `main`.
+  - `deploy-railway.yml` corre en `push` contra `main` y manual `workflow_dispatch`.
+  - CI usa `working-directory` correcto para `av-frontend` y `av-backend`.
+  - Backend CI usa `./mvnw`.
+  - Deploy usa `railway up ./av-frontend --path-as-root` y `railway up ./av-backend --path-as-root`.
 
-| ID | Componente | Archivos |
-|----|-----------|----------|
-| — | Spring Boot 3.3.5 + Java 21 + Maven | `pom.xml` |
-| — | PostgreSQL schema (15 tablas, Flyway V1) | `V1__init.sql` |
-| — | Seed data (1 coach, 4 clients, planes, etc.) | `V2__seed.sql` |
-| — | JWT auth (access + refresh tokens) | `JwtService.java`, `SecurityConfig.java`, `JwtAuthFilter.java` |
-| — | 7 REST controllers (Auth, Plans, Me, Coach, Client, Payment, Onboarding) | `web/controller/` |
-| — | 4 domain services + 4 use cases | `domain/service/impl/`, `application/usecase/` |
-| — | 11 JPA entity adapters | `infrastructure/persistence/` |
-| — | MercadoPago adapter (real, ready for API key) | `MercadoPagoAdapter.java` |
-| — | Email adapter (real, ready for API key) | `EmailAdapter.java` |
-| — | ArchUnit hexagonal architecture test | `HexagonalArchitectureTest.java` |
-| — | Dockerfile multi-stage (Maven build → JRE runtime) | `Dockerfile` |
-| — | Docker Compose (PostgreSQL 16 + pgAdmin) | `docker-compose.yml` (raíz) |
-| — | Frontend API client | `src/api/apiClient.js` |
+## Validado
 
-## Para levantar el entorno completo
+- Frontend:
+  - `npm run lint`: OK
+  - `npm run build`: OK
+  - `npm test`: 25 tests OK
+  - bundle productivo sin `localhost:8080`
+- Backend:
+  - Docker build OK
+  - `/actuator/health` OK
+  - `/v3/api-docs` OK
+  - `/swagger-ui/index.html` OK
+- Railway:
+  - deploy backend OK
+  - deploy frontend OK
+  - servicios separados dentro del proyecto `av`
 
-```bash
-# 1. Base de datos
-docker compose up -d
+## Pendiente
 
-# 2. Backend (requiere Java 21)
-cd backend && ./mvnw spring-boot:run
-
-# 3. Frontend
-npm run dev
-```
-
-## Quality Gates — Último check
-
-```
-✅ Build:        PASS (27 chunks + PWA, 609ms)
-✅ Lint:         PASS (0 errors, 0 warnings)
-✅ Tests:        PASS (26/26, 3 suites)
-✅ E2E Config:   READY (playwright.config.js + onboarding.spec.js)
-✅ Secrets:      PASS (0 hardcoded)
-✅ Husky:        PASS (pre-commit lint-staged)
-✅ EditorConfig: PASS
-✅ JSDoc:        PASS (37 archivos)
-✅ PWA:          PASS (service worker)
-✅ CodeSplit:    PASS (27 chunks)
-✅ Backend:      IMPLEMENTED (Maven, 50+ Java files, compila)
-✅ CI/CD:        CONFIGURED (.github + railway.toml)
-✅ Docker:       READY (PostgreSQL 16 + pgAdmin)
-✅ PDF Export:   DONE (print styles)
-✅ Theme:        DONE (dark/light toggle)
-✅ i18n:         DONE (es/en)
-```
+- Confirmar en GitHub que `main` sea la rama protegida y productiva.
+- Configurar branch protection para `main`:
+  - PR obligatorio.
+  - CI requerido.
+  - bloqueo de push directo si aplica.
+- Validar workflows remotos despues del proximo push:
+  - `gh workflow list --repo LeoSaracco/av`
+  - `gh run list --repo LeoSaracco/av`
+  - `gh run view <run-id> --log-failed`
+- Definir secretos GitHub:
+  - `RAILWAY_TOKEN`
+- Completar integraciones productivas con credenciales reales:
+  - MercadoPago
+  - Resend
+  - OpenAI
+- Mejorar cobertura backend con tests de controller/service/repository.
+- Agregar prueba E2E que verifique que el home no llama endpoints privados.
+- Resolver vulnerabilidades de `npm audit --audit-level=high` si siguen presentes en CI.
+- Revisar Swagger en produccion: hoy es publico; decidir si debe quedar publico o restringido.
