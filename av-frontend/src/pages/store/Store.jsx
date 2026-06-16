@@ -8,11 +8,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
+import Loader from '../../components/ui/Loader';
 
 const NAV_HEIGHT = 64;
 
 export default function Store() {
-  const { products, addToCart, cartCount, loadProducts } = useApp();
+  const { products, addToCart, cartCount, loadProducts, productsLoaded } = useApp();
   const navigate = useNavigate();
   const [category, setCategory] = useState('Todos');
   const [search, setSearch] = useState('');
@@ -20,6 +21,8 @@ export default function Store() {
   useEffect(() => {
     loadProducts();
   }, [loadProducts]);
+
+  if (!productsLoaded) return <Loader fullPage text="Cargando tienda..." />;
 
   const categories = ['Todos', ...new Set(products.map(p => p.category))];
   const filtered = products.filter(p =>

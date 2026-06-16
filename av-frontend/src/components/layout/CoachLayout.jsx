@@ -8,6 +8,7 @@ import React, { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
+import Loader from '../ui/Loader';
 
 // ── Navegación ─────────────────────────────────────────────────────────────────
 const navItems = [
@@ -32,7 +33,7 @@ const navItems = [
 export function CoachLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout } = useAuth();
-  const { loadCoachData } = useApp();
+  const { loadCoachData, coachLoaded } = useApp();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,6 +41,8 @@ export function CoachLayout({ children }) {
   }, [loadCoachData]);
 
   const handleLogout = () => { logout(); navigate('/'); };
+
+  if (!coachLoaded) return <Loader fullPage text="Cargando panel..." />;
 
   return (
     <div className="coach-layout">

@@ -638,9 +638,18 @@ tbody tr:hover { background: var(--color-surface); }
 @keyframes fadeOutDown { from { opacity: 1; } to { opacity: 0; transform: translateX(-50%) translateY(10px); } }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 @keyframes spin { to { transform: rotate(360deg); } }
+@keyframes dotPulse { 0%, 100% { opacity: 0.2; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-4px); } }
 
 .animate-fade { animation: fadeIn 0.3s ease; }
 .animate-slide { animation: slideUp 0.3s ease; }
+
+.dot-typing {
+  display: inline-block;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-accent);
+  animation: dotPulse 1.4s infinite ease-in-out;
+}
 
 /* ─── DIVIDER ────────────────────────────────────────────────────────────────── */
 .divider { height: 1px; background: var(--color-border); margin: 20px 0; }

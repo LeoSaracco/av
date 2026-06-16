@@ -7,6 +7,7 @@ import React, { useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
+import Loader from '../ui/Loader';
 
 /**
  * Layout del panel de cliente.
@@ -19,7 +20,7 @@ import { useApp } from '../../context/AppContext';
  */
 export function ClientLayout({ children }) {
   const { user, logout } = useAuth();
-  const { loadClientData } = useApp();
+  const { loadClientData, clientLoaded } = useApp();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,6 +28,8 @@ export function ClientLayout({ children }) {
   }, [loadClientData, user]);
 
   const handleLogout = () => { logout(); navigate('/'); };
+
+  if (!clientLoaded) return <Loader fullPage text="Cargando panel..." />;
 
   return (
     <div className="client-layout">
