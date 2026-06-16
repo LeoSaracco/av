@@ -158,17 +158,27 @@ Revisar:
 
 ## Checklist para agentes
 
-1. Trabajar contra `main` actualizado.
-2. Mantener estructura `av-frontend/` y `av-backend/`.
-3. No recrear `railway.toml` en raiz para deploy monorepo.
-4. No subir `.env`, `.env.production`, `node_modules`, `dist` ni `target`.
-5. Confirmar `av-backend/mvnw` como executable en Git si se toca:
+1. Trabajar desde `C:\Users\Leandro\Documents\projects\av-final`.
+2. Confirmar que el repo local apunta al remoto correcto:
+
+```powershell
+git remote -v
+git status --short --branch
+```
+
+El remoto esperado es `https://github.com/LeoSaracco/av`.
+
+3. Trabajar contra `main` actualizado.
+4. Mantener estructura `av-frontend/` y `av-backend/`.
+5. No recrear `railway.toml` en raiz para deploy monorepo.
+6. No subir `.env`, `.env.production`, `node_modules`, `dist` ni `target`.
+7. Confirmar `av-backend/mvnw` como executable en Git si se toca:
 
 ```powershell
 git update-index --chmod=+x av-backend/mvnw
 ```
 
-6. Validar CI local antes de push:
+8. Validar CI local antes de push:
 
 ```powershell
 cd av-frontend
@@ -183,15 +193,214 @@ cd ..\av-backend
 .\mvnw.cmd package -DskipTests --batch-mode
 ```
 
-7. Despues de push a `main`, revisar:
+9. Despues de push a `main`, revisar:
 
 ```powershell
 gh run list --repo LeoSaracco/av --limit 5
 ```
 
-8. Verificar produccion:
+10. Verificar produccion:
 
 ```powershell
 Invoke-RestMethod https://av-backend-production.up.railway.app/actuator/health
 Invoke-WebRequest https://av-frontend-production.up.railway.app/ -UseBasicParsing
+```
+
+## Queries de validacion en base
+
+Usar estas consultas contra PostgreSQL de Railway para confirmar que el flujo `Plan -> Pago mock -> Formulario -> Usuario` persistio correctamente.
+
+### Ultimos contratos
+
+```sql
+SELECT
+  id,
+  plan_id,
+  payment_id,
+  onboarding_id,
+  user_id,
+  client_id,
+  email,
+  status,
+  created_at,
+  updated_at,
+  completed_at
+FROM plan_contracts
+ORDER BY created_at DESC
+LIMIT 20;
+```
+
+### Pagos mock MercadoPago preparados para integracion real
+
+```sql
+SELECT
+  id,
+  contract_id,
+  client_id,
+  plan_id,
+  preference_id,
+  status,
+  amount,
+  currency,
+  provider,
+  provider_mode,
+  external_reference,
+  init_point,
+  created_at,
+  updated_at
+FROM payments
+ORDER BY created_at DESC
+LIMIT 20;
+```
+
+Valores esperados hoy:
+
+- `provider = 'MERCADOPAGO'`
+- `provider_mode = 'MOCK'`
+- `status = 'APPROVED'` despues del mock payment
+
+### Formularios guardados
+
+```sql
+SELECT
+  id,
+  plan_id,
+  client_id,
+  form_data->>'email' AS email,
+  form_data->>'name' AS name,
+  form_data->>'purpose' AS goal,
+  submitted_at
+FROM onboarding_submissions
+ORDER BY submitted_at DESC
+LIMIT 20;
+```
+
+### Usuario y cliente creados
+
+```sql
+SELECT
+  u.id AS user_id,
+  u.email,
+  u.role,
+  u.client_id,
+  c.name,
+  c.phone,
+  c.goal,
+  c.status,
+  c.join_date
+FROM users u
+JOIN clients c ON c.id = u.client_id
+ORDER BY u.created_at DESC
+LIMIT 20;
+```
+
+### Auditoria del flujo
+
+```sql
+SELECT
+  event_type,
+  aggregate_type,
+  aggregate_id,
+  actor_user_id,
+  client_id,
+  payload,
+  created_at
+FROM audit_events
+ORDER BY created_at DESC
+LIMIT 50;
+```
+
+Eventos esperados para una contratacion completa:
+
+- `CONTRACT_STARTED`
+- `PAYMENT_MOCK_CREATED`
+- `PAYMENT_MOCK_APPROVED`
+- `ONBOARDING_SUBMITTED`
+- `USER_CREATED`
+- `CONTRACT_COMPLETED`
+
+### Validacion por email puntual
+
+Reemplazar `mail@ejemplo.com` por el email usado en el formulario.
+
+```sql
+SELECT
+  id,
+  plan_id,
+  payment_id,
+  onboarding_id,
+  user_id,
+  client_id,
+  email,
+  status,
+  created_at,
+  completed_at
+FROM plan_contracts
+WHERE email = 'mail@ejemplo.com'
+ORDER BY created_at DESC;
+```
+
+```sql
+SELECT
+  p.id,
+  p.contract_id,
+  p.client_id,
+  p.plan_id,
+  p.preference_id,
+  p.status,
+  p.provider,
+  p.provider_mode,
+  p.external_reference,
+  p.created_at
+FROM payments p
+JOIN plan_contracts pc ON pc.id = p.contract_id
+WHERE pc.email = 'mail@ejemplo.com'
+ORDER BY p.created_at DESC;
+```
+
+```sql
+SELECT
+  id,
+  plan_id,
+  client_id,
+  form_data,
+  submitted_at
+FROM onboarding_submissions
+WHERE form_data->>'email' = 'mail@ejemplo.com'
+ORDER BY submitted_at DESC;
+```
+
+```sql
+SELECT
+  u.id AS user_id,
+  u.email,
+  u.role,
+  u.client_id,
+  c.name,
+  c.phone,
+  c.goal,
+  c.status
+FROM users u
+JOIN clients c ON c.id = u.client_id
+WHERE u.email = 'mail@ejemplo.com';
+```
+
+```sql
+SELECT
+  ae.event_type,
+  ae.aggregate_type,
+  ae.aggregate_id,
+  ae.actor_user_id,
+  ae.client_id,
+  ae.payload,
+  ae.created_at
+FROM audit_events ae
+LEFT JOIN plan_contracts pc
+  ON pc.id = ae.aggregate_id
+  OR pc.payment_id = ae.aggregate_id
+  OR pc.onboarding_id = ae.aggregate_id
+  OR pc.user_id = ae.aggregate_id
+WHERE pc.email = 'mail@ejemplo.com'
+   OR ae.payload::text ILIKE '%mail@ejemplo.com%'
+ORDER BY ae.created_at DESC;
 ```

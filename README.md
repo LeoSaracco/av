@@ -2,6 +2,16 @@
 
 Monorepo productivo para la plataforma de entrenamiento de Adrian Vila.
 
+## Path de trabajo
+
+El repo Git local canonico es:
+
+```text
+C:\Users\Leandro\Documents\projects\av-final
+```
+
+Todo cambio, commit, push, validacion y documentacion debe hacerse desde ese path. No usar clones auxiliares como fuente de verdad salvo para recuperacion puntual.
+
 ## Estructura
 
 ```text

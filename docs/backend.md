@@ -113,6 +113,10 @@ Servicio Railway productivo:
 - URL: `https://av-backend-production.up.railway.app`
 - Deploy desde repo: `railway up ./av-backend --path-as-root --project d4fdeffd-14ee-4284-b3aa-327f328e706d --environment production --service av-backend --detach`
 
+## Validacion en base
+
+Las queries operativas para comprobar persistencia de contratacion, pago mock, formulario, usuario y auditoria estan en `docs/railway.md`, seccion `Queries de validacion en base`.
+
 ## Swagger
 
 Swagger esta habilitado y permitido por seguridad:
