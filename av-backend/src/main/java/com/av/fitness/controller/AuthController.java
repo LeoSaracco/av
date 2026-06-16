@@ -91,7 +91,7 @@ public class AuthController {
         return ResponseCookie.from(name, value)
                 .httpOnly(true)
                 .secure(cookieSecure)
-                .sameSite("Lax")
+                .sameSite(cookieSecure ? "None" : "Lax")
                 .path("/")
                 .maxAge(maxAgeSeconds)
                 .build();
@@ -101,7 +101,7 @@ public class AuthController {
         return ResponseCookie.from(name, "")
                 .httpOnly(true)
                 .secure(cookieSecure)
-                .sameSite("Lax")
+                .sameSite(cookieSecure ? "None" : "Lax")
                 .path("/")
                 .maxAge(0)
                 .build();
