@@ -1,33 +1,15 @@
-# ── EditorConfig — AV Fitness App ──────────────────────────────────────────────
-# Consistent coding styles across editors and IDEs
-
 root = true
 
 [*]
-charset = utf-8
 indent_style = space
 indent_size = 2
 end_of_line = lf
-insert_final_newline = true
+charset = utf-8
 trim_trailing_whitespace = true
+insert_final_newline = true
 
 [*.md]
 trim_trailing_whitespace = false
 
-[*.{yml,yaml}]
+[*.{json,yml,yaml}]
 indent_size = 2
-
-[*.{json,jsonc}]
-indent_size = 2
-
-[*.{css,html}]
-indent_size = 2
-
-[*.{js,jsx}]
-indent_size = 2
-
-[*.java]
-indent_size = 4
-
-[.gitignore]
-indent_style = space

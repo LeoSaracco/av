@@ -1,0 +1,397 @@
+package com.av.fitness.service.impl;
+
+import com.av.fitness.dto.coach.*;
+import com.av.fitness.dto.ProgressResponse;
+import com.av.fitness.dto.ThreadResponse;
+import com.av.fitness.model.*;
+import com.av.fitness.repository.*;
+import com.av.fitness.service.CoachService;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class CoachServiceImpl implements CoachService {
+
+    private final ClientJpaRepository clientJpaRepository;
+    private final RoutineTemplateJpaRepository routineTemplateJpaRepository;
+    private final RoutineJpaRepository routineJpaRepository;
+    private final DietTemplateJpaRepository dietTemplateJpaRepository;
+    private final DietJpaRepository dietJpaRepository;
+    private final NoteJpaRepository noteJpaRepository;
+    private final AssignmentJpaRepository assignmentJpaRepository;
+    private final ProgressJpaRepository progressJpaRepository;
+    private final NutritionThreadJpaRepository nutritionThreadJpaRepository;
+    private final ModelMapper modelMapper;
+
+    @Override
+    public ClientResponse createClient(ClientRequest request) {
+        ClientEntity entity = new ClientEntity();
+        entity.setId(UUID.randomUUID());
+        entity.setName(request.getName());
+        entity.setEmail(request.getEmail());
+        entity.setPhone(request.getPhone());
+        entity.setGoal(request.getGoal());
+        entity.setStatus("ACTIVO");
+        entity.setJoinDate(LocalDate.now());
+        entity.setAvatarUrl(request.getAvatarUrl());
+        entity.setCreatedAt(LocalDateTime.now());
+        entity.setUpdatedAt(LocalDateTime.now());
+
+        clientJpaRepository.save(entity);
+        return modelMapper.map(entity, ClientResponse.class);
+    }
+
+    @Override
+    public ClientResponse updateClient(UUID id, ClientRequest request) {
+        ClientEntity entity = clientJpaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+        entity.setName(request.getName());
+        entity.setEmail(request.getEmail());
+        entity.setPhone(request.getPhone());
+        entity.setGoal(request.getGoal());
+        entity.setStatus(request.getStatus());
+        entity.setAvatarUrl(request.getAvatarUrl());
+        entity.setUpdatedAt(LocalDateTime.now());
+
+        clientJpaRepository.save(entity);
+        return modelMapper.map(entity, ClientResponse.class);
+    }
+
+    @Override
+    public void deleteClient(UUID id) {
+        clientJpaRepository.deleteById(id);
+    }
+
+    @Override
+    public ClientResponse getClient(UUID id) {
+        ClientEntity entity = clientJpaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+        return modelMapper.map(entity, ClientResponse.class);
+    }
+
+    @Override
+    public List<ClientResponse> getClients() {
+        return clientJpaRepository.findAll().stream()
+                .map(e -> modelMapper.map(e, ClientResponse.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public TemplateResponse createTemplate(TemplateRequest request) {
+        RoutineTemplateEntity entity = new RoutineTemplateEntity();
+        entity.setId(UUID.randomUUID());
+        entity.setName(request.getName());
+        entity.setGoal(request.getGoal());
+        entity.setDescription(request.getDescription());
+        entity.setExercises(request.getExercises() != null ? request.getExercises() : "[]");
+        entity.setCreatedAt(LocalDate.now());
+        entity.setUpdatedAt(LocalDateTime.now());
+
+        routineTemplateJpaRepository.save(entity);
+        return modelMapper.map(entity, TemplateResponse.class);
+    }
+
+    @Override
+    public TemplateResponse updateTemplate(UUID id, TemplateRequest request) {
+        RoutineTemplateEntity entity = routineTemplateJpaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Plantilla no encontrada"));
+        entity.setName(request.getName());
+        entity.setGoal(request.getGoal());
+        entity.setDescription(request.getDescription());
+        entity.setExercises(request.getExercises());
+        entity.setUpdatedAt(LocalDateTime.now());
+
+        routineTemplateJpaRepository.save(entity);
+        return modelMapper.map(entity, TemplateResponse.class);
+    }
+
+    @Override
+    public void deleteTemplate(UUID id) {
+        routineTemplateJpaRepository.deleteById(id);
+    }
+
+    @Override
+    public TemplateResponse getTemplate(UUID id) {
+        RoutineTemplateEntity entity = routineTemplateJpaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Plantilla no encontrada"));
+        return modelMapper.map(entity, TemplateResponse.class);
+    }
+
+    @Override
+    public List<TemplateResponse> getTemplates() {
+        return routineTemplateJpaRepository.findAll().stream()
+                .map(e -> modelMapper.map(e, TemplateResponse.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public RoutineResponse createRoutine(RoutineRequest request) {
+        RoutineEntity entity = new RoutineEntity();
+        entity.setId(UUID.randomUUID());
+        entity.setName(request.getName());
+        entity.setGoal(request.getGoal());
+        entity.setTemplateId(request.getTemplateId());
+        entity.setExercises(request.getExercises() != null ? request.getExercises() : "[]");
+        entity.setCreatedAt(LocalDate.now());
+        entity.setUpdatedAt(LocalDateTime.now());
+
+        routineJpaRepository.save(entity);
+        return modelMapper.map(entity, RoutineResponse.class);
+    }
+
+    @Override
+    public RoutineResponse updateRoutine(UUID id, RoutineRequest request) {
+        RoutineEntity entity = routineJpaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Rutina no encontrada"));
+        entity.setName(request.getName());
+        entity.setGoal(request.getGoal());
+        entity.setTemplateId(request.getTemplateId());
+        entity.setExercises(request.getExercises());
+        entity.setUpdatedAt(LocalDateTime.now());
+
+        routineJpaRepository.save(entity);
+        return modelMapper.map(entity, RoutineResponse.class);
+    }
+
+    @Override
+    public void deleteRoutine(UUID id) {
+        routineJpaRepository.deleteById(id);
+    }
+
+    @Override
+    public RoutineResponse getRoutine(UUID id) {
+        RoutineEntity entity = routineJpaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Rutina no encontrada"));
+        return modelMapper.map(entity, RoutineResponse.class);
+    }
+
+    @Override
+    public List<RoutineResponse> getRoutines() {
+        return routineJpaRepository.findAll().stream()
+                .map(e -> modelMapper.map(e, RoutineResponse.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public DietResponse createDiet(DietRequest request) {
+        DietEntity entity = new DietEntity();
+        entity.setId(UUID.randomUUID());
+        entity.setName(request.getName());
+        entity.setGoal(request.getGoal());
+        entity.setTemplateId(request.getTemplateId());
+        entity.setIndications(request.getIndications());
+        entity.setMeals(request.getMeals() != null ? request.getMeals() : "[]");
+        entity.setCreatedAt(LocalDate.now());
+        entity.setUpdatedAt(LocalDateTime.now());
+
+        dietJpaRepository.save(entity);
+        return modelMapper.map(entity, DietResponse.class);
+    }
+
+    @Override
+    public DietResponse updateDiet(UUID id, DietRequest request) {
+        DietEntity entity = dietJpaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Dieta no encontrada"));
+        entity.setName(request.getName());
+        entity.setGoal(request.getGoal());
+        entity.setTemplateId(request.getTemplateId());
+        entity.setIndications(request.getIndications());
+        entity.setMeals(request.getMeals());
+        entity.setUpdatedAt(LocalDateTime.now());
+
+        dietJpaRepository.save(entity);
+        return modelMapper.map(entity, DietResponse.class);
+    }
+
+    @Override
+    public void deleteDiet(UUID id) {
+        dietJpaRepository.deleteById(id);
+    }
+
+    @Override
+    public DietResponse getDiet(UUID id) {
+        DietEntity entity = dietJpaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Dieta no encontrada"));
+        return modelMapper.map(entity, DietResponse.class);
+    }
+
+    @Override
+    public List<DietResponse> getDiets() {
+        return dietJpaRepository.findAll().stream()
+                .map(e -> modelMapper.map(e, DietResponse.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public DietTemplateResponse createDietTemplate(DietTemplateRequest request) {
+        DietTemplateEntity entity = new DietTemplateEntity();
+        entity.setId(UUID.randomUUID());
+        entity.setName(request.getName());
+        entity.setGoal(request.getGoal());
+        entity.setDescription(request.getDescription());
+        entity.setIndications(request.getIndications());
+        entity.setMeals(request.getMeals() != null ? request.getMeals() : "[]");
+        entity.setCreatedAt(LocalDate.now());
+        entity.setUpdatedAt(LocalDateTime.now());
+
+        dietTemplateJpaRepository.save(entity);
+        return modelMapper.map(entity, DietTemplateResponse.class);
+    }
+
+    @Override
+    public DietTemplateResponse updateDietTemplate(UUID id, DietTemplateRequest request) {
+        DietTemplateEntity entity = dietTemplateJpaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Plantilla de dieta no encontrada"));
+        entity.setName(request.getName());
+        entity.setGoal(request.getGoal());
+        entity.setDescription(request.getDescription());
+        entity.setIndications(request.getIndications());
+        entity.setMeals(request.getMeals());
+        entity.setUpdatedAt(LocalDateTime.now());
+
+        dietTemplateJpaRepository.save(entity);
+        return modelMapper.map(entity, DietTemplateResponse.class);
+    }
+
+    @Override
+    public void deleteDietTemplate(UUID id) {
+        dietTemplateJpaRepository.deleteById(id);
+    }
+
+    @Override
+    public DietTemplateResponse getDietTemplate(UUID id) {
+        DietTemplateEntity entity = dietTemplateJpaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Plantilla de dieta no encontrada"));
+        return modelMapper.map(entity, DietTemplateResponse.class);
+    }
+
+    @Override
+    public List<DietTemplateResponse> getDietTemplates() {
+        return dietTemplateJpaRepository.findAll().stream()
+                .map(e -> modelMapper.map(e, DietTemplateResponse.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public NoteResponse updateNote(UUID id, NoteRequest request) {
+        NoteEntity entity = noteJpaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Nota no encontrada"));
+        entity.setText(request.getText());
+        entity.setUpdatedAt(LocalDate.now());
+
+        noteJpaRepository.save(entity);
+        return modelMapper.map(entity, NoteResponse.class);
+    }
+
+    @Override
+    public void deleteNote(UUID id) {
+        noteJpaRepository.deleteById(id);
+    }
+
+    @Override
+    public NoteResponse getNote(UUID id) {
+        NoteEntity entity = noteJpaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Nota no encontrada"));
+        return modelMapper.map(entity, NoteResponse.class);
+    }
+
+    @Override
+    public List<NoteResponse> getNotesForClient(UUID clientId) {
+        return noteJpaRepository.findByClientIdOrderByCreatedAtDesc(clientId).stream()
+                .map(e -> modelMapper.map(e, NoteResponse.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public NoteResponse addNote(UUID clientId, NoteRequest request) {
+        NoteEntity entity = new NoteEntity();
+        entity.setId(UUID.randomUUID());
+        entity.setClientId(clientId);
+        entity.setText(request.getText());
+        LocalDate now = LocalDate.now();
+        entity.setCreatedAt(now);
+        entity.setUpdatedAt(now);
+        entity.setUpdatedAtTz(LocalDateTime.now());
+
+        noteJpaRepository.save(entity);
+        return modelMapper.map(entity, NoteResponse.class);
+    }
+
+    @Override
+    public AssignmentResponse createAssignment(AssignmentRequest request) {
+        AssignmentEntity entity = new AssignmentEntity();
+        entity.setId(UUID.randomUUID());
+        entity.setClientId(request.getClientId());
+        entity.setRoutineId(request.getRoutineId());
+        entity.setDietId(request.getDietId());
+        entity.setAssignedAt(LocalDate.now());
+        entity.setActive(true);
+        entity.setCreatedAt(LocalDateTime.now());
+
+        assignmentJpaRepository.save(entity);
+        return modelMapper.map(entity, AssignmentResponse.class);
+    }
+
+    @Override
+    public void deactivateAssignment(UUID id) {
+        AssignmentEntity entity = assignmentJpaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Asignacion no encontrada"));
+        entity.setActive(false);
+        assignmentJpaRepository.save(entity);
+    }
+
+    @Override
+    public List<AssignmentResponse> getAssignmentsForClient(UUID clientId) {
+        return assignmentJpaRepository.findAll().stream()
+                .filter(a -> a.getClientId().equals(clientId))
+                .map(e -> modelMapper.map(e, AssignmentResponse.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProgressResponse> getClientProgress(UUID clientId) {
+        return progressJpaRepository.findByClientIdOrderByDateAsc(clientId).stream()
+                .map(e -> modelMapper.map(e, ProgressResponse.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public ThreadResponse getThreadForClient(UUID clientId) {
+        NutritionThreadEntity entity = nutritionThreadJpaRepository.findByClientId(clientId)
+                .orElseThrow(() -> new RuntimeException("Hilo no encontrado para el cliente"));
+        return modelMapper.map(entity, ThreadResponse.class);
+    }
+
+    @Override
+    public ThreadResponse sendThreadMessage(UUID clientId, String message) {
+        NutritionThreadEntity entity = nutritionThreadJpaRepository.findByClientId(clientId)
+                .orElseThrow(() -> new RuntimeException("Hilo no encontrado para el cliente"));
+
+        String jsonMessage = "{\"id\":\"" + UUID.randomUUID()
+                + "\",\"sender\":\"COACH\",\"text\":\"" + message
+                + "\",\"date\":\"" + LocalDateTime.now() + "\"}";
+
+        String messages = entity.getMessages();
+        if (messages == null || "[]".equals(messages)) {
+            messages = "[" + jsonMessage + "]";
+        } else {
+            messages = messages.substring(0, messages.length() - 1)
+                    + "," + jsonMessage + "]";
+        }
+        entity.setMessages(messages);
+        entity.setUpdatedAt(LocalDateTime.now());
+
+        nutritionThreadJpaRepository.save(entity);
+        return modelMapper.map(entity, ThreadResponse.class);
+    }
+}

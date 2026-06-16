@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/avdb
+    username: avuser
+    password: avpass
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        ddl-auto: validate
+
+jwt:
+  secret: local-dev-secret-key-for-local-development-only-change-in-prod
+
+cors:
+  allowed-origins: http://localhost:5173
+
+logging:
+  level:
+    com.av.fitness: DEBUG
+    org.flywaydb: DEBUG

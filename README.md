@@ -1,27 +1,92 @@
-# AV Fitness App - PaaS Mockup
+# AV Fitness App
 
-Este proyecto es una plataforma interactiva "Platform as a Service" (PaaS) diseñada inicialmente para el coach Adrián Vila, con la capacidad de escalar a una arquitectura multi-coach en el futuro. Permite a los profesionales del fitness gestionar rutinas, hacer seguimiento del progreso y proveer planes nutricionales a sus clientes.
+Monorepo productivo para la plataforma de entrenamiento de Adrian Vila.
 
-## Arquitectura y Stack
-*   **Frontend**: React + Vite
-*   **Estado & Persistencia**: Context API + `localStorage` (mockup de backend)
-*   **Estilos**: Vanilla CSS con variables nativas, paleta dark mode premium "Glassmorphism" con acentos verde flúor.
+## Estructura
 
-## Módulo de Nutrición Bidireccional
-La aplicación incluye un módulo de `DietTemplates` para Coaches y visualización simplificada para Clientes. Adicionalmente, cuenta con un chat/hilo de consultas asíncrono para dudas en tiempo real.
+```text
+av/
+  av-frontend/     React + Vite, servido por Nginx en Railway
+  av-backend/      Spring Boot, PostgreSQL, Flyway, Swagger/OpenAPI
+  docs/            arquitectura, frontend, backend, pipeline, seguridad y backlog
+  .github/         CI/CD GitHub Actions
+```
 
-### 🤖 Integración Pendiente (Asistente IA Dedicado)
-Se ha incorporado un submódulo independiente **"Asistente IA ✨"** (`/client/ai-assistant`) en el dashboard del cliente. El propósito es actuar como un chatbot inteligente que genera una "lluvia de ideas" de comidas sugeridas si el cliente no sabe qué comer y potenciar la experiencia. 
+## URLs productivas
 
-**Instrucciones para el equipo de Backend:**
-Cuando se conecte una API/BD real, la funcionalidad de IA en el Cliente debe funcionar como un chatbot websocket o endpoint dedicado (ej. `/api/ai/chat`) que cumpla con los siguientes requisitos:
-1.  **Contexto Inicial**: El cliente de React envía un prompt de sistema invisible a la IA junto con el objetivo nutricional actual (ej. "Entrenás a Martina, su objetivo es Volumen").
-2.  **Llamada a LLM**: El servidor formula e interroga directamente al LLM (OpenAI, Claude, etc.) ante cada pregunta del cliente.
-3.  **Persistencia Aislada**: El historial de charla con la IA debe guardarse internamente en la DB en una colección apartada (`ai_threads`) y NO mezclarse en el hilo general de Consultas humano.
-4.  Actualmente la respuesta ("typing" y mensajería condicional por peso/volumen) está mockeada en el frontend local mediante `setTimeout`, pero la lógica decisional entera deberá trasladarse a la nube.
+- Frontend: `https://av-frontend-production.up.railway.app`
+- Backend: `https://av-backend-production.up.railway.app`
+- Health: `https://av-backend-production.up.railway.app/actuator/health`
+- Swagger: `https://av-backend-production.up.railway.app/swagger-ui/index.html`
+- OpenAPI JSON: `https://av-backend-production.up.railway.app/v3/api-docs`
 
-## Instalación Local
-```bash
-npm install
+## Datos y autenticacion
+
+El backend es la fuente de verdad para datos persistidos. El frontend no debe persistir auth ni datos de negocio en `localStorage` o `sessionStorage`.
+
+- Home publico: solo carga planes desde `/api/plans`.
+- Store publica: carga productos desde `/api/products` al entrar a tienda.
+- Coach: carga endpoints `/api/coach/*` solo en rutas coach autenticadas.
+- Cliente: carga endpoints `/api/me/*` solo en rutas cliente autenticadas.
+- Auth: cookies httpOnly administradas por el backend.
+
+## Desarrollo local
+
+```powershell
+# Base de datos
+docker compose up -d
+
+# Backend
+cd av-backend
+.\mvnw.cmd spring-boot:run
+
+# Frontend
+cd ..\av-frontend
+npm ci
 npm run dev
 ```
+
+Variables locales:
+
+- raiz: `.env.example`
+- frontend: `av-frontend/.env.local.example`
+- backend: `av-backend/.env.local.example`
+
+## Validacion
+
+```powershell
+cd av-frontend
+npm run lint
+npm run build
+npm test
+npm audit --audit-level=high
+
+cd ..\av-backend
+.\mvnw.cmd test --batch-mode
+.\mvnw.cmd package -DskipTests --batch-mode
+```
+
+## CI/CD
+
+Los workflows viven en `.github/workflows/`.
+
+- `ci.yml`: corre en `push` y PR contra `main`.
+- `deploy-railway.yml`: corre en `push` contra `main` y manualmente con `workflow_dispatch`.
+
+Deploy Railway:
+
+```powershell
+railway up ./av-frontend --path-as-root --project d4fdeffd-14ee-4284-b3aa-327f328e706d --environment production --service av-frontend --detach
+railway up ./av-backend --path-as-root --project d4fdeffd-14ee-4284-b3aa-327f328e706d --environment production --service av-backend --detach
+```
+
+## Documentacion
+
+- `docs/backlog.md`: hecho, validado y pendiente.
+- `docs/architecture.md`: arquitectura general del monorepo.
+- `docs/frontend.md`: lineamientos frontend.
+- `docs/backend.md`: lineamientos backend.
+- `docs/code-map.md`: mapa de codigo frontend/backend.
+- `docs/pipeline.md`: CI/CD y Railway.
+- `docs/security.md`: lineamientos de seguridad.
+- `docs/dod.md`: definition of done.
