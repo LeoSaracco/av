@@ -8,6 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import { apiMockPlanPayment, apiStartPlanContract } from '../api/apiClient';
 
 const MPLogo = () => (
   <svg width="38" height="38" viewBox="0 0 48 48" fill="none">
@@ -61,6 +62,8 @@ export default function PaymentSimulator() {
   const formatPrice = (p) => '$' + p.toLocaleString('es-AR');
 
   const [status, setStatus] = useState('form');
+  const [error, setError] = useState('');
+  const [contractInfo, setContractInfo] = useState(null);
   // ── Datos de tarjeta pre-cargados para demo ──
   const [card, setCard] = useState({
     number: '4509953566233704',
@@ -72,21 +75,30 @@ export default function PaymentSimulator() {
 
   // ── Redirección tras aprobación ──
   useEffect(() => {
-    if (status === 'approved') {
+    if (status === 'approved' && contractInfo) {
       if (redirectCountdown > 0) {
         const timer = setTimeout(() => setRedirectCountdown(c => c - 1), 1000);
         return () => clearTimeout(timer);
       }
-      window.location.href = `#/onboarding?plan=${planId}`;
+      window.location.href = `#/onboarding?plan=${planId}&contract=${contractInfo.contractId}`;
     }
-  }, [status, redirectCountdown, planId]);
+  }, [status, redirectCountdown, planId, contractInfo]);
 
-  // Pago mockeado para demo: no crea una preferencia real ni realiza cobros.
+  // Pago mockeado para demo: no realiza cobros reales, pero persiste el proceso en backend.
   const handlePay = async () => {
     if (!plan || !card.number || !card.name || !card.expiry || !card.cvv) return;
+    setError('');
     setStatus('processing');
-    await new Promise(resolve => setTimeout(resolve, 1200));
-    setStatus('approved');
+    try {
+      const contract = await apiStartPlanContract(plan.id);
+      await new Promise(resolve => setTimeout(resolve, 1200));
+      await apiMockPlanPayment(contract.contractId, contract.preferenceId, 'APPROVED');
+      setContractInfo(contract);
+      setStatus('approved');
+    } catch (err) {
+      setError(err.message || 'No se pudo registrar el pago mock');
+      setStatus('form');
+    }
   };
 
   const isFormValid = card.number.length >= 13 && card.name.trim() && card.expiry.length >= 3 && card.cvv.length >= 3;
@@ -128,6 +140,12 @@ export default function PaymentSimulator() {
               <CreditCardIcon />
               <span>Paso 2 de 2: Pagá con tarjeta</span>
             </div>
+
+            {error && (
+              <div style={{ background: '#FFEBEE', border: '1px solid #FFCDD2', color: '#B71C1C', borderRadius: 6, padding: 12, marginBottom: 16, fontSize: 13 }}>
+                {error}
+              </div>
+            )}
 
             <div className="mp-checkout-grid" style={{ display: 'grid', gap: 24, alignItems: 'start' }}>
               {/* ── Columna izquierda: formulario de tarjeta ── */}

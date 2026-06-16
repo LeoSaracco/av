@@ -15,9 +15,11 @@ La aplicacion usa backend real con Spring Security y cookies httpOnly. El fronte
 - CORS limitado a dominios conocidos.
 - Nada de secrets en repo.
 - Nada de tokens, passwords, auth headers ni PII sensible en logs.
+- La auditoria no debe guardar passwords, tokens, cookies, CVV ni numero completo de tarjeta.
 - Endpoints `/api/coach/*` requieren rol coach.
 - Endpoints `/api/me/*` requieren usuario autenticado cliente.
 - Endpoints publicos permitidos: auth, plans, products, onboarding, payment public flow, health y Swagger segun politica vigente.
+- Endpoints publicos de contratacion permitidos: `/api/plan-contracts/start`, `/api/plan-contracts/{id}/mock-payment`, `/api/plan-contracts/{id}/complete-onboarding`.
 
 ## Storage navegador
 

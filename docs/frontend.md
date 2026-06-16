@@ -21,6 +21,7 @@ Actualizado: 2026-06-16
 - Los componentes de pagina no deben llamar `fetch` directo; deben usar `apiClient` o funciones expuestas por contexto.
 - La landing publica no debe cargar datos privados.
 - Los errores de API deben mostrarse como estados de carga/error/vacio, no con fallback seed.
+- El pago mock debe comunicarse por API y persistirse; no debe ser una simulacion solo local.
 
 ## Capas
 
@@ -34,6 +35,8 @@ pages/components -> context -> apiClient -> backend
 - `CoachLayout.jsx`: dispara carga coach.
 - `ClientLayout.jsx`: dispara carga cliente.
 - `Store.jsx`/`ProductDetail.jsx`: disparan carga de productos.
+- `PaymentSimulator.jsx`: inicia contrato y confirma pago mock por API.
+- `Onboarding.jsx`: completa contrato, crea usuario/cliente y guarda formulario por API.
 
 ## Variables
 

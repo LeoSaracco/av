@@ -111,6 +111,27 @@ export async function apiCheckPaymentStatus(preferenceId) {
   return request('GET', `/payment/status/${preferenceId}`);
 }
 
+export async function apiStartPlanContract(planId) {
+  return request('POST', '/plan-contracts/start', { planId });
+}
+
+export async function apiMockPlanPayment(contractId, preferenceId, status) {
+  return request('POST', `/plan-contracts/${contractId}/mock-payment`, { preferenceId, status });
+}
+
+export async function apiCompletePlanContract(contractId, data) {
+  const formData = { ...data };
+  delete formData.password;
+  return request('POST', `/plan-contracts/${contractId}/complete-onboarding`, {
+    name: data.name,
+    email: data.email,
+    password: data.password,
+    phone: data.whatsapp,
+    goal: data.purpose,
+    formData: JSON.stringify(formData),
+  });
+}
+
 // ── Client (Me) ───────────────────────────────────────────────────────────────
 export async function apiGetMyRoutine() {
   return normalizeRoutine(await request('GET', '/me/routine'));

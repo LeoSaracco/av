@@ -38,6 +38,12 @@ Puntos de entrada:
 - `dto/`: contratos de entrada/salida.
 - `src/main/resources/db/migration/`: migraciones Flyway.
 
+Contratacion de plan:
+
+- `PaymentSimulator.jsx` llama las APIs de `plan-contracts`.
+- `PlanContractController` expone inicio, pago mock y cierre de onboarding.
+- `PlanContractServiceImpl` crea `plan_contracts`, `payments`, `clients`, `users`, `onboarding_submissions` y `audit_events`.
+
 Rutas operacionales:
 
 - `/actuator/health`

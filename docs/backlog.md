@@ -50,6 +50,11 @@ Actualizado: 2026-06-16
 - GitHub Actions:
   - `RAILWAY_TOKEN` configurado como secret del repo.
   - El error `Unauthorized` de Railway se resolvio cargando el secret con nombre correcto.
+- Contratacion de plan persistente:
+  - inicio de contrato por API.
+  - pago mock MercadoPago persistido en `payments`.
+  - formulario, usuario y cliente creados al completar onboarding.
+  - auditoria de eventos clave en `audit_events`.
 
 ## Validado
 
@@ -90,6 +95,7 @@ Actualizado: 2026-06-16
   - componentes y contextos frontend.
   - controllers, services, repositories, DTOs y entidades backend.
   - flujos de auth, pagos, onboarding, coach, cliente y store.
+- Integrar MercadoPago real reemplazando el mock persistido.
 - Mejorar cobertura backend con tests de controller/service/repository.
 - Agregar prueba E2E que verifique que el home no llama endpoints privados.
 - Resolver vulnerabilidades de `npm audit --audit-level=high` si siguen presentes en CI.

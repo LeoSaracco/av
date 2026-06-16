@@ -10,6 +10,7 @@ vi.mock('../../api/apiClient', () => ({
   apiRegister: vi.fn(),
   apiLogin: vi.fn(),
   apiLogout: vi.fn(),
+  apiCompletePlanContract: vi.fn(),
 }));
 
 import * as api from '../../api/apiClient';
@@ -113,6 +114,31 @@ describe('AuthContext — isCoach / isClient', () => {
       await result.current.login('martina@gmail.com', '1234');
     });
 
+    expect(result.current.isClient).toBe(true);
+  });
+});
+
+describe('AuthContext completePlanContract', () => {
+  it('completa contratacion y establece usuario', async () => {
+    api.apiCompletePlanContract.mockResolvedValueOnce({
+      contractId: 'contract-1',
+      onboardingId: 'onboarding-1',
+      user: { name: 'Laura', email: 'laura@test.com', role: 'CLIENT', clientId: 'client-1' },
+    });
+
+    const { result } = renderHook(() => useAuth(), { wrapper });
+
+    let completeResult;
+    await act(async () => {
+      completeResult = await result.current.completePlanContract('contract-1', {
+        name: 'Laura',
+        email: 'laura@test.com',
+        password: 'abc123',
+      });
+    });
+
+    expect(completeResult.ok).toBe(true);
+    expect(result.current.user.email).toBe('laura@test.com');
     expect(result.current.isClient).toBe(true);
   });
 });

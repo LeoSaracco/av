@@ -55,10 +55,11 @@ const DEMO_CODE = '123456';
 export default function Onboarding() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { registerUser } = useAuth();
-  const { createOnboardingSubmission, showToast, plans } = useApp();
+  const { completePlanContract } = useAuth();
+  const { showToast, plans } = useApp();
 
   const planId = searchParams.get('plan') || '';
+  const contractId = searchParams.get('contract') || '';
   const plan = plans.find(p => p.id === planId) || plans[0] || null;
 
   const [step, setStep] = useState(1);
@@ -150,19 +151,17 @@ export default function Onboarding() {
       return;
     }
 
-    const result = await registerUser(form.step1_name, form.step1_email, form.step5_password);
-    if (!result.ok) {
-      setErrors({ step1_email: result.error });
-      setStep(1);
+    if (!contractId) {
+      setErrors({ step5_terms: 'Falta la contratacion asociada al pago. Volve a elegir un plan.' });
       setSubmitting(false);
       return;
     }
 
-    const submission = await createOnboardingSubmission({
+    const result = await completePlanContract(contractId, {
       planId,
-      clientId: result.clientId,
       name: form.step1_name,
       email: form.step1_email,
+      password: form.step5_password,
       whatsapp: form.step1_whatsapp,
       age: Number(form.step1_age),
       height: Number(form.step1_height),
@@ -184,8 +183,8 @@ export default function Onboarding() {
       city: form.step4_city,
       community: form.step4_community,
     });
-
-    if (!submission) {
+    if (!result.ok) {
+      setErrors({ step5_terms: result.error });
       setSubmitting(false);
       return;
     }
@@ -219,6 +218,18 @@ export default function Onboarding() {
         <div className="onboarding-header">
           <h1>Cuestionario</h1>
           <p>No hay planes disponibles para iniciar el onboarding.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!contractId) {
+    return (
+      <div className="onboarding-page">
+        <div className="onboarding-header">
+          <h1>Contratacion requerida</h1>
+          <p>Para completar el formulario primero tenes que elegir un plan y registrar el pago mock.</p>
+          <button className="btn btn-primary" onClick={() => navigate('/')}>Volver a planes</button>
         </div>
       </div>
     );

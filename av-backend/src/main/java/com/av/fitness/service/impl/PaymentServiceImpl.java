@@ -30,7 +30,13 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setStatus("PENDING");
         payment.setAmount(BigDecimal.ZERO);
         payment.setCurrency("ARS");
+        payment.setProvider("MERCADOPAGO");
+        payment.setProviderMode("MOCK");
+        payment.setExternalReference(payment.getId().toString());
+        payment.setInitPoint("mock://mercadopago/checkout/" + payment.getPreferenceId());
+        payment.setRawProviderPayload("{}");
         payment.setCreatedAt(LocalDateTime.now());
+        payment.setUpdatedAt(LocalDateTime.now());
 
         paymentJpaRepository.save(payment);
         return payment.getPreferenceId();
@@ -68,6 +74,8 @@ public class PaymentServiceImpl implements PaymentService {
             PaymentEntity payment = paymentJpaRepository.findByPreferenceId(preferenceId)
                     .orElseThrow(() -> new RuntimeException("Pago no encontrado"));
             payment.setStatus(status.toUpperCase());
+            payment.setRawProviderPayload("{\"webhookStatus\":\"" + status.toUpperCase() + "\"}");
+            payment.setUpdatedAt(LocalDateTime.now());
             paymentJpaRepository.save(payment);
         }
     }

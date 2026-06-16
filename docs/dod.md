@@ -8,6 +8,8 @@ Ningun cambio se considera terminado solo porque compila. Debe estar alineado co
 
 - El cambio esta limitado al alcance pedido.
 - No introduce secrets.
+- Los procesos de negocio nuevos se comunican via API y persisten estado en base.
+- Si toca contratacion/pagos/onboarding, debe auditar eventos clave sin datos sensibles.
 - No introduce mocks/seed runtime en produccion.
 - No usa `localStorage` o `sessionStorage` para auth o datos de negocio.
 - Incluye estados de carga/error/vacio cuando toca datos remotos.

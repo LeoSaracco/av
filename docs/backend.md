@@ -43,10 +43,21 @@ Publicos:
 - `POST /api/auth/logout`
 - `POST /api/auth/refresh`
 - `GET /api/plans`
+- `POST /api/plan-contracts/start`
+- `POST /api/plan-contracts/{contractId}/mock-payment`
+- `POST /api/plan-contracts/{contractId}/complete-onboarding`
 - `GET /api/products`
 - `GET /api/products/{id}`
 - `POST /api/onboarding`
 - `POST /api/payment/create-preference`
+
+Contratacion de planes:
+
+- El orden productivo actual es `Plan -> Pago mock -> Formulario -> Usuario`.
+- `plan_contracts` registra el proceso completo.
+- `payments` registra la preferencia mock MercadoPago desde el inicio, incluso antes de existir `client_id`.
+- `onboarding_submissions`, `clients` y `users` se crean al completar el formulario.
+- `audit_events` registra eventos clave sin passwords, tokens ni datos de tarjeta.
 
 Coach:
 

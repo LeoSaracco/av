@@ -4,7 +4,7 @@
  *              Usa cookies httpOnly administradas por el backend.
  */
 import React, { createContext, useContext, useState } from 'react';
-import { apiRegister, apiLogin, apiLogout } from '../api/apiClient';
+import { apiRegister, apiLogin, apiLogout, apiCompletePlanContract } from '../api/apiClient';
 
 const AuthContext = createContext(null);
 
@@ -50,6 +50,26 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const completePlanContract = async (contractId, data) => {
+    setLoading(true);
+    try {
+      const result = await apiCompletePlanContract(contractId, data);
+      const normalized = normalizeUser(result.user);
+      setUser(normalized);
+      return {
+        ok: true,
+        user: normalized,
+        clientId: result.user?.clientId,
+        contractId: result.contractId,
+        onboardingId: result.onboardingId,
+      };
+    } catch (err) {
+      return { ok: false, error: err.message || 'Error al completar contratacion' };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = async () => {
     try { await apiLogout(); } catch { /* ignore */ }
     setUser(null);
@@ -57,7 +77,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider value={{
-      user, login, registerUser, logout, loading,
+      user, login, registerUser, completePlanContract, logout, loading,
       isCoach: user?.roles?.includes('ROLE_COACH') || user?.role === 'COACH' || user?.role === 'coach',
       isClient: user?.roles?.includes('ROLE_CLIENT') || user?.role === 'CLIENT' || user?.role === 'client',
     }}>

@@ -25,6 +25,7 @@ av/
 El backend es la fuente de verdad para datos persistidos. El frontend no debe persistir auth ni datos de negocio en `localStorage` o `sessionStorage`.
 
 - Home publico: solo carga planes desde `/api/plans`.
+- Contratacion de plan: inicia en `/api/plan-contracts/start`, registra pago mock en `/api/plan-contracts/{id}/mock-payment` y completa usuario/formulario en `/api/plan-contracts/{id}/complete-onboarding`.
 - Store publica: carga productos desde `/api/products` al entrar a tienda.
 - Coach: carga endpoints `/api/coach/*` solo en rutas coach autenticadas.
 - Cliente: carga endpoints `/api/me/*` solo en rutas cliente autenticadas.
