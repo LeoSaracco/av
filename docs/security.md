@@ -1,6 +1,6 @@
 # Seguridad - AV Fitness App
 
-Actualizado: 2026-06-15
+Actualizado: 2026-06-16
 
 ## Estado actual
 
@@ -49,13 +49,13 @@ Riesgo pendiente:
 
 - `npm audit --audit-level=high` bloqueante en frontend.
 - Backend compila y testea con Maven Wrapper.
-- GitHub secret requerido: `RAILWAY_TOKEN`.
+- GitHub secret requerido: `RAILWAY_TOKEN`; no documentar nunca su valor.
 - Branch protection recomendada para `main`.
 
 ## Pendientes
 
 - Activar branch protection en `main`.
-- Revisar resultado remoto de `npm audit --audit-level=high` luego del proximo push.
+- Revisar resultado remoto de `npm audit --audit-level=high` si cambian dependencias.
 - Agregar tests de autorizacion por rol en backend.
 - Definir politica productiva de Swagger.
 - Agregar secret scanning en CI si se decide exigirlo como gate.

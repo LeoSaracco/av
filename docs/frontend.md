@@ -1,6 +1,6 @@
 # Frontend - Arquitectura y lineamientos
 
-Actualizado: 2026-06-15
+Actualizado: 2026-06-16
 
 ## Stack
 
@@ -50,6 +50,13 @@ En Railway:
 VITE_API_URL=https://av-backend-production.up.railway.app/api
 VITE_WS_URL=wss://av-backend-production.up.railway.app/ws
 ```
+
+Servicio Railway productivo:
+
+- Proyecto: `av` (`d4fdeffd-14ee-4284-b3aa-327f328e706d`)
+- Servicio: `av-frontend`
+- URL: `https://av-frontend-production.up.railway.app`
+- Deploy desde repo: `railway up ./av-frontend --path-as-root --project d4fdeffd-14ee-4284-b3aa-327f328e706d --environment production --service av-frontend --detach`
 
 ## Build Docker
 

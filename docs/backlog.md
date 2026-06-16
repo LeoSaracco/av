@@ -1,6 +1,6 @@
 # Backlog - AV Fitness App
 
-Actualizado: 2026-06-15
+Actualizado: 2026-06-16
 
 ## Hecho
 
@@ -47,6 +47,9 @@ Actualizado: 2026-06-15
   - CI usa `working-directory` correcto para `av-frontend` y `av-backend`.
   - Backend CI usa `./mvnw`.
   - Deploy usa `railway up ./av-frontend --path-as-root` y `railway up ./av-backend --path-as-root`.
+- GitHub Actions:
+  - `RAILWAY_TOKEN` configurado como secret del repo.
+  - El error `Unauthorized` de Railway se resolvio cargando el secret con nombre correcto.
 
 ## Validado
 
@@ -64,6 +67,9 @@ Actualizado: 2026-06-15
   - deploy backend OK
   - deploy frontend OK
   - servicios separados dentro del proyecto `av`
+- GitHub:
+  - PR de migracion a monorepo mergeado en `main`.
+  - CI remoto en `main` OK.
 
 ## Pendiente
 
@@ -72,16 +78,18 @@ Actualizado: 2026-06-15
   - PR obligatorio.
   - CI requerido.
   - bloqueo de push directo si aplica.
-- Validar workflows remotos despues del proximo push:
+- Mantener verificacion de workflows remotos despues de cambios de pipeline:
   - `gh workflow list --repo LeoSaracco/av`
   - `gh run list --repo LeoSaracco/av`
   - `gh run view <run-id> --log-failed`
-- Definir secretos GitHub:
-  - `RAILWAY_TOKEN`
 - Completar integraciones productivas con credenciales reales:
   - MercadoPago
   - Resend
   - OpenAI
+- Documentar el codigo:
+  - componentes y contextos frontend.
+  - controllers, services, repositories, DTOs y entidades backend.
+  - flujos de auth, pagos, onboarding, coach, cliente y store.
 - Mejorar cobertura backend con tests de controller/service/repository.
 - Agregar prueba E2E que verifique que el home no llama endpoints privados.
 - Resolver vulnerabilidades de `npm audit --audit-level=high` si siguen presentes en CI.

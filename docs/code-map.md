@@ -1,6 +1,6 @@
 # Mapa de codigo - Frontend y Backend
 
-Actualizado: 2026-06-15
+Actualizado: 2026-06-16
 
 ## Frontend
 
@@ -57,3 +57,8 @@ Regla importante:
 - Rama productiva: `main`.
 - Backend usa Maven Wrapper.
 - Deploy usa Railway CLI con `--path-as-root`, `--project` y `--environment production`.
+
+## Pendiente de documentacion de codigo
+
+- Completar documentacion interna de componentes, servicios, DTOs, entidades, repositorios y flujos criticos.
+- Priorizar codigo que define contratos publicos, autenticacion, pagos, integraciones externas, carga de datos y permisos por rol.

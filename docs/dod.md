@@ -1,6 +1,6 @@
 # Definition of Done
 
-Actualizado: 2026-06-15
+Actualizado: 2026-06-16
 
 Ningun cambio se considera terminado solo porque compila. Debe estar alineado con arquitectura, seguridad, CI/CD y documentacion.
 
@@ -68,6 +68,7 @@ Requisitos:
   - `av-backend`
 - Deploy Railway usa `--path-as-root`.
 - Secret requerido: `RAILWAY_TOKEN`.
+- Si falla Railway con `Unauthorized`, verificar primero `gh secret list --repo LeoSaracco/av` y que `RAILWAY_TOKEN` exista.
 
 ## Documentacion
 
@@ -77,6 +78,7 @@ Actualizar segun corresponda:
 - `docs/architecture.md`
 - `docs/frontend.md`
 - `docs/backend.md`
+- `docs/railway.md`
 - `docs/pipeline.md`
 - `docs/security.md`
 - `README.md`

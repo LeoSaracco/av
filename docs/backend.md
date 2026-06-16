@@ -1,6 +1,6 @@
 # Backend - Arquitectura y lineamientos
 
-Actualizado: 2026-06-15
+Actualizado: 2026-06-16
 
 ## Stack
 
@@ -94,6 +94,13 @@ Variables requeridas:
 - `JWT_SECRET`
 - `CORS_ALLOWED_ORIGINS`
 - `AUTH_COOKIE_SECURE=true`
+
+Servicio Railway productivo:
+
+- Proyecto: `av` (`d4fdeffd-14ee-4284-b3aa-327f328e706d`)
+- Servicio: `av-backend`
+- URL: `https://av-backend-production.up.railway.app`
+- Deploy desde repo: `railway up ./av-backend --path-as-root --project d4fdeffd-14ee-4284-b3aa-327f328e706d --environment production --service av-backend --detach`
 
 ## Swagger
 

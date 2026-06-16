@@ -8,7 +8,7 @@ Monorepo productivo para la plataforma de entrenamiento de Adrian Vila.
 av/
   av-frontend/     React + Vite, servido por Nginx en Railway
   av-backend/      Spring Boot, PostgreSQL, Flyway, Swagger/OpenAPI
-  docs/            arquitectura, frontend, backend, pipeline, seguridad y backlog
+  docs/            arquitectura, frontend, backend, Railway, pipeline, seguridad y backlog
   .github/         CI/CD GitHub Actions
 ```
 
@@ -72,6 +72,7 @@ Los workflows viven en `.github/workflows/`.
 
 - `ci.yml`: corre en `push` y PR contra `main`.
 - `deploy-railway.yml`: corre en `push` contra `main` y manualmente con `workflow_dispatch`.
+- Secret requerido en GitHub Actions: `RAILWAY_TOKEN`.
 
 Deploy Railway:
 
@@ -87,6 +88,7 @@ railway up ./av-backend --path-as-root --project d4fdeffd-14ee-4284-b3aa-327f328
 - `docs/frontend.md`: lineamientos frontend.
 - `docs/backend.md`: lineamientos backend.
 - `docs/code-map.md`: mapa de codigo frontend/backend.
+- `docs/railway.md`: estado Railway, servicios, variables, deploy y troubleshooting.
 - `docs/pipeline.md`: CI/CD y Railway.
 - `docs/security.md`: lineamientos de seguridad.
 - `docs/dod.md`: definition of done.

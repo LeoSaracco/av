@@ -1,6 +1,6 @@
 # Arquitectura - AV Fitness App
 
-Actualizado: 2026-06-15
+Actualizado: 2026-06-16
 
 ## Vista general
 
@@ -89,5 +89,6 @@ No debe haber llamadas globales a endpoints privados al montar la app publica.
 - CI y deploy corren desde `.github/workflows`.
 - Rama productiva esperada: `main`.
 - Deploy separado por servicio Railway con `--path-as-root`.
+- GitHub Actions necesita el secret `RAILWAY_TOKEN`; no depende de la sesion local del Railway CLI.
 
-Ver `docs/pipeline.md`.
+Ver `docs/pipeline.md` y `docs/railway.md`.

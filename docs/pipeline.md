@@ -1,6 +1,6 @@
 # Pipeline y despliegue - Railway + GitHub Actions
 
-Actualizado: 2026-06-15
+Actualizado: 2026-06-16
 
 ## Repositorio
 
@@ -12,6 +12,8 @@ Actualizado: 2026-06-15
 
 Proyecto: `av`
 
+Project ID: `d4fdeffd-14ee-4284-b3aa-327f328e706d`
+
 Servicios:
 
 | Servicio | Tipo | URL |
@@ -19,6 +21,14 @@ Servicios:
 | `av-frontend` | React + Vite + Nginx | `https://av-frontend-production.up.railway.app` |
 | `av-backend` | Spring Boot | `https://av-backend-production.up.railway.app` |
 | `Postgres` | PostgreSQL | interno Railway |
+
+Estado operativo validado el 2026-06-16:
+
+- Deploy manual de `av-frontend` enviado con `railway up`.
+- Deploy manual de `av-backend` enviado con `railway up`.
+- Frontend respondio `200` en `/`.
+- Backend respondio `{"status":"UP","groups":["liveness","readiness"]}` en `/actuator/health`.
+- Swagger y OpenAPI respondieron `200`.
 
 Deploy manual:
 
@@ -28,6 +38,13 @@ railway up ./av-backend --path-as-root --project d4fdeffd-14ee-4284-b3aa-327f328
 ```
 
 El flag `--path-as-root` es obligatorio porque cada app se despliega desde su carpeta como raiz de build.
+
+Importante para agentes:
+
+- Ejecutar los comandos desde la raiz del repo.
+- No usar `railway.toml` en raiz; el repo despliega dos servicios separados por path.
+- Si se usa CLI local, `railway whoami` solo valida la sesion local. GitHub Actions no usa esa sesion.
+- GitHub Actions requiere el secret `RAILWAY_TOKEN`.
 
 ## Variables Railway
 
@@ -101,6 +118,19 @@ Requisito:
 
 - secret GitHub `RAILWAY_TOKEN`
 
+El secret debe existir en el repo `LeoSaracco/av` con nombre exacto `RAILWAY_TOKEN`.
+Para cargarlo:
+
+```powershell
+gh secret set RAILWAY_TOKEN --repo LeoSaracco/av
+```
+
+No pasar el token como nombre del secret. El comando correcto pide el valor por stdin/interactivo. Verificar:
+
+```powershell
+gh secret list --repo LeoSaracco/av
+```
+
 ## Flujo esperado
 
 ```text
@@ -119,6 +149,28 @@ gh workflow list --repo LeoSaracco/av
 gh run list --repo LeoSaracco/av
 gh run view <run-id> --log-failed
 ```
+
+Si deploy falla con `Unauthorized. Please check that your RAILWAY_TOKEN is valid...`:
+
+1. Confirmar que existe `RAILWAY_TOKEN`:
+
+```powershell
+gh secret list --repo LeoSaracco/av
+```
+
+2. Si falta o fue cargado con nombre incorrecto, cargarlo de nuevo:
+
+```powershell
+gh secret set RAILWAY_TOKEN --repo LeoSaracco/av
+```
+
+3. Re-ejecutar el run:
+
+```powershell
+gh run rerun <run-id> --repo LeoSaracco/av
+```
+
+4. Si sigue fallando, generar un token nuevo en Railway con acceso al proyecto `av`.
 
 ## Rollback
 
