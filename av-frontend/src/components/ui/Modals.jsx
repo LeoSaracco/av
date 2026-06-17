@@ -68,16 +68,18 @@ export function Modal({ open, onClose, title, children, footer }) {
  * @param {string} [props.message] - Mensaje de advertencia
  * @returns {JSX.Element} Modal de confirmación
  */
-export function ConfirmModal({ open, onClose, onConfirm, title, message }) {
+export function ConfirmModal({ open, onClose, onConfirm, title, message, confirmLabel, confirmDisabled }) {
   return (
-    <Modal open={open} onClose={onClose} title={title || 'Confirmar acción'}
+    <Modal open={open} onClose={onClose} title={title || 'Confirmar accion'}
       footer={
         <>
-          <button className="btn btn-ghost" onClick={onClose}>Cancelar</button>
-          <button className="btn btn-danger" onClick={() => { onConfirm(); onClose(); }}>Eliminar</button>
+          <button className="btn btn-ghost" onClick={onClose} disabled={confirmDisabled}>Cancelar</button>
+          <button className="btn btn-danger" onClick={onConfirm} disabled={confirmDisabled}>
+            {confirmLabel || 'Eliminar'}
+          </button>
         </>
       }>
-      <p style={{ color: 'var(--color-text-2)' }}>{message || '¿Estás seguro? Esta acción no se puede deshacer.'}</p>
+      <p style={{ color: 'var(--color-text-2)' }}>{message || 'Estas seguro? Esta accion no se puede deshacer.'}</p>
     </Modal>
   );
 }

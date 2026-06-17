@@ -33,6 +33,7 @@ export default function ClientProgress() {
   const [modal, setModal] = useState(false);
   const [form, setForm] = useState(emptyForm());
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [weightError, setWeightError] = useState('');
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
@@ -58,10 +59,16 @@ export default function ClientProgress() {
     }
   };
 
-  const handleDelete = () => {
-    if (confirmDeleteId) {
-      deleteProgress(confirmDeleteId);
+  const handleDelete = async () => {
+    if (!confirmDeleteId) return;
+    setDeleting(true);
+    try {
+      await deleteProgress(confirmDeleteId);
       setConfirmDeleteId(null);
+    } catch {
+      // toast handled by context
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -138,22 +145,44 @@ export default function ClientProgress() {
             {[...progress].reverse().map((p, i) => {
               const prev = progress[progress.length - 2 - i];
               const diff = prev ? (p.weight - prev.weight).toFixed(1) : null;
+              const diffNum = diff !== null ? parseFloat(diff) : null;
+              const accentColor = diffNum !== null && diffNum < 0 ? 'var(--color-accent)' : diffNum !== null && diffNum > 0 ? 'var(--color-warning)' : 'var(--color-border)';
+
               return (
-                <div key={p.id} className="card" style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: '14px 16px' }}>
-                  <div style={{ textAlign: 'center', minWidth: 56 }}>
-                    <div style={{ fontSize: 20, fontWeight: 800, fontFamily: 'var(--font-main)', color: 'var(--color-accent)' }}>{p.weight}</div>
-                    <div style={{ fontSize: 10, color: 'var(--color-text-3)' }}>kg</div>
+                <div key={p.id} style={{
+                  background: 'var(--color-surface)',
+                  border: '1px solid var(--color-border)',
+                  borderLeft: `3px solid ${accentColor}`,
+                  borderRadius: 'var(--radius-md)',
+                  padding: '16px',
+                  position: 'relative',
+                  transition: 'var(--transition)',
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+                    <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--color-text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      {new Date(p.date + 'T00:00:00').toLocaleDateString('es-AR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </span>
+                    <button onClick={() => setConfirmDeleteId(p.id)} style={{ background: 'none', border: 'none', color: 'var(--color-text-3)', cursor: 'pointer', fontSize: 16, padding: '2px 4px', lineHeight: 1 }} title="Eliminar registro">✕</button>
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 600, fontSize: 13 }}>{p.date}</div>
-                    {p.comment && <p style={{ fontSize: 12, color: 'var(--color-text-2)', marginTop: 2 }}>{p.comment}</p>}
-                  </div>
-                  {diff !== null && (
-                    <div style={{ fontSize: 12, fontWeight: 700, color: parseFloat(diff) < 0 ? 'var(--color-accent)' : parseFloat(diff) > 0 ? 'var(--color-warning)' : 'var(--color-text-3)' }}>
-                      {parseFloat(diff) > 0 ? '+' : ''}{diff}
+                  <div style={{ display: 'flex', gap: 24, marginBottom: p.comment ? 8 : 0 }}>
+                    <div>
+                      <div style={{ fontSize: 22, fontWeight: 800, fontFamily: 'var(--font-main)', color: 'var(--color-accent)' }}>{p.weight}</div>
+                      <div style={{ fontSize: 10, color: 'var(--color-text-3)', marginTop: 2 }}>kg</div>
                     </div>
+                    {diff !== null && (
+                      <div>
+                        <div style={{ fontSize: 18, fontWeight: 700, fontFamily: 'var(--font-main)', color: diffNum < 0 ? 'var(--color-accent)' : diffNum > 0 ? 'var(--color-warning)' : 'var(--color-text-3)' }}>
+                          {diffNum > 0 ? '+' : ''}{diff}
+                        </div>
+                        <div style={{ fontSize: 10, color: 'var(--color-text-3)', marginTop: 2 }}>kg cambio</div>
+                      </div>
+                    )}
+                  </div>
+                  {p.comment && (
+                    <p style={{ fontSize: 13, color: 'var(--color-text-2)', margin: 0, lineHeight: 1.5, fontStyle: 'italic' }}>
+                      {p.comment}
+                    </p>
                   )}
-                  <button onClick={() => setConfirmDeleteId(p.id)} style={{ background: 'none', border: 'none', color: 'var(--color-text-3)', cursor: 'pointer', fontSize: 14, padding: 4 }} title="Eliminar registro">✕</button>
                 </div>
               );
             })}
@@ -166,8 +195,8 @@ export default function ClientProgress() {
         footer={
           <>
             <button className="btn btn-ghost" onClick={closeModal} disabled={saving}>Cancelar</button>
-            <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
-              {saving ? <><Loader size="sm" inline /> Guardando...</> : 'Guardar registro'}
+            <button className="btn btn-primary" onClick={handleSave} disabled={saving} style={{ minWidth: 120 }}>
+              {saving ? <Loader size="sm" /> : 'Guardar registro'}
             </button>
           </>
         }>
@@ -193,7 +222,9 @@ export default function ClientProgress() {
         onClose={() => setConfirmDeleteId(null)}
         onConfirm={handleDelete}
         title="Eliminar registro"
-        message="¿Seguro que queres eliminar este registro de peso? No se puede deshacer."
+        message="Seguro que queres eliminar este registro de peso? No se puede deshacer."
+        confirmLabel={deleting ? <Loader size="sm" /> : 'Eliminar'}
+        confirmDisabled={deleting}
       />
     </ClientLayout>
   );
