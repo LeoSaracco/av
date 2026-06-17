@@ -34,9 +34,11 @@ export default function Assign() {
     setSaveError('');
     try {
       await assignRoutine(selectedClient, selectedRoutine, undefined, reason || undefined, observations || undefined);
-      setSuccess(true);
+      setSelectedClient('');
+      setSelectedRoutine('');
       setReason('');
       setObservations('');
+      setSuccess(true);
       setTimeout(() => setSuccess(false), 4000);
     } catch (err) {
       setSaveError(err.message || 'Error al asignar rutina');
@@ -117,6 +119,11 @@ export default function Assign() {
           >
             {assigning ? <div style={inlineSpinnerStyle(18, '#000', 'rgba(0,0,0,0.25)')} /> : 'Asignar rutina'}
           </button>
+          {hasExisting && !reason && selectedClient && selectedRoutine && (
+            <div style={{ fontSize: 12, color: 'var(--color-text-3)', textAlign: 'center' }}>
+              Seleccioná un motivo de reasignación para continuar
+            </div>
+          )}
           {saveError && (
             <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 'var(--radius-md)', padding: '10px 14px', fontSize: 13, color: 'var(--color-error)' }}>
               {saveError}
@@ -170,7 +177,13 @@ export default function Assign() {
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button
                     className="btn btn-sm btn-ghost"
-                    onClick={() => { setSelectedClient(c.id); }}
+                    onClick={() => {
+                      setSelectedClient(c.id);
+                      if (assignment) setSelectedRoutine(assignment.routineId);
+                      setReason('');
+                      setObservations('');
+                      setSaveError('');
+                    }}
                   >
                     {routine ? 'Cambiar' : 'Asignar'}
                   </button>
@@ -195,7 +208,10 @@ function AssignedRoutineEditor({ routine, routineId }) {
   const [saving, setSaving] = useState(false);
 
   const openEdit = () => {
-    setForm({ name: routine.name, goal: routine.goal, exercises: routine.exercises.map(e => ({ ...e })) });
+    const exercises = Array.isArray(routine.exercises)
+      ? routine.exercises
+      : (() => { try { return JSON.parse(routine.exercises || '[]'); } catch { return []; } })();
+    setForm({ name: routine.name, goal: routine.goal, exercises: exercises.map(e => ({ ...e })) });
     setOpen(true);
   };
 
