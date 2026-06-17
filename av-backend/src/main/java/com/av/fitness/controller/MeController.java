@@ -6,6 +6,8 @@ import com.av.fitness.dto.coach.RoutineResponse;
 import com.av.fitness.dto.MessageResponse;
 import com.av.fitness.dto.ProgressResponse;
 import com.av.fitness.dto.ThreadResponse;
+import com.av.fitness.model.UserEntity;
+import com.av.fitness.repository.UserJpaRepository;
 import com.av.fitness.service.ClientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,31 +24,32 @@ import java.util.UUID;
 public class MeController {
 
     private final ClientService clientService;
+    private final UserJpaRepository userJpaRepository;
 
     @GetMapping("/routine")
     public ResponseEntity<RoutineResponse> getMyRoutine(Authentication auth) {
-        UUID userId = (UUID) auth.getPrincipal();
-        return ResponseEntity.ok(clientService.getMyRoutine(userId));
+        UUID clientId = resolveClientId(auth);
+        return ResponseEntity.ok(clientService.getMyRoutine(clientId));
     }
 
     @GetMapping("/diet")
     public ResponseEntity<DietResponse> getMyDiet(Authentication auth) {
-        UUID userId = (UUID) auth.getPrincipal();
-        return ResponseEntity.ok(clientService.getMyDiet(userId));
+        UUID clientId = resolveClientId(auth);
+        return ResponseEntity.ok(clientService.getMyDiet(clientId));
     }
 
     @GetMapping("/progress")
     public ResponseEntity<List<ProgressResponse>> getMyProgress(Authentication auth) {
-        UUID userId = (UUID) auth.getPrincipal();
-        return ResponseEntity.ok(clientService.getMyProgress(userId));
+        UUID clientId = resolveClientId(auth);
+        return ResponseEntity.ok(clientService.getMyProgress(clientId));
     }
 
     @PostMapping("/progress")
     public ResponseEntity<ProgressResponse> logProgress(
             Authentication auth,
             @RequestBody ProgressResponse request) {
-        UUID userId = (UUID) auth.getPrincipal();
-        return ResponseEntity.ok(clientService.logProgress(userId, request));
+        UUID clientId = resolveClientId(auth);
+        return ResponseEntity.ok(clientService.logProgress(clientId, request));
     }
 
     @DeleteMapping("/progress/{id}")
@@ -57,21 +60,31 @@ public class MeController {
 
     @GetMapping("/notes")
     public ResponseEntity<List<NoteResponse>> getMyNotes(Authentication auth) {
-        UUID userId = (UUID) auth.getPrincipal();
-        return ResponseEntity.ok(clientService.getMyNotes(userId));
+        UUID clientId = resolveClientId(auth);
+        return ResponseEntity.ok(clientService.getMyNotes(clientId));
     }
 
     @GetMapping("/thread")
     public ResponseEntity<ThreadResponse> getMyThread(Authentication auth) {
-        UUID userId = (UUID) auth.getPrincipal();
-        return ResponseEntity.ok(clientService.getMyThread(userId));
+        UUID clientId = resolveClientId(auth);
+        return ResponseEntity.ok(clientService.getMyThread(clientId));
     }
 
     @PostMapping("/thread/message")
     public ResponseEntity<ThreadResponse> sendMessage(
             Authentication auth,
             @RequestBody Map<String, String> body) {
+        UUID clientId = resolveClientId(auth);
+        return ResponseEntity.ok(clientService.sendMessage(clientId, body.get("message")));
+    }
+
+    private UUID resolveClientId(Authentication auth) {
         UUID userId = (UUID) auth.getPrincipal();
-        return ResponseEntity.ok(clientService.sendMessage(userId, body.get("message")));
+        UserEntity user = userJpaRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        if (user.getClientId() == null) {
+            throw new RuntimeException("El usuario no tiene un cliente asociado");
+        }
+        return user.getClientId();
     }
 }
