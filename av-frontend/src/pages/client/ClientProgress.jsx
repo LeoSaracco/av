@@ -10,7 +10,6 @@ import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
 import { ClientLayout } from '../../components/layout/ClientLayout';
 import { Modal, ConfirmModal } from '../../components/ui/Modals';
-import Loader from '../../components/ui/Loader';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 function CustomTooltip({ active, payload, label }) {
@@ -159,15 +158,14 @@ export default function ClientProgress() {
                   transition: 'var(--transition)',
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
-                    <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--color-text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    <span style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-text)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                       {new Date(p.date + 'T00:00:00').toLocaleDateString('es-AR', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </span>
                     <button onClick={() => setConfirmDeleteId(p.id)} style={{ background: 'none', border: 'none', color: 'var(--color-text-3)', cursor: 'pointer', fontSize: 16, padding: '2px 4px', lineHeight: 1 }} title="Eliminar registro">✕</button>
                   </div>
-                  <div style={{ display: 'flex', gap: 24, marginBottom: p.comment ? 8 : 0 }}>
-                    <div>
-                      <div style={{ fontSize: 22, fontWeight: 800, fontFamily: 'var(--font-main)', color: 'var(--color-accent)' }}>{p.weight}</div>
-                      <div style={{ fontSize: 10, color: 'var(--color-text-3)', marginTop: 2 }}>kg</div>
+                  <div style={{ display: 'flex', gap: 24, marginBottom: p.comment ? 8 : 0, alignItems: 'flex-end' }}>
+                    <div style={{ fontSize: 22, fontWeight: 800, fontFamily: 'var(--font-main)', color: 'var(--color-accent)' }}>
+                      {p.weight} <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-text-3)' }}>kg</span>
                     </div>
                     {diff !== null && (
                       <div>
@@ -195,8 +193,8 @@ export default function ClientProgress() {
         footer={
           <>
             <button className="btn btn-ghost" onClick={closeModal} disabled={saving}>Cancelar</button>
-            <button className="btn btn-primary" onClick={handleSave} disabled={saving} style={{ minWidth: 120 }}>
-              {saving ? <Loader size="sm" /> : 'Guardar registro'}
+            <button className="btn btn-primary" onClick={handleSave} disabled={saving} style={{ minWidth: 120, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              {saving ? <div style={{ width: 18, height: 18, border: '2px solid rgba(0,0,0,0.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> : 'Guardar registro'}
             </button>
           </>
         }>
@@ -223,7 +221,7 @@ export default function ClientProgress() {
         onConfirm={handleDelete}
         title="Eliminar registro"
         message="Seguro que queres eliminar este registro de peso? No se puede deshacer."
-        confirmLabel={deleting ? <Loader size="sm" /> : 'Eliminar'}
+        confirmLabel={deleting ? <div style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.25)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.7s linear infinite', display: 'inline-block', verticalAlign: 'middle' }} /> : 'Eliminar'}
         confirmDisabled={deleting}
       />
     </ClientLayout>
