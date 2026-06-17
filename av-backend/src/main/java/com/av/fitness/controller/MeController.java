@@ -3,7 +3,6 @@ package com.av.fitness.controller;
 import com.av.fitness.dto.coach.DietResponse;
 import com.av.fitness.dto.coach.NoteResponse;
 import com.av.fitness.dto.coach.RoutineResponse;
-import com.av.fitness.dto.MessageResponse;
 import com.av.fitness.dto.ProgressResponse;
 import com.av.fitness.dto.ThreadResponse;
 import com.av.fitness.model.UserEntity;
@@ -56,6 +55,13 @@ public class MeController {
     public ResponseEntity<Void> deleteProgress(@PathVariable UUID id) {
         clientService.deleteProgress(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/progress/{id}")
+    public ResponseEntity<ProgressResponse> updateProgress(
+            @PathVariable UUID id,
+            @RequestBody ProgressResponse request) {
+        return ResponseEntity.ok(clientService.updateProgress(id, request));
     }
 
     @GetMapping("/notes")

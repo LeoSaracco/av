@@ -165,6 +165,10 @@ export async function apiDeleteProgress(id) {
   return request('DELETE', `/me/progress/${id}`);
 }
 
+export async function apiUpdateProgress(id, weight, date, comment) {
+  return request('PUT', `/me/progress/${id}`, { weight, date, comment });
+}
+
 export async function apiGetMyNotes() {
   return request('GET', '/me/notes');
 }

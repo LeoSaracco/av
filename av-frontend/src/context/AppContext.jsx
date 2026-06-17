@@ -149,6 +149,7 @@ export function AppProvider({ children }) {
 
   const addProgress = async (clientId, data) => { try { const created = await api.apiLogProgress(data.weight, data.date, data.comment); setProgress(prev => [...prev, { ...created, clientId }]); showToast('Progreso registrado'); } catch { showToast('Error', 'error'); } };
   const deleteProgress = async (id) => { try { await api.apiDeleteProgress(id); setProgress(prev => prev.filter(p => p.id !== id)); } catch { showToast('Error', 'error'); } };
+  const updateProgress = async (id, data) => { try { const updated = await api.apiUpdateProgress(id, data.weight, data.date, data.comment); setProgress(prev => prev.map(p => p.id === id ? { ...p, ...updated } : p)); showToast('Progreso actualizado'); } catch { showToast('Error', 'error'); } };
   const getProgressForClient = (clientId) => progress.filter(p => p.clientId === clientId).sort((a, b) => new Date(a.date) - new Date(b.date));
 
   const addDietTemplate = async (data) => { try { const created = await api.apiCreateDietTemplate(data); setDietTemplates(prev => [...prev, created]); showToast('Dieta creada'); } catch { showToast('Error', 'error'); } };
@@ -216,7 +217,7 @@ export function AppProvider({ children }) {
       addRoutine, updateRoutine, deleteRoutine, duplicateRoutine, getRoutine, createRoutineFromTemplate,
       assignRoutine, getAssignmentForClient,
       addNote, updateNote, deleteNote, getNotesForClient,
-      addProgress, deleteProgress, getProgressForClient,
+      addProgress, deleteProgress, updateProgress, getProgressForClient,
       addDietTemplate, updateDietTemplate, deleteDietTemplate, getDietTemplate,
       addDiet, updateDiet, deleteDiet, getDiet, createDietFromTemplate,
       assignDiet, getDietAssignmentForClient,

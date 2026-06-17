@@ -79,6 +79,19 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
+    public ProgressResponse updateProgress(UUID id, ProgressResponse request) {
+        ProgressEntity entity = progressJpaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Registro no encontrado"));
+
+        if (request.getDate() != null) entity.setDate(request.getDate());
+        if (request.getWeight() != null) entity.setWeight(request.getWeight());
+        entity.setComment(request.getComment());
+
+        progressJpaRepository.save(entity);
+        return modelMapper.map(entity, ProgressResponse.class);
+    }
+
+    @Override
     public void deleteProgress(UUID id) {
         progressJpaRepository.deleteById(id);
     }

@@ -1,7 +1,7 @@
 /**
  * @file Registro y seguimiento del progreso de peso del cliente. Incluye
  *       grafico de evolucion (Recharts), estadisticas de resumen,
- *       historial cronologico y alta/baja de registros.
+ *       historial cronologico y alta/baja/edicion de registros.
  * @route /client/progress
  * @auth Requiere rol "client".
  */
@@ -26,21 +26,30 @@ function CustomTooltip({ active, payload, label }) {
 
 const emptyForm = () => ({ date: new Date().toISOString().slice(0, 10), weight: '', comment: '' });
 
+const spinnerStyle = (size, color, bg) => ({
+  width: size, height: size,
+  border: `2px solid ${bg}`, borderTopColor: color,
+  borderRadius: '50%', animation: 'spin 0.7s linear infinite',
+  display: 'inline-block', verticalAlign: 'middle'
+});
+
 export default function ClientProgress() {
   const { user } = useAuth();
-  const { getClient, getProgressForClient, addProgress, deleteProgress, loadError } = useApp();
+  const { getClient, getProgressForClient, addProgress, deleteProgress, updateProgress, loadError } = useApp();
   const [modal, setModal] = useState(false);
   const [form, setForm] = useState(emptyForm());
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [weightError, setWeightError] = useState('');
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [editingEntry, setEditingEntry] = useState(null);
 
   const client = getClient(user?.clientId);
   const progress = client ? getProgressForClient(client.id) : [];
 
-  const openModal = () => { setForm(emptyForm()); setWeightError(''); setModal(true); };
-  const closeModal = () => { setModal(false); setWeightError(''); };
+  const openCreate = () => { setEditingEntry(null); setForm(emptyForm()); setWeightError(''); setModal(true); };
+  const openEdit = (entry) => { setEditingEntry(entry); setForm({ date: entry.date, weight: entry.weight.toString(), comment: entry.comment || '' }); setWeightError(''); setModal(true); };
+  const closeModal = () => { setModal(false); setWeightError(''); setEditingEntry(null); };
 
   const handleSave = async () => {
     if (!form.weight || isNaN(parseFloat(form.weight))) {
@@ -49,7 +58,12 @@ export default function ClientProgress() {
     }
     setSaving(true);
     try {
-      await addProgress(client.id, { date: form.date, weight: parseFloat(form.weight), comment: form.comment });
+      const data = { date: form.date, weight: parseFloat(form.weight), comment: form.comment };
+      if (editingEntry) {
+        await updateProgress(editingEntry.id, data);
+      } else {
+        await addProgress(client.id, data);
+      }
       closeModal();
     } catch {
       // toast handled by context
@@ -86,7 +100,7 @@ export default function ClientProgress() {
           <div style={{ fontSize: 12, color: 'var(--color-text-3)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 6 }}>Mi evolucion</div>
           <h1 style={{ fontSize: 22 }}>Progreso de peso</h1>
         </div>
-        <button className="btn btn-primary btn-sm" onClick={openModal}>+ Registrar</button>
+        <button className="btn btn-primary btn-sm" onClick={openCreate}>+ Registrar</button>
       </div>
 
       {loadError && (
@@ -135,7 +149,7 @@ export default function ClientProgress() {
           <span style={{ fontSize: 48 }}>📊</span>
           <h3>Sin registros</h3>
           <p>Registra tu peso hoy para comenzar a ver tu evolucion</p>
-          <button className="btn btn-primary" onClick={openModal}>+ Registrar ahora</button>
+          <button className="btn btn-primary" onClick={openCreate}>+ Registrar ahora</button>
         </div>
       ) : (
         <div>
@@ -161,7 +175,12 @@ export default function ClientProgress() {
                     <span style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-text)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                       {new Date(p.date + 'T00:00:00').toLocaleDateString('es-AR', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </span>
-                    <button onClick={() => setConfirmDeleteId(p.id)} style={{ background: 'none', border: 'none', color: 'var(--color-text-3)', cursor: 'pointer', fontSize: 16, padding: '2px 4px', lineHeight: 1 }} title="Eliminar registro">✕</button>
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      <button onClick={() => openEdit(p)} style={{ background: 'none', border: 'none', color: 'var(--color-text-3)', cursor: 'pointer', fontSize: 14, padding: '2px 4px', lineHeight: 1 }} title="Editar registro">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                      </button>
+                      <button onClick={() => setConfirmDeleteId(p.id)} style={{ background: 'none', border: 'none', color: 'var(--color-text-3)', cursor: 'pointer', fontSize: 16, padding: '2px 4px', lineHeight: 1 }} title="Eliminar registro">✕</button>
+                    </div>
                   </div>
                   <div style={{ display: 'flex', gap: 24, marginBottom: p.comment ? 8 : 0, alignItems: 'flex-end' }}>
                     <div style={{ fontSize: 22, fontWeight: 800, fontFamily: 'var(--font-main)', color: 'var(--color-accent)' }}>
@@ -189,12 +208,12 @@ export default function ClientProgress() {
       )}
 
       <Modal open={modal} onClose={closeModal}
-        title="Nuevo registro de peso"
+        title={editingEntry ? 'Editar registro de peso' : 'Nuevo registro de peso'}
         footer={
           <>
             <button className="btn btn-ghost" onClick={closeModal} disabled={saving}>Cancelar</button>
-            <button className="btn btn-primary" onClick={handleSave} disabled={saving} style={{ minWidth: 120, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-              {saving ? <div style={{ width: 18, height: 18, border: '2px solid rgba(0,0,0,0.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> : 'Guardar registro'}
+            <button className="btn btn-primary" onClick={handleSave} disabled={saving} style={{ minWidth: 150, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              {saving ? <div style={spinnerStyle(18, '#000', 'rgba(0,0,0,0.25)')} /> : (editingEntry ? 'Guardar cambios' : 'Guardar registro')}
             </button>
           </>
         }>
@@ -221,7 +240,7 @@ export default function ClientProgress() {
         onConfirm={handleDelete}
         title="Eliminar registro"
         message="Seguro que queres eliminar este registro de peso? No se puede deshacer."
-        confirmLabel={deleting ? <div style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.25)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.7s linear infinite', display: 'inline-block', verticalAlign: 'middle' }} /> : 'Eliminar'}
+        confirmLabel={deleting ? <div style={spinnerStyle(16, '#fff', 'rgba(255,255,255,0.25)')} /> : 'Eliminar'}
         confirmDisabled={deleting}
       />
     </ClientLayout>

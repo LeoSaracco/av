@@ -13,6 +13,7 @@ public interface ClientService {
     DietResponse getMyDiet(UUID clientId);
     List<ProgressResponse> getMyProgress(UUID clientId);
     ProgressResponse logProgress(UUID clientId, ProgressResponse request);
+    ProgressResponse updateProgress(UUID id, ProgressResponse request);
     void deleteProgress(UUID id);
     List<NoteResponse> getMyNotes(UUID clientId);
     ThreadResponse getMyThread(UUID clientId);
