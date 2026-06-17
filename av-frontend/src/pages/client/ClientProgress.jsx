@@ -159,7 +159,7 @@ export default function ClientProgress() {
               const prev = progress[progress.length - 2 - i];
               const diff = prev ? (p.weight - prev.weight).toFixed(1) : null;
               const diffNum = diff !== null ? parseFloat(diff) : null;
-              const accentColor = diffNum !== null && diffNum < 0 ? 'var(--color-accent)' : diffNum !== null && diffNum > 0 ? 'var(--color-warning)' : 'var(--color-border)';
+              const accentColor = diffNum !== null && diffNum < 0 ? 'var(--color-accent)' : diffNum !== null && diffNum > 0 ? 'var(--color-warning)' : 'var(--color-accent)';
 
               return (
                 <div key={p.id} style={{

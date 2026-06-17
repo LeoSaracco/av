@@ -78,7 +78,7 @@ export default function ClientDashboard() {
         {routine ? (
           <>
             <div>
-              <div style={{ fontWeight: 700, fontFamily: 'var(--font-main)', fontSize: 16 }}>{routine.name}</div>
+              <div style={{ fontWeight: 700, fontFamily: 'var(--font-main)', fontSize: 16, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.4 }}>{routine.name}</div>
               <div style={{ fontSize: 12, color: 'var(--color-accent)', marginTop: 4, fontWeight: 600 }}>{routine.goal}</div>
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
