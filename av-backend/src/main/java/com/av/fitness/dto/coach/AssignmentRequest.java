@@ -24,4 +24,10 @@ public class AssignmentRequest {
 
     /** The unique identifier of the diet to assign (optional). */
     private UUID dietId;
+
+    /** Reason for reassignment. Required when the client already has an active routine. */
+    private String reason;
+
+    /** Optional observations from the coach about the reassignment. */
+    private String observations;
 }

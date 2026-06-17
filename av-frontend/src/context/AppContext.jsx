@@ -169,12 +169,16 @@ export function AppProvider({ children }) {
     try { const created = await api.apiCreateRoutineFromTemplate(templateId, name, goal); setRoutines(prev => [...prev, created]); showToast('Rutina creada desde template'); } catch { showToast('Error', 'error'); }
   };
 
-  const assignRoutine = async (clientId, routineId, dietId) => {
+  const assignRoutine = async (clientId, routineId, dietId, reason, observations) => {
     try {
-      const created = await api.apiAssignRoutine(clientId, routineId, dietId);
+      const created = await api.apiAssignRoutine(clientId, routineId, dietId, reason, observations);
       setAssignments(prev => prev.filter(a => a.clientId !== clientId).concat(created));
       showToast('Rutina asignada');
-    } catch { showToast('Error', 'error'); }
+      return created;
+    } catch (err) {
+      showToast(err.message || 'Error', 'error');
+      throw err;
+    }
   };
   const getAssignmentForClient = (clientId) => assignments.find(a => a.clientId === clientId && a.active);
 

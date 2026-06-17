@@ -15,13 +15,34 @@ export default function Assign() {
   const { clients, routines, assignRoutine, getAssignmentForClient, getRoutine } = useApp();
   const [selectedClient, setSelectedClient] = useState('');
   const [selectedRoutine, setSelectedRoutine] = useState('');
+  const [reason, setReason] = useState('');
+  const [observations, setObservations] = useState('');
+  const [assigning, setAssigning] = useState(false);
+  const [saveError, setSaveError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  const handleAssign = () => {
+  const currentAssignment = selectedClient ? getAssignmentForClient(selectedClient) : null;
+  const currentRoutine = currentAssignment ? getRoutine(currentAssignment.routineId) : null;
+  const newRoutine = selectedRoutine ? routines.find(r => r.id === selectedRoutine) : null;
+  const client = selectedClient ? clients.find(c => c.id === selectedClient) : null;
+  const hasExisting = !!currentRoutine;
+
+  const handleAssign = async () => {
     if (!selectedClient || !selectedRoutine) return;
-    assignRoutine(selectedClient, selectedRoutine);
-    setSuccess(true);
-    setTimeout(() => setSuccess(false), 3000);
+    if (hasExisting && !reason) return;
+    setAssigning(true);
+    setSaveError('');
+    try {
+      await assignRoutine(selectedClient, selectedRoutine, undefined, reason || undefined, observations || undefined);
+      setSuccess(true);
+      setReason('');
+      setObservations('');
+      setTimeout(() => setSuccess(false), 4000);
+    } catch (err) {
+      setSaveError(err.message || 'Error al asignar rutina');
+    } finally {
+      setAssigning(false);
+    }
   };
 
   return (
@@ -52,26 +73,55 @@ export default function Assign() {
             </select>
           </div>
           {selectedClient && selectedRoutine && (
-            <div style={{ background: 'var(--color-accent-dim2)', border: '1px solid rgba(0,255,0,0.15)', borderRadius: 'var(--radius-md)', padding: '12px 14px', fontSize: 13 }}>
-              <div style={{ color: 'var(--color-text-2)' }}>
-                Se asignará <strong style={{ color: 'var(--color-text)' }}>{routines.find(r => r.id === selectedRoutine)?.name}</strong> a{' '}
-                <strong style={{ color: 'var(--color-accent)' }}>{clients.find(c => c.id === selectedClient)?.name}</strong>
-              </div>
-              {getAssignmentForClient(selectedClient) && (
-                <div style={{ marginTop: 6, color: 'var(--color-warning)', fontSize: 12 }}>
-                  ⚠ Este cliente ya tiene una rutina asignada. Se reemplazará.
+            <div style={{ background: 'var(--color-accent-dim2)', border: '1px solid rgba(0,255,0,0.15)', borderRadius: 'var(--radius-md)', padding: '14px', fontSize: 13, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {hasExisting ? (
+                <div style={{ color: 'var(--color-text)', lineHeight: 1.5 }}>
+                  💡 <strong>{client?.name}</strong> ya tiene asignada{' '}
+                  <strong style={{ color: 'var(--color-accent)' }}>{currentRoutine.name}</strong>.
+                  <br />Se reasignará a{' '}
+                  <strong style={{ color: 'var(--color-accent)' }}>{newRoutine?.name}</strong>.
                 </div>
+              ) : (
+                <div style={{ color: 'var(--color-text-2)', lineHeight: 1.5 }}>
+                  Se asignará <strong style={{ color: 'var(--color-text)' }}>{newRoutine?.name}</strong> a{' '}
+                  <strong style={{ color: 'var(--color-accent)' }}>{client?.name}</strong>
+                </div>
+              )}
+
+              {hasExisting && (
+                <>
+                  <div className="form-group" style={{ marginTop: 4 }}>
+                    <label className="form-label">Motivo de reasignación *</label>
+                    <select className="form-input" value={reason} onChange={e => setReason(e.target.value)}>
+                      <option value="">— Seleccionar motivo —</option>
+                      <option value="OBJETIVO_CUMPLIDO">Cumplió el objetivo</option>
+                      <option value="CAMBIO_ESTRATEGIA">Cambio de estrategia</option>
+                      <option value="NO_CUMPLIO">No cumplió el objetivo</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Observaciones (opcional)</label>
+                    <textarea className="form-input" rows={2} value={observations}
+                      onChange={e => setObservations(e.target.value)}
+                      placeholder="Ej: Excelente progreso, pasamos a un split de 4 días..." />
+                  </div>
+                </>
               )}
             </div>
           )}
           <button
             className="btn btn-primary"
-            disabled={!selectedClient || !selectedRoutine}
-            style={{ opacity: (!selectedClient || !selectedRoutine) ? 0.5 : 1 }}
+            disabled={assigning || !selectedClient || !selectedRoutine || (hasExisting && !reason)}
+            style={assigning ? { minWidth: 180, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 } : {}}
             onClick={handleAssign}
           >
-            Asignar rutina
+            {assigning ? <div style={inlineSpinnerStyle(18, '#000', 'rgba(0,0,0,0.25)')} /> : 'Asignar rutina'}
           </button>
+          {saveError && (
+            <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 'var(--radius-md)', padding: '10px 14px', fontSize: 13, color: 'var(--color-error)' }}>
+              {saveError}
+            </div>
+          )}
           {success && (
             <div style={{ background: 'var(--color-accent-dim)', border: '1px solid rgba(0,255,0,0.3)', borderRadius: 'var(--radius-md)', padding: '10px 14px', fontSize: 13, color: 'var(--color-accent)' }}>
               ✓ Rutina asignada correctamente

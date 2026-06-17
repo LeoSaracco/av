@@ -254,8 +254,9 @@ export async function apiCreateRoutineFromTemplate(templateId, name, goal) {
 }
 
 // ── Coach: Assignments ────────────────────────────────────────────────────────
-export async function apiAssignRoutine(clientId, routineId, dietId) {
-  return request('POST', '/coach/assignments', { clientId, routineId, dietId });
+export async function apiAssignRoutine(clientId, routineId, dietId, reason, observations) {
+  return request('POST', '/coach/assignments',
+    { clientId, routineId, dietId, reason, observations });
 }
 
 export async function apiGetAssignments() {

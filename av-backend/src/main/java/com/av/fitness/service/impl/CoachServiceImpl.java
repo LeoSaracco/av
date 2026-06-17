@@ -36,6 +36,7 @@ public class CoachServiceImpl implements CoachService {
     private final AssignmentJpaRepository assignmentJpaRepository;
     private final ProgressJpaRepository progressJpaRepository;
     private final NutritionThreadJpaRepository nutritionThreadJpaRepository;
+    private final AuditEventJpaRepository auditEventJpaRepository;
     private final ModelMapper modelMapper;
 
     // ── Clients ──
@@ -377,20 +378,85 @@ public class CoachServiceImpl implements CoachService {
     // ── Assignments ──
 
     /**
-     * Creates an assignment linking a routine and a diet to a client.
+     * Creates an assignment linking a routine and optionally a diet to a client.
+     * <p>
+     * If the client already has an active assignment, it is deactivated and an
+     * audit event is recorded with the reassignment details. A note is also
+     * created for the client summarising the change.
      *
      * @param request assignment request with {@code clientId},
-     *                {@code routineId}, and {@code dietId}
+     *                {@code routineId}, {@code dietId}, {@code reason}, and {@code observations}
      * @return the created assignment
      */
     @Override
     public AssignmentResponse createAssignment(AssignmentRequest request) {
+        LocalDate today = LocalDate.now();
+
+        assignmentJpaRepository.findAll().stream()
+                .filter(a -> a.getClientId().equals(request.getClientId()) && a.getActive())
+                .findFirst()
+                .ifPresent(prev -> {
+                    prev.setActive(false);
+                    assignmentJpaRepository.save(prev);
+
+                    UUID oldRoutineId = prev.getRoutineId();
+                    UUID newRoutineId = request.getRoutineId();
+                    String reason = request.getReason();
+                    String observations = request.getObservations();
+
+                    String oldName = routineJpaRepository.findById(oldRoutineId)
+                            .map(RoutineEntity::getName).orElse("Rutina anterior");
+                    String newName = routineJpaRepository.findById(newRoutineId)
+                            .map(RoutineEntity::getName).orElse("Nueva rutina");
+
+                    String reasonLabel = switch (reason != null ? reason : "") {
+                        case "OBJETIVO_CUMPLIDO" -> "Cumplió el objetivo 🎯";
+                        case "CAMBIO_ESTRATEGIA" -> "Cambio de estrategia 🔄";
+                        case "NO_CUMPLIO" -> "No cumplió el objetivo ⚠";
+                        default -> reason;
+                    };
+
+                    if (reason != null && !reason.isBlank()) {
+                        String auditPayload = "{\"action\":\"REASSIGN_ROUTINE\","
+                                + "\"oldRoutineId\":\"" + oldRoutineId + "\","
+                                + "\"newRoutineId\":\"" + newRoutineId + "\","
+                                + "\"reason\":\"" + reason + "\","
+                                + "\"observations\":\"" + (observations != null ? observations : "") + "\"}";
+
+                        AuditEventEntity event = new AuditEventEntity();
+                        event.setId(UUID.randomUUID());
+                        event.setEventType("REASSIGN_ROUTINE");
+                        event.setAggregateType("ASSIGNMENT");
+                        event.setAggregateId(prev.getId());
+                        event.setClientId(request.getClientId());
+                        event.setPayload(auditPayload);
+                        event.setCreatedAt(LocalDateTime.now());
+                        auditEventJpaRepository.save(event);
+                    }
+
+                    String noteText = "📋 Rutina actualizada — " + today + "\n"
+                            + oldName + " → " + newName + "\n"
+                            + "Motivo: " + reasonLabel;
+                    if (observations != null && !observations.isBlank()) {
+                        noteText += "\nObs: " + observations;
+                    }
+
+                    NoteEntity note = new NoteEntity();
+                    note.setId(UUID.randomUUID());
+                    note.setClientId(request.getClientId());
+                    note.setText(noteText);
+                    note.setCreatedAt(today);
+                    note.setUpdatedAt(today);
+                    note.setUpdatedAtTz(LocalDateTime.now());
+                    noteJpaRepository.save(note);
+                });
+
         AssignmentEntity entity = new AssignmentEntity();
         entity.setId(UUID.randomUUID());
         entity.setClientId(request.getClientId());
         entity.setRoutineId(request.getRoutineId());
         entity.setDietId(request.getDietId());
-        entity.setAssignedAt(LocalDate.now());
+        entity.setAssignedAt(today);
         entity.setActive(true);
         entity.setCreatedAt(LocalDateTime.now());
 
