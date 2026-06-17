@@ -1,37 +1,30 @@
 # Database - AV Fitness App
 
-Actualizado: 2026-06-16
+Actualizado: 2026-06-17
 
 ## Conexion
 
 ```bash
-railway connect postgres
+# Via Docker (interactivo):
+db-docker.bat
+
+# O via Node.js (una query):
+node db.js "SELECT ..."
 ```
 
-Requiere `psql` instalado localmente.
+Requiere Docker o Node.js con modulo `pg` instalado.
 
 ## Queries utiles
 
-### Eliminar un usuario/cliente con todo su rastro
+### Eliminar un cliente con todo su rastro (stored procedure)
 
 ```sql
-DO $$
-DECLARE
-    target_email TEXT := 'leosaracco@gmail.com';
-    target_client_id UUID;
-    target_user_id UUID;
-BEGIN
-    SELECT id INTO target_client_id FROM clients WHERE email = target_email;
-    SELECT id INTO target_user_id FROM users WHERE email = target_email;
-
-    DELETE FROM plan_contracts WHERE email = target_email;
-    DELETE FROM payments WHERE client_id = target_client_id;
-    DELETE FROM onboarding_submissions WHERE client_id = target_client_id;
-    DELETE FROM refresh_tokens WHERE user_id = target_user_id;
-    DELETE FROM users WHERE email = target_email;
-    DELETE FROM clients WHERE email = target_email;
-END $$;
+SELECT sp_delete_client_by_email('test@email.com');
 ```
+
+Devuelve un resumen de lo eliminado: contracts, payments, onboardings, tokens, notes, threads.
+
+El SP esta definido en `V7__sp_delete_client.sql` y se aplica automaticamente via Flyway.
 
 Las tablas `assignments`, `notes`, `progress_entries`, `diet_assignments` y `nutrition_threads` se limpian automaticamente por `ON DELETE CASCADE` desde `clients`.
 
