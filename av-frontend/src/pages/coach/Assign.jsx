@@ -1,11 +1,10 @@
 /**
- * @file Panel de asignación de rutinas a clientes. Incluye selector de
- *       cliente/rutina, vista de asignaciones actuales y editor inline
- *       para rutinas ya asignadas.
+ * @file Panel de asignación de rutinas a clientes con grilla de cards,
+ *       buscador global, y modal unificado para asignar y reasignar.
  * @route /coach/assign
  * @auth Requiere rol "coach".
  */
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { CoachLayout } from '../../components/layout/CoachLayout';
 import { inlineSpinnerStyle } from '../../utils/spinnerStyle';
@@ -13,39 +12,76 @@ import { Modal } from '../../components/ui/Modals';
 
 export default function Assign() {
   const { clients, routines, assignRoutine, getAssignmentForClient, getRoutine } = useApp();
-  const [selectedClient, setSelectedClient] = useState('');
-  const [selectedRoutine, setSelectedRoutine] = useState('');
+  const [search, setSearch] = useState('');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalClientId, setModalClientId] = useState('');
+  const [modalRoutineId, setModalRoutineId] = useState('');
   const [reason, setReason] = useState('');
   const [observations, setObservations] = useState('');
   const [assigning, setAssigning] = useState(false);
   const [saveError, setSaveError] = useState('');
-  const [success, setSuccess] = useState(false);
 
-  const currentAssignment = selectedClient ? getAssignmentForClient(selectedClient) : null;
-  const currentRoutine = currentAssignment ? getRoutine(currentAssignment.routineId) : null;
-  const newRoutine = selectedRoutine ? routines.find(r => r.id === selectedRoutine) : null;
-  const client = selectedClient ? clients.find(c => c.id === selectedClient) : null;
-  const hasExisting = !!currentRoutine;
+  const openModal = (clientId, routineId) => {
+    setModalClientId(clientId || '');
+    setModalRoutineId(routineId || '');
+    setReason('');
+    setObservations('');
+    setSaveError('');
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    if (assigning) return;
+    setModalOpen(false);
+    setModalClientId('');
+    setModalRoutineId('');
+    setReason('');
+    setObservations('');
+    setSaveError('');
+  };
+
+  const modalClient = clients.find(c => c.id === modalClientId);
+  const modalRoutine = routines.find(r => r.id === modalRoutineId);
+  const existingAssignment = modalClientId ? getAssignmentForClient(modalClientId) : null;
+  const existingRoutine = existingAssignment ? getRoutine(existingAssignment.routineId) : null;
+  const isReassign = !!existingRoutine;
 
   const handleAssign = async () => {
-    if (!selectedClient || !selectedRoutine) return;
-    if (hasExisting && !reason) return;
+    if (!modalClientId || !modalRoutineId) return;
+    if (isReassign && !reason) return;
     setAssigning(true);
     setSaveError('');
     try {
-      await assignRoutine(selectedClient, selectedRoutine, undefined, reason || undefined, observations || undefined);
-      setSelectedClient('');
-      setSelectedRoutine('');
-      setReason('');
-      setObservations('');
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 4000);
+      await assignRoutine(modalClientId, modalRoutineId, undefined, reason || undefined, observations || undefined);
+      closeModal();
     } catch (err) {
       setSaveError(err.message || 'Error al asignar rutina');
     } finally {
       setAssigning(false);
     }
   };
+
+  const filteredClients = useMemo(() => {
+    if (!search) return clients;
+    const q = search.toLowerCase();
+    return clients.filter(c => {
+      if (c.name.toLowerCase().includes(q)) return true;
+      const assignment = getAssignmentForClient(c.id);
+      if (!assignment) return false;
+      const routine = getRoutine(assignment.routineId);
+      return routine?.name?.toLowerCase().includes(q);
+    });
+  }, [clients, search, getAssignmentForClient, getRoutine]);
+
+  const sortedClients = useMemo(() => {
+    return [...filteredClients].sort((a, b) => {
+      const aHas = !!getAssignmentForClient(a.id);
+      const bHas = !!getAssignmentForClient(b.id);
+      if (aHas && !bHas) return -1;
+      if (!aHas && bHas) return 1;
+      return a.name.localeCompare(b.name);
+    });
+  }, [filteredClients, getAssignmentForClient]);
 
   return (
     <CoachLayout>
@@ -56,41 +92,138 @@ export default function Assign() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 24 }}>
-        {/* Assign panel */}
-        <div className="card" style={{ gap: 20 }}>
-          <h3 style={{ fontSize: 16 }}>🔗 Asignar nueva rutina</h3>
-          <div className="form-group">
-            <label className="form-label">Cliente</label>
-            <select className="form-input" value={selectedClient} onChange={e => setSelectedClient(e.target.value)}>
-              <option value="">— Seleccionar cliente —</option>
-              {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
+      <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div className="search-bar" style={{ maxWidth: 380, flex: 1 }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-3)" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input placeholder="Buscar cliente o rutina..." value={search} onChange={e => setSearch(e.target.value)} />
+        </div>
+        <button className="btn btn-primary" onClick={() => openModal('', '')}>
+          + Asignar rutina
+        </button>
+      </div>
+
+      {sortedClients.length === 0 ? (
+        <div className="empty-state">
+          <span style={{ fontSize: 48 }}>📋</span>
+          <h3>{clients.length === 0 ? 'Sin clientes' : 'Sin resultados'}</h3>
+          <p>{clients.length === 0 ? 'Creá clientes desde la sección Clientes.' : 'Probá con otro término de búsqueda.'}</p>
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
+          {sortedClients.map(c => {
+            const assignment = getAssignmentForClient(c.id);
+            const routine = assignment ? getRoutine(assignment.routineId) : null;
+            return (
+              <div key={c.id} className="card" style={{ gap: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div className="avatar" style={{ width: 40, height: 40, fontSize: 14, flexShrink: 0 }}>
+                    {c.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, fontFamily: 'var(--font-main)', fontSize: 15, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
+                    <div style={{ fontSize: 11, color: 'var(--color-text-3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.email}</div>
+                  </div>
+                </div>
+
+                {routine ? (
+                  <>
+                    <div style={{ background: 'var(--color-bg-3)', borderRadius: 'var(--radius-sm)', padding: '12px' }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-accent)', marginBottom: 4 }}>
+                        💪 {routine.name}
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 6 }}>
+                        {routine.exercises?.slice(0, 3).map(e => (
+                          <span key={e.id} style={{ fontSize: 10, background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', padding: '2px 6px', color: 'var(--color-text-2)' }}>{e.name}</span>
+                        ))}
+                        {(routine.exercises?.length || 0) > 3 && (
+                          <span style={{ fontSize: 10, color: 'var(--color-text-3)', padding: '2px 4px' }}>+{routine.exercises.length - 3} más</span>
+                        )}
+                      </div>
+                      <div style={{ fontSize: 11, color: 'var(--color-text-3)' }}>
+                        {routine.exercises?.length || 0} ejercicios · Asignada {assignment.assignedAt}
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button className="btn btn-sm btn-primary" onClick={() => openModal(c.id, assignment.routineId)}>
+                        Cambiar
+                      </button>
+                      <AssignedRoutineEditor routine={routine} routineId={assignment.routineId} />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div style={{ padding: '8px 0', fontSize: 13, color: 'var(--color-text-3)', fontStyle: 'italic' }}>
+                      Sin rutina asignada
+                    </div>
+                    <button className="btn btn-sm btn-primary" onClick={() => openModal(c.id, '')}>
+                      Asignar
+                    </button>
+                  </>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <Modal open={modalOpen} onClose={closeModal}
+        title={isReassign ? 'Reasignar rutina' : 'Asignar rutina'}
+        footer={
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}>
+            {saveError && <span style={{ fontSize: 12, color: 'var(--color-danger)', marginRight: 'auto', flex: 1 }}>{saveError}</span>}
+            <button className="btn btn-ghost" onClick={closeModal} disabled={assigning}>Cancelar</button>
+            <button className="btn btn-primary" onClick={handleAssign}
+              disabled={assigning || !modalClientId || !modalRoutineId || (isReassign && !reason)}
+              style={assigning ? { minWidth: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 } : {}}>
+              {assigning ? <div style={inlineSpinnerStyle(18, '#000', 'rgba(0,0,0,0.25)')} /> : 'Guardar'}
+            </button>
           </div>
+        }>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div className="form-group">
-            <label className="form-label">Rutina</label>
-            <select className="form-input" value={selectedRoutine} onChange={e => setSelectedRoutine(e.target.value)}>
-              <option value="">— Seleccionar rutina —</option>
-              {routines.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
-            </select>
+            <label className="form-label">Cliente *</label>
+            <input className="form-input" list="assign-clients" placeholder="🔍 Buscar cliente..."
+              value={modalClient ? modalClient.name : ''}
+              onChange={e => {
+                const match = clients.find(c => c.name.toLowerCase() === e.target.value.toLowerCase());
+                setModalClientId(match ? match.id : '');
+              }} />
+            <datalist id="assign-clients">
+              {clients.map(c => <option key={c.id} value={c.name}>{c.name} — {c.email}</option>)}
+            </datalist>
           </div>
-          {selectedClient && selectedRoutine && (
+
+          <div className="form-group">
+            <label className="form-label">Rutina *</label>
+            <input className="form-input" list="assign-routines" placeholder="🔍 Buscar rutina..."
+              value={modalRoutine ? modalRoutine.name : ''}
+              onChange={e => {
+                const match = routines.find(r => r.name.toLowerCase() === e.target.value.toLowerCase());
+                setModalRoutineId(match ? match.id : '');
+              }} />
+            <datalist id="assign-routines">
+              {routines.map(r => <option key={r.id} value={r.name}>{r.name} — {r.goal}</option>)}
+            </datalist>
+          </div>
+
+          {modalClientId && modalRoutineId && (
             <div style={{ background: 'var(--color-accent-dim2)', border: '1px solid rgba(0,255,0,0.15)', borderRadius: 'var(--radius-md)', padding: '14px', fontSize: 13, display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {hasExisting ? (
+              {isReassign ? (
                 <div style={{ color: 'var(--color-text)', lineHeight: 1.5 }}>
-                  💡 <strong>{client?.name}</strong> ya tiene asignada{' '}
-                  <strong style={{ color: 'var(--color-accent)' }}>{currentRoutine.name}</strong>.
+                  💡 <strong>{modalClient?.name}</strong> ya tiene asignada{' '}
+                  <strong style={{ color: 'var(--color-accent)' }}>{existingRoutine.name}</strong>.
                   <br />Se reasignará a{' '}
-                  <strong style={{ color: 'var(--color-accent)' }}>{newRoutine?.name}</strong>.
+                  <strong style={{ color: 'var(--color-accent)' }}>{modalRoutine?.name}</strong>.
                 </div>
               ) : (
                 <div style={{ color: 'var(--color-text-2)', lineHeight: 1.5 }}>
-                  Se asignará <strong style={{ color: 'var(--color-text)' }}>{newRoutine?.name}</strong> a{' '}
-                  <strong style={{ color: 'var(--color-accent)' }}>{client?.name}</strong>
+                  Se asignará <strong style={{ color: 'var(--color-text)' }}>{modalRoutine?.name}</strong> a{' '}
+                  <strong style={{ color: 'var(--color-accent)' }}>{modalClient?.name}</strong>
                 </div>
               )}
 
-              {hasExisting && (
+              {isReassign && (
                 <>
                   <div className="form-group" style={{ marginTop: 4 }}>
                     <label className="form-label">Motivo de reasignación *</label>
@@ -111,91 +244,8 @@ export default function Assign() {
               )}
             </div>
           )}
-          <button
-            className="btn btn-primary"
-            disabled={assigning || !selectedClient || !selectedRoutine || (hasExisting && !reason)}
-            style={assigning ? { minWidth: 180, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 } : {}}
-            onClick={handleAssign}
-          >
-            {assigning ? <div style={inlineSpinnerStyle(18, '#000', 'rgba(0,0,0,0.25)')} /> : 'Asignar rutina'}
-          </button>
-          {hasExisting && !reason && selectedClient && selectedRoutine && (
-            <div style={{ fontSize: 12, color: 'var(--color-text-3)', textAlign: 'center' }}>
-              Seleccioná un motivo de reasignación para continuar
-            </div>
-          )}
-          {saveError && (
-            <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 'var(--radius-md)', padding: '10px 14px', fontSize: 13, color: 'var(--color-error)' }}>
-              {saveError}
-            </div>
-          )}
-          {success && (
-            <div style={{ background: 'var(--color-accent-dim)', border: '1px solid rgba(0,255,0,0.3)', borderRadius: 'var(--radius-md)', padding: '10px 14px', fontSize: 13, color: 'var(--color-accent)' }}>
-              ✓ Rutina asignada correctamente
-            </div>
-          )}
         </div>
-
-        {/* Current assignments */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <h3 style={{ fontSize: 16 }}>📋 Asignaciones actuales</h3>
-          {clients.map(c => {
-            const assignment = getAssignmentForClient(c.id);
-            const routine = assignment ? getRoutine(assignment.routineId) : null;
-            return (
-              <div key={c.id} className="card" style={{ gap: 12 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div className="avatar" style={{ width: 36, height: 36, fontSize: 13 }}>
-                    {c.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600, fontFamily: 'var(--font-main)', fontSize: 14 }}>{c.name}</div>
-                    <div style={{ fontSize: 12, color: 'var(--color-text-3)' }}>{c.email}</div>
-                  </div>
-                  <span className={`badge ${c.status === 'activo' ? 'badge-success' : 'badge-warning'}`}>{c.status}</span>
-                </div>
-
-                {routine ? (
-                  <div style={{ background: 'var(--color-bg-3)', borderRadius: 'var(--radius-sm)', padding: '10px 12px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
-                      <div>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-accent)', marginBottom: 2 }}>
-                          💪 {routine.name}
-                        </div>
-                        <div style={{ fontSize: 11, color: 'var(--color-text-3)' }}>
-                          {routine.exercises?.length} ejercicios · Asignada el {assignment.assignedAt}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div style={{ fontSize: 13, color: 'var(--color-text-3)', fontStyle: 'italic', padding: '4px 0' }}>
-                    Sin rutina asignada
-                  </div>
-                )}
-
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button
-                    className="btn btn-sm btn-ghost"
-                    onClick={() => {
-                      setSelectedClient(c.id);
-                      if (assignment) setSelectedRoutine(assignment.routineId);
-                      setReason('');
-                      setObservations('');
-                      setSaveError('');
-                    }}
-                  >
-                    {routine ? 'Cambiar' : 'Asignar'}
-                  </button>
-                  {routine && (
-                    <AssignedRoutineEditor clientId={c.id} routine={routine} routineId={assignment.routineId} />
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      </Modal>
     </CoachLayout>
   );
 }
