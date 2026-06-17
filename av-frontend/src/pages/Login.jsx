@@ -55,14 +55,14 @@ export default function Login() {
 
   const handleResetPassword = async () => {
     if (resetPassword.length < 6) {
-      setResetError('La contrasena debe tener al menos 6 caracteres');
+      setResetError('La contraseña debe tener al menos 6 caracteres');
       return;
     }
     setResetLoading(true);
     setResetError('');
     try {
       await apiResetPassword(resetEmail, resetCode, resetPassword);
-      setResetMsg('Contrasena actualizada. Ya podes iniciar sesion.');
+      setResetMsg('Contraseña actualizada. Ya podes iniciar sesion.');
       setTimeout(() => {
         setShowReset(false);
         setResetStep('email');
@@ -70,7 +70,7 @@ export default function Login() {
         setEmail(resetEmail);
       }, 2000);
     } catch (err) {
-      setResetError(err.message || 'Error al restablecer la contrasena');
+      setResetError(err.message || 'Error al restablecer la contraseña');
     } finally {
       setResetLoading(false);
     }
@@ -110,8 +110,8 @@ export default function Login() {
           <div style={{ padding: 28 }}>
             {resetStep === 'email' ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <h3 style={{ fontFamily: 'var(--font-main)', fontSize: 18, fontWeight: 700, color: 'var(--color-text)', margin: 0 }}>Recuperar contrasena</h3>
-                <p style={{ fontSize: 13, color: 'var(--color-text-2)', margin: 0 }}>Ingresa tu email y te enviaremos un codigo para restablecer tu contrasena.</p>
+                <h3 style={{ fontFamily: 'var(--font-main)', fontSize: 18, fontWeight: 700, color: 'var(--color-text)', margin: 0 }}>Recuperar contraseña</h3>
+                <p style={{ fontSize: 13, color: 'var(--color-text-2)', margin: 0 }}>Ingresa tu email y te enviaremos un codigo para restablecer tu contraseña.</p>
                 <div className="form-group">
                   <label className="form-label" htmlFor="reset-email">Email</label>
                   <input id="reset-email" className="form-input" type="email" placeholder="tu@email.com"
@@ -136,15 +136,15 @@ export default function Login() {
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <h3 style={{ fontFamily: 'var(--font-main)', fontSize: 18, fontWeight: 700, color: 'var(--color-text)', margin: 0 }}>Nueva contrasena</h3>
-                <p style={{ fontSize: 13, color: 'var(--color-text-2)', margin: 0 }}>Ingresa el codigo que recibiste y tu nueva contrasena.</p>
+                <h3 style={{ fontFamily: 'var(--font-main)', fontSize: 18, fontWeight: 700, color: 'var(--color-text)', margin: 0 }}>Nueva contraseña</h3>
+                <p style={{ fontSize: 13, color: 'var(--color-text-2)', margin: 0 }}>Ingresa el codigo que recibiste y tu nueva contraseña.</p>
                 <div className="form-group">
                   <label className="form-label" htmlFor="reset-code">Codigo</label>
                   <input id="reset-code" className="form-input" placeholder="XXXXXX"
                     value={resetCode} onChange={e => setResetCode(e.target.value)} maxLength={6} />
                 </div>
                 <div className="form-group">
-                  <label className="form-label" htmlFor="reset-new-password">Nueva contrasena</label>
+                  <label className="form-label" htmlFor="reset-new-password">Nueva contraseña</label>
                   <input id="reset-new-password" className="form-input" type="password" placeholder="Minimo 6 caracteres"
                     value={resetPassword} onChange={e => setResetPassword(e.target.value)} />
                 </div>
@@ -159,7 +159,7 @@ export default function Login() {
                   </div>
                 )}
                 <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={handleResetPassword} disabled={resetLoading || !resetCode || !resetPassword}>
-                  {resetLoading ? 'Actualizando...' : 'Cambiar contrasena'}
+                  {resetLoading ? 'Actualizando...' : 'Cambiar contraseña'}
                 </button>
                 <button className="btn btn-ghost" onClick={closeReset}>Cancelar</button>
               </div>
@@ -174,7 +174,7 @@ export default function Login() {
                   value={email} onChange={e => setEmail(e.target.value)} required />
               </div>
               <div className="form-group">
-                <label className="form-label" htmlFor="password">Contrasena</label>
+                <label className="form-label" htmlFor="password">Contraseña</label>
                 <input id="password" className="form-input" type="password" placeholder="••••••••"
                   value={password} onChange={e => setPassword(e.target.value)} required />
               </div>
@@ -188,7 +188,7 @@ export default function Login() {
               </button>
               <div style={{ textAlign: 'center' }}>
                 <button type="button" onClick={() => { setShowReset(true); setResetEmail(email); }} style={{ background: 'none', border: 'none', color: 'var(--color-text-2)', fontSize: 12, cursor: 'pointer' }}>
-                  Olvide mi contrasena
+                  Olvide mi contraseña
                 </button>
               </div>
               <div style={{ fontSize: 12, color: 'var(--color-text-3)', textAlign: 'center', lineHeight: 1.6 }}>

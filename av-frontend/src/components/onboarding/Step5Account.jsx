@@ -1,7 +1,7 @@
 /**
  * @file Paso 6 del onboarding: creacion de cuenta con verificacion
  *       por email. Flujo en dos etapas: (a) envio del codigo,
- *       (b) ingreso de codigo + contrasena + aceptacion de terminos.
+ *       (b) ingreso de codigo + contraseña + aceptacion de terminos.
  */
 import React, { useState } from 'react';
 import { FormGroup, FieldError } from './FormPrimitives';
@@ -9,7 +9,7 @@ import { apiSendVerificationCode } from '../../api/apiClient';
 
 const TERMS_TEXT = 'Acepto los terminos y condiciones y la politica de privacidad';
 
-export default function Step5Account({ form, set, errors, email }) {
+export default function Step5Account({ form, set, errors, email, onCodeSent }) {
   const [codeSent, setCodeSent] = useState(false);
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState('');
@@ -20,6 +20,7 @@ export default function Step5Account({ form, set, errors, email }) {
     try {
       await apiSendVerificationCode(email);
       setCodeSent(true);
+      if (onCodeSent) onCodeSent();
     } catch (err) {
       setSendError(err.message || 'No se pudo enviar el codigo');
     } finally {
@@ -64,13 +65,13 @@ export default function Step5Account({ form, set, errors, email }) {
       </FormGroup>
 
       <div className="grid-2">
-        <FormGroup label="Contrasena *" htmlFor="step5_password" error={errors.step5_password} errorId="err-step5_password">
+        <FormGroup label="Contraseña *" htmlFor="step5_password" error={errors.step5_password} errorId="err-step5_password">
           <input id="step5_password" className="form-input" type="password" placeholder="Minimo 6 caracteres"
             value={form.step5_password} onChange={e => set('step5_password', e.target.value)}
             aria-required="true" aria-invalid={!!errors.step5_password} aria-describedby={errors.step5_password ? 'err-step5_password' : undefined} />
         </FormGroup>
-        <FormGroup label="Confirmar contrasena *" htmlFor="step5_confirm" error={errors.step5_confirm} errorId="err-step5_confirm">
-          <input id="step5_confirm" className="form-input" type="password" placeholder="Repeti la contrasena"
+        <FormGroup label="Confirmar contraseña *" htmlFor="step5_confirm" error={errors.step5_confirm} errorId="err-step5_confirm">
+          <input id="step5_confirm" className="form-input" type="password" placeholder="Repeti la contraseña"
             value={form.step5_confirm} onChange={e => set('step5_confirm', e.target.value)}
             aria-required="true" aria-invalid={!!errors.step5_confirm} aria-describedby={errors.step5_confirm ? 'err-step5_confirm' : undefined} />
         </FormGroup>

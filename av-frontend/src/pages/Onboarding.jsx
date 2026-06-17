@@ -66,6 +66,7 @@ export default function Onboarding() {
   const [errors, setErrors] = useState({});
   const [done, setDone] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [codeSent, setCodeSent] = useState(false);
 
   const setField = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
 
@@ -199,7 +200,7 @@ export default function Onboarding() {
       case 3: return <Step3Health form={form} set={setField} errors={errors} planId={planId} />;
       case 4: return <Step4Profile form={form} set={setField} errors={errors} />;
       case 5: return <Step5Summary form={form} onGoToStep={setStep} />;
-      case 6: return <Step5Account form={form} set={setField} errors={errors} email={form.step1_email} />;
+      case 6: return <Step5Account form={form} set={setField} errors={errors} email={form.step1_email} onCodeSent={() => setCodeSent(true)} />;
       default: return null;
     }
   };
@@ -267,7 +268,7 @@ export default function Onboarding() {
             {step < TOTAL_STEPS ? (
               <button className="btn btn-primary" onClick={nextStep}>{step === 5 ? 'Todo OK, continuar →' : 'Siguiente →'}</button>
             ) : (
-              <button className="btn btn-primary" onClick={handleSubmit} disabled={submitting}>
+              <button className="btn btn-primary" onClick={handleSubmit} disabled={!codeSent || submitting}>
                 {submitting ? 'Creando cuenta...' : 'Crear cuenta ✓'}
               </button>
             )}
