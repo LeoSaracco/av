@@ -1,14 +1,29 @@
 /**
  * @file Cliente HTTP para la API del backend.
- *       Usa cookies httpOnly administradas por el backend.
+ *       Usa cookies httpOnly + Authorization Bearer como fallback.
  *       Configurable mediante variable de entorno VITE_API_URL.
  *       Cubre 47 endpoints del backend.
  */
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
+let bearerToken = null;
+
+/**
+ * Stores the access token in memory for Bearer header fallback.
+ * Called by AuthContext after login/register/completePlanContract.
+ * Set to null on logout.
+ */
+export function setBearerToken(token) {
+  bearerToken = token || null;
+}
+
 function getAuthHeaders() {
-  return { 'Content-Type': 'application/json' };
+  const headers = { 'Content-Type': 'application/json' };
+  if (bearerToken) {
+    headers['Authorization'] = `Bearer ${bearerToken}`;
+  }
+  return headers;
 }
 
 async function request(method, path, body = null) {
