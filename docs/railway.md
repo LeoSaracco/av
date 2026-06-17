@@ -206,6 +206,20 @@ Invoke-RestMethod https://av-backend-production.up.railway.app/actuator/health
 Invoke-WebRequest https://av-frontend-production.up.railway.app/ -UseBasicParsing
 ```
 
+### Lineamiento: Verificacion de deploys locales
+
+Al verificar deploys desde la terminal local, usar `Start-Sleep` de **maximo 20 segundos**. 
+Los deploys Railway pueden tardar 2-4 minutos; no tiene sentido esperar en un sleep largo 
+porque el CI de GitHub Actions ya tiene su propio ciclo de verificacion independiente.
+
+```powershell
+# Correcto: espera corta, luego el pipeline se verifica via gh run list
+Start-Sleep -Seconds 15; gh run list --repo LeoSaracco/av --limit 3
+
+# Incorrecto: no usar sleeps > 20s
+# Start-Sleep -Seconds 45
+```
+
 ## Queries de validacion en base
 
 Usar estas consultas contra PostgreSQL de Railway para confirmar que el flujo `Plan -> Pago mock -> Formulario -> Usuario` persistio correctamente.
