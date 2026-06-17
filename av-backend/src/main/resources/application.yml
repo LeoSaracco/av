@@ -41,6 +41,9 @@ logging:
     com.av.fitness: DEBUG
     org.springframework.security: DEBUG
 
+auth:
+  cookie-secure: ${AUTH_COOKIE_SECURE:false}
+
 jwt:
   access-token-expiration: 900000
   refresh-token-expiration: 604800000
