@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * Base path {@code /api/onboarding}, saves onboarding data and optionally
+ * updates the client's phone and goal.
+ */
 @RestController
 @RequestMapping("/api/onboarding")
 @RequiredArgsConstructor
@@ -21,6 +25,13 @@ public class OnboardingController {
     private final OnboardingJpaRepository onboardingJpaRepository;
     private final ClientJpaRepository clientJpaRepository;
 
+    /**
+     * Submits onboarding form data. If a {@code clientId} is provided,
+     * the client's phone and goal are also updated.
+     *
+     * @param request the onboarding request payload
+     * @return a success message response
+     */
     @PostMapping
     public ResponseEntity<MessageResponse> submitOnboarding(
             @Valid @RequestBody OnboardingRequest request) {

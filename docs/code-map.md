@@ -1,6 +1,6 @@
 # Mapa de codigo - Frontend y Backend
 
-Actualizado: 2026-06-16
+Actualizado: 2026-06-17
 
 ## Frontend
 
@@ -57,6 +57,19 @@ Regla importante:
 - Repositories no deben exponer logica de negocio.
 - Cambios de schema/datos iniciales deben ir por Flyway.
 
+## Email
+
+- EmailServiceImpl.java: envio via Resend API con RestTemplate, templates HTML dark mode.
+- EmailVerificationService.java: generacion y validacion de codigos de 6 digitos, expiran en 10 min, limpieza programada de tokens expirados cada 1h.
+
+## Auto-asignacion
+
+- PlanContractServiceImpl.completeOnboarding(): al completar onboarding crea automaticamente rutina, dieta, hilo de nutricion y nota de bienvenida por defecto vinculados al nuevo cliente.
+
+## Cliente self-service
+
+- MeController.java: resolveClientId() resuelve userId del JWT a clientId via UserJpaRepository. PUT /api/me/progress/{id} permite editar peso existente.
+
 ## CI/CD
 
 - Workflows: `.github/workflows/ci.yml` y `.github/workflows/deploy-railway.yml`.
@@ -66,5 +79,5 @@ Regla importante:
 
 ## Pendiente de documentacion de codigo
 
-- Completar documentacion interna de componentes, servicios, DTOs, entidades, repositorios y flujos criticos.
+- Documentar controllers, services, DTOs, entidades y repositorios backend (COMPLETADO 2026-06-17).
 - Priorizar codigo que define contratos publicos, autenticacion, pagos, integraciones externas, carga de datos y permisos por rol.

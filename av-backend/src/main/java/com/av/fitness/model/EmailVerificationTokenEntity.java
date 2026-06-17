@@ -11,6 +11,9 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * One-time email verification code (table: {@code email_verification_tokens}).
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,22 +21,28 @@ import java.util.UUID;
 @Table(name = "email_verification_tokens")
 public class EmailVerificationTokenEntity {
 
+    /** Primary key. */
     @Id
     @Column(name = "id", nullable = false)
     private UUID id;
 
+    /** Target email address being verified. */
     @Column(name = "email", nullable = false)
     private String email;
 
+    /** One-time verification code. */
     @Column(name = "code", nullable = false)
     private String code;
 
+    /** Code expiry timestamp. */
     @Column(name = "expires_at", nullable = false)
     private LocalDateTime expiresAt;
 
+    /** Whether the code has already been consumed. */
     @Column(name = "used", nullable = false)
     private boolean used;
 
+    /** Creation timestamp. */
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 }

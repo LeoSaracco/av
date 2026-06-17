@@ -1,6 +1,6 @@
 # Pipeline y despliegue - Railway + GitHub Actions
 
-Actualizado: 2026-06-16
+Actualizado: 2026-06-17
 
 ## Repositorio
 

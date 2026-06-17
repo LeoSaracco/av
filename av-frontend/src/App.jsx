@@ -1,3 +1,19 @@
+/**
+ * @file App.jsx — Application root: route definitions, auth context provider, and route guards.
+ *
+ * Route structure:
+ *   /              Landing (public)
+ *   /login         Login (public)
+ *   /coach/*        Coach routes (requires COACH role)
+ *   /client/*       Client routes (requires CLIENT role)
+ *   /store/*        Store (public)
+ *   /pago          Payment flow (public)
+ *   /onboarding     Onboarding flow (public)
+ *
+ * @uses AuthProvider — wraps the entire app for auth state
+ * @uses AppProvider  — wraps the app for business data state
+ * @uses HashRouter   — hash-based routing for Railway SPA compatibility
+ */
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -37,6 +53,10 @@ import PaymentSimulator from './pages/PaymentSimulator';
 import Onboarding from './pages/Onboarding';
 
 // ── Route guards ──────────────────────────────────────────────────────────────
+
+/**
+ * Guards coach routes, redirects to /login if not authenticated or /client if not a coach.
+ */
 function CoachRoute({ children }) {
   const { user, isCoach } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
@@ -44,6 +64,9 @@ function CoachRoute({ children }) {
   return children;
 }
 
+/**
+ * Guards client routes, redirects to /login if not authenticated or /coach if not a client.
+ */
 function ClientRoute({ children }) {
   const { user, isClient } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
@@ -51,6 +74,9 @@ function ClientRoute({ children }) {
   return children;
 }
 
+/**
+ * Auto-redirects logged-in users to /coach or /client based on role.
+ */
 function AuthRedirect() {
   const { user, isCoach } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
@@ -58,6 +84,11 @@ function AuthRedirect() {
 }
 
 // ── App ───────────────────────────────────────────────────────────────────────
+
+/**
+ * Application root component. Wraps the app with AuthProvider, AppProvider, and
+ * HashRouter, then defines all public and role-guarded routes.
+ */
 export default function App() {
   return (
     <AuthProvider>

@@ -1,6 +1,6 @@
 # Arquitectura - AV Fitness App
 
-Actualizado: 2026-06-16
+Actualizado: 2026-06-17
 
 ## Vista general
 
@@ -69,6 +69,7 @@ No debe haber llamadas globales a endpoints privados al montar la app publica.
   - `/swagger-ui/index.html`
 - Actuator:
   - `/actuator/health`
+- Auto-asignacion: Al completar onboarding, el backend crea rutina, dieta, hilo de nutricion y nota de bienvenida por defecto.
 
 ## Autenticacion
 
@@ -76,6 +77,8 @@ No debe haber llamadas globales a endpoints privados al montar la app publica.
 - El frontend no persiste tokens ni usuario en storage del navegador.
 - Las requests usan `credentials: 'include'` para enviar cookies httpOnly.
 - Rutas coach/cliente se protegen en frontend por rol y en backend por Spring Security.
+- Verificacion de email: Se envia codigo de 6 digitos via Resend HTTPS API. Tokens expiran en 10 minutos. Endpoints: /api/auth/send-verification y /api/auth/verify-email.
+- Cross-Origin: prod usa SameSite=None en cookies para que frontend (av-frontend-production.up.railway.app) y backend (av-backend-production.up.railway.app) compartan sesion.
 
 ## Persistencia
 

@@ -9,6 +9,17 @@ import { apiSendVerificationCode } from '../../api/apiClient';
 
 const TERMS_TEXT = 'Acepto los terminos y condiciones y la politica de privacidad';
 
+/**
+ * Account creation step with email verification.
+ *
+ * @param {Object}   props
+ * @param {Object}   props.form          — Form data (email, password, terms)
+ * @param {Function} props.set           — Form setter
+ * @param {Object}   props.errors        — Validation errors
+ * @param {string}   props.email         — User email (from Step 1)
+ * @param {Function} props.onCodeSent    — Callback when verification code is sent
+ * @returns {JSX.Element}
+ */
 export default function Step5Account({ form, set, errors, email, onCodeSent }) {
   const [codeSent, setCodeSent] = useState(false);
   const [sending, setSending] = useState(false);

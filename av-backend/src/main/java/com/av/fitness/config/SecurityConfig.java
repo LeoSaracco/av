@@ -19,6 +19,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Configures Spring Security: public/private routes, CORS, JWT filter,
+ * exception handling with JSON 401/403 responses, permitAll for payment and plan-contracts endpoints.
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -30,6 +34,11 @@ public class SecurityConfig {
     private final SecurityHeadersFilter securityHeadersFilter;
     private final RateLimitFilter rateLimitFilter;
 
+    /**
+     * @param jwtAuthFilter         the JWT authentication filter
+     * @param securityHeadersFilter the security headers filter
+     * @param rateLimitFilter       the rate-limiting filter
+     */
     public SecurityConfig(JwtAuthFilter jwtAuthFilter,
                           SecurityHeadersFilter securityHeadersFilter,
                           RateLimitFilter rateLimitFilter) {
@@ -38,11 +47,21 @@ public class SecurityConfig {
         this.rateLimitFilter = rateLimitFilter;
     }
 
+    /**
+     * @return a {@link BCryptPasswordEncoder} with strength 12
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(12);
     }
 
+    /**
+     * Defines the security filter chain with stateless sessions, CORS,
+     * role-based authorization, and custom exception handling that returns JSON 401/403 bodies.
+     *
+     * @param http the {@link HttpSecurity} to configure
+     * @return the built {@link SecurityFilterChain}
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -91,6 +110,12 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Builds a {@link CorsConfigurationSource} from comma-separated origins in {@code cors.allowed-origins}.
+     * Allows common HTTP methods, all headers, and credentials.
+     *
+     * @return a URL-based CORS configuration source applied to all paths
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();

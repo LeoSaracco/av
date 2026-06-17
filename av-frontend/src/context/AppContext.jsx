@@ -1,3 +1,15 @@
+/**
+ * @file AppContext.jsx — In-memory business data state and operations.
+ * @description
+ * Manages cache for clients, templates, routines, diets, assignments,
+ * notes, progress, products, plans, cart, nutrition threads, and onboarding
+ * submissions. Loads public plans on mount; coach data, client data, and
+ * products are loaded lazily when the corresponding layout mounts.
+ *
+ * All mutations go through the backend API; the local cache is updated
+ * after each successful API call. No data is persisted to localStorage.
+ */
+
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import * as api from '../api/apiClient';
 
@@ -7,6 +19,17 @@ function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2);
 }
 
+/**
+ * Context provider wrapping the entire app with business data.
+ *
+ * Provides state caches for clients, templates, routines, diets,
+ * assignments, notes, progress, products, plans, cart, nutrition threads,
+ * and onboarding submissions. Public plans are fetched on mount; coach
+ * data, client data, and products are loaded lazily via dedicated helpers.
+ *
+ * All exposed mutation functions call the backend API first, then update
+ * the corresponding local cache slice atomically.
+ */
 export function AppProvider({ children }) {
   const [clients, setClients] = useState([]);
   const [templates, setTemplates] = useState([]);
@@ -42,6 +65,9 @@ export function AppProvider({ children }) {
     fetchPublicPlans();
   }, []);
 
+  /**
+   * Lazy-loads product catalog from API (idempotent — no-op if already loaded).
+   */
   const loadProducts = useCallback(async () => {
     if (productsLoaded) return;
     try {
@@ -52,6 +78,10 @@ export function AppProvider({ children }) {
     }
   }, [productsLoaded]);
 
+  /**
+   * Lazy-loads coach data (clients, templates, routines, diet templates,
+   * diets, notes) from API. Idempotent — no-op once coachLoaded is true.
+   */
   const loadCoachData = useCallback(async () => {
     if (coachLoaded) return;
     try {
@@ -73,6 +103,12 @@ export function AppProvider({ children }) {
     }
   }, [coachLoaded]);
 
+  /**
+   * Lazy-loads client-scoped data (routine, diet, progress, notes) for the
+   * given authenticated user. Idempotent — no-op once clientLoaded is true.
+   *
+   * @param {Object} user - Authenticated user object with clientId, name, email, goal.
+   */
   const loadClientData = useCallback(async (user) => {
     if (clientLoaded || !user) return;
     const clientId = user.clientId || user.id;
@@ -190,7 +226,9 @@ export function AppProvider({ children }) {
   const removeFromCart = (key) => setCart(prev => prev.filter(i => i.key !== key));
   const updateCartQty = (key, qty) => { if (qty < 1) removeFromCart(key); else setCart(prev => prev.map(i => i.key === key ? { ...i, qty } : i)); };
   const clearCart = () => setCart([]);
+  /** Total monetary value of all items in cart. */
   const cartTotal = cart.reduce((sum, i) => sum + i.product.price * i.qty, 0);
+  /** Total number of items in cart (sum of quantities). */
   const cartCount = cart.reduce((sum, i) => sum + i.qty, 0);
 
   const createOnboardingSubmission = async (data) => {
@@ -231,6 +269,13 @@ export function AppProvider({ children }) {
   );
 }
 
+/**
+ * Convenience hook to consume AppContext.
+ * Must be called within an {@link AppProvider}.
+ *
+ * @returns {Object} The full context value (state slices + actions).
+ * @throws {Error} If called outside of AppProvider.
+ */
 // eslint-disable-next-line react-refresh/only-export-components
 export function useApp() {
   const ctx = useContext(AppContext);

@@ -19,6 +19,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Implements client self-service operations. Provides access to the authenticated
+ * client's routine, diet, progress tracking, coach notes, and nutrition thread.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -33,6 +37,13 @@ public class ClientServiceImpl implements ClientService {
     private final NutritionThreadJpaRepository nutritionThreadJpaRepository;
     private final ModelMapper modelMapper;
 
+    /**
+     * Finds the active routine assignment for the given client and maps it to a response.
+     *
+     * @param clientId the authenticated client's ID
+     * @return the active routine mapped to {@link RoutineResponse}
+     * @throws RuntimeException if no active routine is assigned
+     */
     @Override
     public RoutineResponse getMyRoutine(UUID clientId) {
         AssignmentEntity assignment = assignmentJpaRepository.findAll().stream()
@@ -45,6 +56,13 @@ public class ClientServiceImpl implements ClientService {
         return modelMapper.map(routine, RoutineResponse.class);
     }
 
+    /**
+     * Finds the active diet assignment for the given client and maps it to a response.
+     *
+     * @param clientId the authenticated client's ID
+     * @return the active diet mapped to {@link DietResponse}
+     * @throws RuntimeException if no active diet is assigned
+     */
     @Override
     public DietResponse getMyDiet(UUID clientId) {
         DietAssignmentEntity assignment = dietAssignmentJpaRepository.findAll().stream()
@@ -57,6 +75,12 @@ public class ClientServiceImpl implements ClientService {
         return modelMapper.map(diet, DietResponse.class);
     }
 
+    /**
+     * Returns all progress entries for the client, ordered by date ascending.
+     *
+     * @param clientId the authenticated client's ID
+     * @return list of progress entries mapped to {@link ProgressResponse}
+     */
     @Override
     public List<ProgressResponse> getMyProgress(UUID clientId) {
         return progressJpaRepository.findByClientIdOrderByDateAsc(clientId).stream()
@@ -64,6 +88,14 @@ public class ClientServiceImpl implements ClientService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Creates a new progress entry with the given weight, date, and comment.
+     * Defaults the date to today if not provided.
+     *
+     * @param clientId the authenticated client's ID
+     * @param request  the progress data (weight, date, comment)
+     * @return the saved progress entry mapped to {@link ProgressResponse}
+     */
     @Override
     public ProgressResponse logProgress(UUID clientId, ProgressResponse request) {
         ProgressEntity entity = new ProgressEntity();
@@ -78,6 +110,15 @@ public class ClientServiceImpl implements ClientService {
         return modelMapper.map(entity, ProgressResponse.class);
     }
 
+    /**
+     * Updates the fields (date, weight, comment) of an existing progress entry.
+     * Only non-null fields in the request are applied.
+     *
+     * @param id      the ID of the progress entry to update
+     * @param request the fields to update (date, weight, comment)
+     * @return the updated progress entry mapped to {@link ProgressResponse}
+     * @throws RuntimeException if the progress entry is not found
+     */
     @Override
     public ProgressResponse updateProgress(UUID id, ProgressResponse request) {
         ProgressEntity entity = progressJpaRepository.findById(id)
@@ -91,11 +132,23 @@ public class ClientServiceImpl implements ClientService {
         return modelMapper.map(entity, ProgressResponse.class);
     }
 
+    /**
+     * Deletes a progress entry by its ID.
+     *
+     * @param id the ID of the progress entry to delete
+     */
     @Override
     public void deleteProgress(UUID id) {
         progressJpaRepository.deleteById(id);
     }
 
+    /**
+     * Returns all coach notes for the client, ordered by creation date descending
+     * (most recent first).
+     *
+     * @param clientId the authenticated client's ID
+     * @return list of coach notes mapped to {@link NoteResponse}
+     */
     @Override
     public List<NoteResponse> getMyNotes(UUID clientId) {
         return noteJpaRepository.findByClientIdOrderByCreatedAtDesc(clientId).stream()
@@ -103,6 +156,13 @@ public class ClientServiceImpl implements ClientService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Returns the nutrition thread for the given client.
+     *
+     * @param clientId the authenticated client's ID
+     * @return the nutrition thread mapped to {@link ThreadResponse}
+     * @throws RuntimeException if no thread is found
+     */
     @Override
     public ThreadResponse getMyThread(UUID clientId) {
         NutritionThreadEntity entity = nutritionThreadJpaRepository.findByClientId(clientId)
@@ -110,6 +170,15 @@ public class ClientServiceImpl implements ClientService {
         return modelMapper.map(entity, ThreadResponse.class);
     }
 
+    /**
+     * Appends a JSON message to the client's nutrition thread messages array.
+     * The message is sent with sender {@code CLIENT} and the current timestamp.
+     *
+     * @param clientId the authenticated client's ID
+     * @param message  the text content of the message
+     * @return the updated nutrition thread mapped to {@link ThreadResponse}
+     * @throws RuntimeException if the thread is not found
+     */
     @Override
     public ThreadResponse sendMessage(UUID clientId, String message) {
         NutritionThreadEntity entity = nutritionThreadJpaRepository.findByClientId(clientId)

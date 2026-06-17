@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Base path {@code /api/plans}, public endpoint listing available plans.
+ */
 @RestController
 @RequestMapping("/api/plans")
 @RequiredArgsConstructor
@@ -20,6 +23,11 @@ public class PlanController {
     private final PlanJpaRepository planJpaRepository;
     private final ModelMapper modelMapper;
 
+    /**
+     * Returns all available fitness plans.
+     *
+     * @return a list of {@link PlanResponse} containing plan details
+     */
     @GetMapping
     public ResponseEntity<List<PlanResponse>> getPlans() {
         List<PlanResponse> plans = planJpaRepository.findAll().stream()

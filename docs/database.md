@@ -14,6 +14,12 @@ node db.js "SELECT ..."
 
 Requiere Docker o Node.js con modulo `pg` instalado.
 
+## Migraciones
+
+- V5__email_verification.sql: tabla email_verification_tokens para codigos de verificacion y recupero de password.
+- V6__fix_password_hashes.sql: corrige hashes BCrypt del seed data.
+- V7__sp_delete_client.sql: stored procedure para eliminar clientes con todo su rastro.
+
 ## Queries utiles
 
 ### Eliminar un cliente con todo su rastro (stored procedure)

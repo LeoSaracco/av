@@ -4,6 +4,16 @@
  */
 import React from 'react';
 
+/**
+ * Reusable loading spinner with green accent color.
+ *
+ * @param {Object} props
+ * @param {boolean} [props.fullPage=false] — Render as centered full-page overlay
+ * @param {string}  [props.text]           — Optional loading text below spinner
+ * @param {string}  [props.size='md']      — Spinner size: 'sm' (20px), 'md' (32px), 'lg' (48px)
+ * @param {boolean} [props.inline=false]   — Render inline with centered flex row
+ * @returns {JSX.Element}
+ */
 export default function Loader({ fullPage = false, text, size = 'md', inline = false }) {
   const sizeMap = { sm: 20, md: 32, lg: 48 };
   const px = sizeMap[size] || sizeMap.md;

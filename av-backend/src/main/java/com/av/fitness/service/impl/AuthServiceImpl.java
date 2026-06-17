@@ -24,6 +24,13 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Transactional
+/**
+ * Implements authentication workflows including registration, login, token refresh,
+ * email verification, password reset, and logout.
+ * Creates both {@link UserEntity} and {@link ClientEntity} on registration.
+ * Uses {@link JwtService} for token generation and {@link EmailVerificationService}
+ * for email verification and password reset codes.
+ */
 public class AuthServiceImpl implements AuthService {
 
     private final UserJpaRepository userJpaRepository;
@@ -34,6 +41,14 @@ public class AuthServiceImpl implements AuthService {
     private final EmailVerificationService emailVerificationService;
     private final EmailService emailService;
 
+    /**
+     * Registers a new user by creating both a {@link ClientEntity} and a {@link UserEntity},
+     * generates access and refresh tokens, stores the refresh token, and sends a welcome email.
+     *
+     * @param request the registration payload containing name, email, and password
+     * @return a {@link TokenResponse} with access token, refresh token, role, and user details
+     * @throws RuntimeException if the email is already registered by an existing user or client
+     */
     @Override
     public TokenResponse register(RegisterRequest request) {
         if (userJpaRepository.findByEmail(request.getEmail()).isPresent()) {
@@ -92,6 +107,14 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
+    /**
+     * Authenticates a user by email and password, generates new access and refresh tokens,
+     * deletes any previously stored refresh tokens for the user, and persists the new one.
+     *
+     * @param request the login payload containing email and password
+     * @return a {@link TokenResponse} with access token, refresh token, role, and user details
+     * @throws RuntimeException if the email is not found or the password does not match
+     */
     @Override
     public TokenResponse login(LoginRequest request) {
         UserEntity user = userJpaRepository.findByEmail(request.getEmail())
@@ -125,6 +148,15 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
+    /**
+     * Rotates refresh tokens: validates the provided refresh token exists and is not expired,
+     * deletes the old token, generates a new access token and refresh token pair,
+     * and persists the new refresh token.
+     *
+     * @param request the refresh payload containing the current refresh token
+     * @return a {@link TokenResponse} with a new access token, new refresh token, role, and user details
+     * @throws RuntimeException if the refresh token is invalid or expired, or the user is not found
+     */
     @Override
     public TokenResponse refresh(RefreshRequest request) {
         RefreshTokenEntity stored = refreshTokenJpaRepository.findByToken(request.getRefreshToken())
@@ -162,16 +194,38 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
+    /**
+     * Validates an email verification code by delegating to {@link EmailVerificationService}.
+     *
+     * @param request the payload containing the email address and verification code
+     * @return a {@link MessageResponse} indicating whether verification succeeded
+     * @throws RuntimeException if the code is invalid or expired (from the underlying service)
+     */
     @Override
     public MessageResponse verifyEmail(VerifyEmailRequest request) {
         return emailVerificationService.validate(request.getEmail(), request.getCode());
     }
 
+    /**
+     * Generates and sends a verification code to the provided email address
+     * by delegating to {@link EmailVerificationService}.
+     *
+     * @param request the payload containing the target email address
+     * @return a {@link MessageResponse} indicating the code was sent
+     */
     @Override
     public MessageResponse sendVerificationEmail(SendVerificationRequest request) {
         return emailVerificationService.generateAndSend(request.getEmail());
     }
 
+    /**
+     * Initiates a password reset flow by verifying the email exists, then delegates to
+     * {@link EmailVerificationService} to generate and send a password reset code.
+     *
+     * @param request the payload containing the email address
+     * @return a {@link MessageResponse} indicating the reset code was sent
+     * @throws RuntimeException if no account exists with the given email
+     */
     @Override
     public MessageResponse forgotPassword(PasswordResetRequest request) {
         userJpaRepository.findByEmail(request.getEmail())
@@ -180,6 +234,14 @@ public class AuthServiceImpl implements AuthService {
         return emailVerificationService.generateAndSendPasswordReset(request.getEmail());
     }
 
+    /**
+     * Completes the password reset flow by validating the reset code via
+     * {@link EmailVerificationService}, then hashes and persists the new password.
+     *
+     * @param request the payload containing email, verification code, and new password
+     * @return a {@link MessageResponse} confirming the password was updated
+     * @throws RuntimeException if the code is invalid, expired, or the user is not found
+     */
     @Override
     public MessageResponse resetPassword(PasswordResetConfirmRequest request) {
         emailVerificationService.validate(request.getEmail(), request.getCode());
@@ -195,6 +257,12 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
+    /**
+     * Deletes the stored refresh token if present, effectively logging the user out
+     * by invalidating the token. Does nothing if the token is null or blank.
+     *
+     * @param refreshToken the refresh token to invalidate
+     */
     @Override
     public void logout(String refreshToken) {
         if (refreshToken == null || refreshToken.isBlank()) {

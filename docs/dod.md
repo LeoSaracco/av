@@ -1,6 +1,6 @@
 # Definition of Done
 
-Actualizado: 2026-06-16
+Actualizado: 2026-06-17
 
 Ningun cambio se considera terminado solo porque compila. Debe estar alineado con arquitectura, seguridad, CI/CD y documentacion.
 
@@ -84,6 +84,7 @@ Actualizar segun corresponda:
 - `docs/pipeline.md`
 - `docs/security.md`
 - `README.md`
+- El codigo debe tener JavaDoc (backend) o JSDoc (frontend) en controllers, services, DTOs, entidades y componentes principales.
 
 ## Pendientes aceptables solo si quedan documentados
 

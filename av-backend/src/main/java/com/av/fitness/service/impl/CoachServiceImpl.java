@@ -17,6 +17,11 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Implements coach operations. Manages clients, routine templates, routines,
+ * diet templates, diets, notes, assignments, progress tracking, and
+ * nutrition messaging threads.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -33,6 +38,9 @@ public class CoachServiceImpl implements CoachService {
     private final NutritionThreadJpaRepository nutritionThreadJpaRepository;
     private final ModelMapper modelMapper;
 
+    // ── Clients ──
+
+    /** Creates a new client. */
     @Override
     public ClientResponse createClient(ClientRequest request) {
         ClientEntity entity = new ClientEntity();
@@ -51,6 +59,7 @@ public class CoachServiceImpl implements CoachService {
         return modelMapper.map(entity, ClientResponse.class);
     }
 
+    /** Updates an existing client by ID. */
     @Override
     public ClientResponse updateClient(UUID id, ClientRequest request) {
         ClientEntity entity = clientJpaRepository.findById(id)
@@ -67,11 +76,13 @@ public class CoachServiceImpl implements CoachService {
         return modelMapper.map(entity, ClientResponse.class);
     }
 
+    /** Deletes a client by ID. */
     @Override
     public void deleteClient(UUID id) {
         clientJpaRepository.deleteById(id);
     }
 
+    /** Retrieves a client by ID. */
     @Override
     public ClientResponse getClient(UUID id) {
         ClientEntity entity = clientJpaRepository.findById(id)
@@ -79,6 +90,7 @@ public class CoachServiceImpl implements CoachService {
         return modelMapper.map(entity, ClientResponse.class);
     }
 
+    /** Retrieves all clients. */
     @Override
     public List<ClientResponse> getClients() {
         return clientJpaRepository.findAll().stream()
@@ -86,6 +98,9 @@ public class CoachServiceImpl implements CoachService {
                 .collect(Collectors.toList());
     }
 
+    // ── Routine Templates ──
+
+    /** Creates a new routine template. */
     @Override
     public TemplateResponse createTemplate(TemplateRequest request) {
         RoutineTemplateEntity entity = new RoutineTemplateEntity();
@@ -101,6 +116,7 @@ public class CoachServiceImpl implements CoachService {
         return modelMapper.map(entity, TemplateResponse.class);
     }
 
+    /** Updates a routine template by ID. */
     @Override
     public TemplateResponse updateTemplate(UUID id, TemplateRequest request) {
         RoutineTemplateEntity entity = routineTemplateJpaRepository.findById(id)
@@ -115,11 +131,13 @@ public class CoachServiceImpl implements CoachService {
         return modelMapper.map(entity, TemplateResponse.class);
     }
 
+    /** Deletes a routine template by ID. */
     @Override
     public void deleteTemplate(UUID id) {
         routineTemplateJpaRepository.deleteById(id);
     }
 
+    /** Retrieves a routine template by ID. */
     @Override
     public TemplateResponse getTemplate(UUID id) {
         RoutineTemplateEntity entity = routineTemplateJpaRepository.findById(id)
@@ -127,6 +145,7 @@ public class CoachServiceImpl implements CoachService {
         return modelMapper.map(entity, TemplateResponse.class);
     }
 
+    /** Retrieves all routine templates. */
     @Override
     public List<TemplateResponse> getTemplates() {
         return routineTemplateJpaRepository.findAll().stream()
@@ -134,6 +153,9 @@ public class CoachServiceImpl implements CoachService {
                 .collect(Collectors.toList());
     }
 
+    // ── Routines ──
+
+    /** Creates a new routine. */
     @Override
     public RoutineResponse createRoutine(RoutineRequest request) {
         RoutineEntity entity = new RoutineEntity();
@@ -149,6 +171,7 @@ public class CoachServiceImpl implements CoachService {
         return modelMapper.map(entity, RoutineResponse.class);
     }
 
+    /** Updates a routine by ID. */
     @Override
     public RoutineResponse updateRoutine(UUID id, RoutineRequest request) {
         RoutineEntity entity = routineJpaRepository.findById(id)
@@ -163,11 +186,13 @@ public class CoachServiceImpl implements CoachService {
         return modelMapper.map(entity, RoutineResponse.class);
     }
 
+    /** Deletes a routine by ID. */
     @Override
     public void deleteRoutine(UUID id) {
         routineJpaRepository.deleteById(id);
     }
 
+    /** Retrieves a routine by ID. */
     @Override
     public RoutineResponse getRoutine(UUID id) {
         RoutineEntity entity = routineJpaRepository.findById(id)
@@ -175,6 +200,7 @@ public class CoachServiceImpl implements CoachService {
         return modelMapper.map(entity, RoutineResponse.class);
     }
 
+    /** Retrieves all routines. */
     @Override
     public List<RoutineResponse> getRoutines() {
         return routineJpaRepository.findAll().stream()
@@ -182,6 +208,9 @@ public class CoachServiceImpl implements CoachService {
                 .collect(Collectors.toList());
     }
 
+    // ── Diets ──
+
+    /** Creates a new diet. */
     @Override
     public DietResponse createDiet(DietRequest request) {
         DietEntity entity = new DietEntity();
@@ -198,6 +227,7 @@ public class CoachServiceImpl implements CoachService {
         return modelMapper.map(entity, DietResponse.class);
     }
 
+    /** Updates a diet by ID. */
     @Override
     public DietResponse updateDiet(UUID id, DietRequest request) {
         DietEntity entity = dietJpaRepository.findById(id)
@@ -213,11 +243,13 @@ public class CoachServiceImpl implements CoachService {
         return modelMapper.map(entity, DietResponse.class);
     }
 
+    /** Deletes a diet by ID. */
     @Override
     public void deleteDiet(UUID id) {
         dietJpaRepository.deleteById(id);
     }
 
+    /** Retrieves a diet by ID. */
     @Override
     public DietResponse getDiet(UUID id) {
         DietEntity entity = dietJpaRepository.findById(id)
@@ -225,6 +257,7 @@ public class CoachServiceImpl implements CoachService {
         return modelMapper.map(entity, DietResponse.class);
     }
 
+    /** Retrieves all diets. */
     @Override
     public List<DietResponse> getDiets() {
         return dietJpaRepository.findAll().stream()
@@ -232,6 +265,9 @@ public class CoachServiceImpl implements CoachService {
                 .collect(Collectors.toList());
     }
 
+    // ── Diet Templates ──
+
+    /** Creates a new diet template. */
     @Override
     public DietTemplateResponse createDietTemplate(DietTemplateRequest request) {
         DietTemplateEntity entity = new DietTemplateEntity();
@@ -248,6 +284,7 @@ public class CoachServiceImpl implements CoachService {
         return modelMapper.map(entity, DietTemplateResponse.class);
     }
 
+    /** Updates a diet template by ID. */
     @Override
     public DietTemplateResponse updateDietTemplate(UUID id, DietTemplateRequest request) {
         DietTemplateEntity entity = dietTemplateJpaRepository.findById(id)
@@ -263,11 +300,13 @@ public class CoachServiceImpl implements CoachService {
         return modelMapper.map(entity, DietTemplateResponse.class);
     }
 
+    /** Deletes a diet template by ID. */
     @Override
     public void deleteDietTemplate(UUID id) {
         dietTemplateJpaRepository.deleteById(id);
     }
 
+    /** Retrieves a diet template by ID. */
     @Override
     public DietTemplateResponse getDietTemplate(UUID id) {
         DietTemplateEntity entity = dietTemplateJpaRepository.findById(id)
@@ -275,6 +314,7 @@ public class CoachServiceImpl implements CoachService {
         return modelMapper.map(entity, DietTemplateResponse.class);
     }
 
+    /** Retrieves all diet templates. */
     @Override
     public List<DietTemplateResponse> getDietTemplates() {
         return dietTemplateJpaRepository.findAll().stream()
@@ -282,6 +322,9 @@ public class CoachServiceImpl implements CoachService {
                 .collect(Collectors.toList());
     }
 
+    // ── Notes ──
+
+    /** Updates a note by ID. */
     @Override
     public NoteResponse updateNote(UUID id, NoteRequest request) {
         NoteEntity entity = noteJpaRepository.findById(id)
@@ -293,11 +336,13 @@ public class CoachServiceImpl implements CoachService {
         return modelMapper.map(entity, NoteResponse.class);
     }
 
+    /** Deletes a note by ID. */
     @Override
     public void deleteNote(UUID id) {
         noteJpaRepository.deleteById(id);
     }
 
+    /** Retrieves a note by ID. */
     @Override
     public NoteResponse getNote(UUID id) {
         NoteEntity entity = noteJpaRepository.findById(id)
@@ -305,6 +350,7 @@ public class CoachServiceImpl implements CoachService {
         return modelMapper.map(entity, NoteResponse.class);
     }
 
+    /** Retrieves all notes for a client ordered by creation date. */
     @Override
     public List<NoteResponse> getNotesForClient(UUID clientId) {
         return noteJpaRepository.findByClientIdOrderByCreatedAtDesc(clientId).stream()
@@ -312,6 +358,7 @@ public class CoachServiceImpl implements CoachService {
                 .collect(Collectors.toList());
     }
 
+    /** Adds a new note for a client. */
     @Override
     public NoteResponse addNote(UUID clientId, NoteRequest request) {
         NoteEntity entity = new NoteEntity();
@@ -327,6 +374,15 @@ public class CoachServiceImpl implements CoachService {
         return modelMapper.map(entity, NoteResponse.class);
     }
 
+    // ── Assignments ──
+
+    /**
+     * Creates an assignment linking a routine and a diet to a client.
+     *
+     * @param request assignment request with {@code clientId},
+     *                {@code routineId}, and {@code dietId}
+     * @return the created assignment
+     */
     @Override
     public AssignmentResponse createAssignment(AssignmentRequest request) {
         AssignmentEntity entity = new AssignmentEntity();
@@ -342,6 +398,7 @@ public class CoachServiceImpl implements CoachService {
         return modelMapper.map(entity, AssignmentResponse.class);
     }
 
+    /** Sets {@code active = false} on the given assignment. */
     @Override
     public void deactivateAssignment(UUID id) {
         AssignmentEntity entity = assignmentJpaRepository.findById(id)
@@ -350,6 +407,7 @@ public class CoachServiceImpl implements CoachService {
         assignmentJpaRepository.save(entity);
     }
 
+    /** Retrieves all assignments for a client. */
     @Override
     public List<AssignmentResponse> getAssignmentsForClient(UUID clientId) {
         return assignmentJpaRepository.findAll().stream()
@@ -358,6 +416,9 @@ public class CoachServiceImpl implements CoachService {
                 .collect(Collectors.toList());
     }
 
+    // ── Progress & Thread ──
+
+    /** Retrieves progress records for a client ordered by date. */
     @Override
     public List<ProgressResponse> getClientProgress(UUID clientId) {
         return progressJpaRepository.findByClientIdOrderByDateAsc(clientId).stream()
@@ -365,6 +426,7 @@ public class CoachServiceImpl implements CoachService {
                 .collect(Collectors.toList());
     }
 
+    /** Retrieves the nutrition messaging thread for a client. */
     @Override
     public ThreadResponse getThreadForClient(UUID clientId) {
         NutritionThreadEntity entity = nutritionThreadJpaRepository.findByClientId(clientId)
@@ -372,6 +434,13 @@ public class CoachServiceImpl implements CoachService {
         return modelMapper.map(entity, ThreadResponse.class);
     }
 
+    /**
+     * Appends a COACH message to the nutrition thread JSON.
+     *
+     * @param clientId the client ID
+     * @param message  the message text to send
+     * @return the updated thread
+     */
     @Override
     public ThreadResponse sendThreadMessage(UUID clientId, String message) {
         NutritionThreadEntity entity = nutritionThreadJpaRepository.findByClientId(clientId)

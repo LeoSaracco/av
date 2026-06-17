@@ -1,6 +1,6 @@
 # Backlog - AV Fitness App
 
-Actualizado: 2026-06-16
+Actualizado: 2026-06-17
 
 ## Hecho
 
@@ -54,7 +54,14 @@ Actualizado: 2026-06-16
   - inicio de contrato por API.
   - pago mock MercadoPago persistido en `payments`.
   - formulario, usuario y cliente creados al completar onboarding.
-  - auditoria de eventos clave en `audit_events`.
+- auditoria de eventos clave en `audit_events`.
+- Documentacion de codigo completada: JavaDoc en ~110 archivos backend (controllers, services, DTOs, entities, repos, config) y JSDoc en frontend (App, AppContext, Loader, Step5Account, AuthContext).
+- Email verification via Resend: envio de codigos de 6 digitos con templates HTML dark mode.
+- Auto-asignacion de rutina/dieta/hilo/nota al completar onboarding.
+- Edicion de registros de peso: PUT /api/me/progress/{id}.
+- Fix de cookies cross-origin: SameSite=None en AuthController y PlanContractController.
+- Fix visual frontend: wrap de titulo rutina, display flex en .card, borde verde consistente en historial.
+- SP sp_delete_client_by_email para limpiar datos de prueba e2e.
 
 ## Validado
 
@@ -91,10 +98,6 @@ Actualizado: 2026-06-16
   - MercadoPago
   - Resend
   - OpenAI
-- Documentar el codigo:
-  - componentes y contextos frontend.
-  - controllers, services, repositories, DTOs y entidades backend.
-  - flujos de auth, pagos, onboarding, coach, cliente y store.
 - Integrar MercadoPago real reemplazando el mock persistido.
 - Mejorar cobertura backend con tests de controller/service/repository.
 - Agregar prueba E2E que verifique que el home no llama endpoints privados.

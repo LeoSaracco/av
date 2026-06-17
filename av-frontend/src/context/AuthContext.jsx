@@ -18,6 +18,14 @@ function normalizeUser(data) {
   };
 }
 
+/**
+ * Authentication context provider connected to the real JWT API.
+ * Uses httpOnly cookies managed by the backend.
+ *
+ * @param {Object} props
+ * @param {ReactNode} props.children
+ * @returns {JSX.Element}
+ */
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -86,6 +94,12 @@ export function AuthProvider({ children }) {
   );
 }
 
+/**
+ * Access authentication state and actions.
+ *
+ * @returns {Object} Context value with: user, login, registerUser,
+ *                   completePlanContract, logout, loading, isCoach, isClient.
+ */
 // eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const ctx = useContext(AuthContext);

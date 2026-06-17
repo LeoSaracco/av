@@ -1,6 +1,6 @@
 # Railway - Estado operativo y guia para agentes
 
-Actualizado: 2026-06-16
+Actualizado: 2026-06-17
 
 ## Estado actual
 
@@ -111,7 +111,7 @@ Backend:
 | `CORS_ALLOWED_ORIGINS` | frontend productivo y localhost dev |
 | `AUTH_COOKIE_SECURE=true` | cookies seguras HTTPS |
 | `MERCADOPAGO_ACCESS_TOKEN` | credencial real pendiente |
-| `RESEND_API_KEY` | credencial real pendiente |
+| `RESEND_API_KEY` | configurado |
 | `OPENAI_API_KEY` | credencial real pendiente |
 
 No documentar valores secretos en Git.

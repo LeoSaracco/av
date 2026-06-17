@@ -20,6 +20,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Implements rate limiting using bucket4j.
+ * Limits login attempts to {@value #MAX_ATTEMPTS} per IP within a {@value #WINDOW_SECONDS}-second window.
+ */
 @Component
 public class RateLimitFilter extends OncePerRequestFilter {
 
@@ -38,11 +42,18 @@ public class RateLimitFilter extends OncePerRequestFilter {
                 return t;
             });
 
+    /**
+     * Schedules a periodic cleanup task that evicts expired IP entries every minute.
+     */
     public RateLimitFilter() {
         cleanupScheduler.scheduleAtFixedRate(
                 this::cleanupExpired, 1, 1, TimeUnit.MINUTES);
     }
 
+    /**
+     * Applies rate limiting only to {@code POST /api/auth/login}.
+     * Returns HTTP 429 with a JSON error body when the limit is exceeded.
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -83,6 +94,9 @@ public class RateLimitFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    /**
+     * Removes entries whose window is older than twice the configured window duration.
+     */
     private void cleanupExpired() {
         long now = Instant.now().getEpochSecond();
         Iterator<Map.Entry<String, AttemptWindow>> it =
@@ -95,6 +109,12 @@ public class RateLimitFilter extends OncePerRequestFilter {
         }
     }
 
+    /**
+     * Resolves the client IP, preferring the {@code X-Forwarded-For} header.
+     *
+     * @param request the incoming HTTP request
+     * @return the client's remote IP address
+     */
     private String getClientIp(HttpServletRequest request) {
         String xForwardedFor = request.getHeader("X-Forwarded-For");
         if (xForwardedFor != null && !xForwardedFor.isBlank()) {
@@ -103,6 +123,9 @@ public class RateLimitFilter extends OncePerRequestFilter {
         return request.getRemoteAddr();
     }
 
+    /**
+     * Holds per-IP attempt count and the start of the current time window.
+     */
     private static class AttemptWindow {
         long windowStart = Instant.now().getEpochSecond();
         AtomicInteger count = new AtomicInteger(0);

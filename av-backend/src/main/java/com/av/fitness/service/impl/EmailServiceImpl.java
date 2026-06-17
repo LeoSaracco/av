@@ -14,6 +14,10 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Implements email sending via Resend REST API.
+ * Templates use dark theme branding (#0a0a0a, #00FF00) with Outfit/Inter fonts.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -31,24 +35,50 @@ public class EmailServiceImpl implements EmailService {
     private static final String FONT_OUTFIT = "'Outfit', sans-serif";
     private static final String FONT_INTER = "'Inter', sans-serif";
 
+    /**
+     * Sends a verification email with a 6-digit code.
+     *
+     * @param to   the recipient email address
+     * @param code the 6-digit verification code
+     */
     @Override
     public void sendVerificationEmail(String to, String code) {
         String html = verificationTemplate(code);
         send(to, "Verific\u00e1 tu cuenta \u2014 AV Fitness", html);
     }
 
+    /**
+     * Sends a welcome email with a CTA to the platform.
+     *
+     * @param to   the recipient email address
+     * @param name the recipient's name
+     */
     @Override
     public void sendWelcomeEmail(String to, String name) {
         String html = welcomeTemplate(name);
         send(to, "\u00a1Bienvenido a AV Fitness!", html);
     }
 
+    /**
+     * Sends a password reset email with a reset code.
+     *
+     * @param to   the recipient email address
+     * @param code the password reset code
+     */
     @Override
     public void sendPasswordResetEmail(String to, String code) {
         String html = passwordResetTemplate(code);
         send(to, "Recupero de contrase\u00f1a \u2014 AV Fitness", html);
     }
 
+    /**
+     * Low-level HTTP POST to the Resend API.
+     *
+     * @param to      the recipient email address
+     * @param subject the email subject
+     * @param html    the HTML body content
+     * @throws RuntimeException if the email fails to send
+     */
     private void send(String to, String subject, String html) {
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -72,6 +102,13 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    /**
+     * Returns the base HTML wrapper for all email templates.
+     *
+     * @param emoji   the emoji displayed in the header
+     * @param content the inner content rows (tr elements)
+     * @return the complete HTML document as a string
+     */
     private String baseTemplate(String emoji, String content) {
         return """
                 <!DOCTYPE html>
@@ -138,6 +175,12 @@ public class EmailServiceImpl implements EmailService {
                 """.formatted(FONT_OUTFIT, emoji, FONT_OUTFIT, content, FONT_INTER, FONT_INTER);
     }
 
+    /**
+     * Returns an HTML table row displaying a formatted code.
+     *
+     * @param code the code string to display
+     * @return the HTML table row
+     */
     private String codeBlock(String code) {
         return """
                 <tr>
@@ -148,10 +191,22 @@ public class EmailServiceImpl implements EmailService {
                 """.formatted(FONT_INTER, formatCode(code));
     }
 
+    /**
+     * Formats a code by inserting spaces between each character for legibility.
+     *
+     * @param code the raw code string
+     * @return the formatted code with spaces between characters
+     */
     private String formatCode(String code) {
         return String.join(" ", code.split(""));
     }
 
+    /**
+     * Builds the HTML content for the email verification template.
+     *
+     * @param code the 6-digit verification code
+     * @return the HTML content wrapped in the base template
+     */
     private String verificationTemplate(String code) {
         String content = """
                 <tr>
@@ -179,6 +234,12 @@ public class EmailServiceImpl implements EmailService {
         return baseTemplate("\uD83C\uDFCB\uFE0F", content);
     }
 
+    /**
+     * Builds the HTML content for the welcome email template.
+     *
+     * @param name the recipient's name
+     * @return the HTML content wrapped in the base template
+     */
     private String welcomeTemplate(String name) {
         String content = """
                 <tr>
@@ -210,6 +271,12 @@ public class EmailServiceImpl implements EmailService {
         return baseTemplate("\uD83C\uDFCB\uFE0F", content);
     }
 
+    /**
+     * Builds the HTML content for the password reset template.
+     *
+     * @param code the password reset code
+     * @return the HTML content wrapped in the base template
+     */
     private String passwordResetTemplate(String code) {
         String content = """
                 <tr>
