@@ -19,6 +19,8 @@ export default function Routines() {
   const [confirmId, setConfirmId] = useState(null);
   const [fromTemplate, setFromTemplate] = useState('');
   const [viewRoutine, setViewRoutine] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   const filtered = routines.filter(r =>
     r.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -27,7 +29,7 @@ export default function Routines() {
 
   const EMPTY_EX = { name: '', sets: 3, reps: 10, rest: '60s', notes: '', videoUrl: '' };
 
-  const openAdd = () => { setForm({ name: '', goal: '', exercises: [] }); setEditId(null); setFromTemplate(''); setModal('form'); };
+  const openAdd = () => { setForm({ name: '', goal: '', exercises: [] }); setEditId(null); setFromTemplate(''); setSaveError(''); setModal('form'); };
   const openEdit = (r) => {
     setForm({ name: r.name, goal: r.goal, exercises: r.exercises.map(e => ({ ...e })) });
     setEditId(r.id); setModal('form');
@@ -43,11 +45,19 @@ export default function Routines() {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.name.trim()) return;
-    if (editId) updateRoutine(editId, form);
-    else addRoutine({ ...form, templateId: fromTemplate || null });
-    setModal(null);
+    setSaving(true);
+    setSaveError('');
+    try {
+      if (editId) await updateRoutine(editId, form);
+      else await addRoutine({ ...form, templateId: fromTemplate || null });
+      setModal(null);
+    } catch (err) {
+      setSaveError(err.message || 'Error al guardar');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const addExercise = () => setForm(f => ({ ...f, exercises: [...f.exercises, { ...EMPTY_EX, id: Date.now().toString() }] }));
@@ -159,8 +169,9 @@ export default function Routines() {
         title={editId ? 'Editar rutina' : 'Nueva rutina'}
         footer={
           <>
-            <button className="btn btn-ghost" onClick={() => setModal(null)}>Cancelar</button>
-            <button className="btn btn-primary" onClick={handleSave}>{editId ? 'Guardar' : 'Crear rutina'}</button>
+            {saveError && <span style={{ fontSize: 12, color: 'var(--color-danger)', marginRight: 'auto' }}>{saveError}</span>}
+            <button className="btn btn-ghost" onClick={() => setModal(null)} disabled={saving}>Cancelar</button>
+            <button className="btn btn-primary" onClick={handleSave} disabled={saving}>{saving ? 'Guardando...' : editId ? 'Guardar' : 'Crear rutina'}</button>
           </>
         }>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

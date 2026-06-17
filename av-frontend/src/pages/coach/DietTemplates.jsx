@@ -15,6 +15,8 @@ export default function DietTemplates() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState(null);
   const [confirmId, setConfirmId] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   const [formData, setFormData] = useState({
     name: '', goal: '', description: '', indications: '',
@@ -24,6 +26,7 @@ export default function DietTemplates() {
   const openAdd = () => {
     setFormData({ name: '', goal: '', description: '', indications: '', meals: [] });
     setEditId(null);
+    setSaveError('');
     setModalOpen(true);
   };
 
@@ -36,11 +39,19 @@ export default function DietTemplates() {
     setModalOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.name.trim()) return;
-    if (editId) updateDietTemplate(editId, formData);
-    else addDietTemplate(formData);
-    setModalOpen(false);
+    setSaving(true);
+    setSaveError('');
+    try {
+      if (editId) await updateDietTemplate(editId, formData);
+      else await addDietTemplate(formData);
+      setModalOpen(false);
+    } catch (err) {
+      setSaveError(err.message || 'Error al guardar');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleAddMeal = () => {
@@ -105,8 +116,11 @@ export default function DietTemplates() {
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editId ? 'Editar Dieta' : 'Nueva Dieta'}
         footer={
           <>
-            <button className="btn btn-ghost" onClick={() => setModalOpen(false)}>Cancelar</button>
-            <button className="btn btn-primary" onClick={handleSave}>Guardar dieta</button>
+            {saveError && <span style={{ fontSize: 12, color: 'var(--color-danger)', marginRight: 'auto' }}>{saveError}</span>}
+            <button className="btn btn-ghost" onClick={() => setModalOpen(false)} disabled={saving}>Cancelar</button>
+            <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+              {saving ? 'Guardando...' : 'Guardar dieta'}
+            </button>
           </>
         }>
         

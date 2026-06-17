@@ -61,6 +61,13 @@ function normalizeDiet(diet) {
   return { ...diet, meals: parseJsonField(diet.meals, []) };
 }
 
+function stringifyJsonArray(data, field) {
+  if (data && data[field] !== undefined && Array.isArray(data[field])) {
+    return { ...data, [field]: JSON.stringify(data[field]) };
+  }
+  return data;
+}
+
 // ── Auth ──────────────────────────────────────────────────────────────────────
 export async function apiRegister(name, email, password) {
   return request('POST', '/auth/register', { name, email, password });
@@ -213,11 +220,11 @@ export async function apiGetTemplates() {
 }
 
 export async function apiCreateTemplate(data) {
-  return normalizeTemplate(await request('POST', '/coach/templates', data));
+  return normalizeTemplate(await request('POST', '/coach/templates', stringifyJsonArray(data, 'exercises')));
 }
 
 export async function apiUpdateTemplate(id, data) {
-  return normalizeTemplate(await request('PUT', `/coach/templates/${id}`, data));
+  return normalizeTemplate(await request('PUT', `/coach/templates/${id}`, stringifyJsonArray(data, 'exercises')));
 }
 
 export async function apiDeleteTemplate(id) {
@@ -231,11 +238,11 @@ export async function apiGetRoutines() {
 }
 
 export async function apiCreateRoutine(data) {
-  return normalizeRoutine(await request('POST', '/coach/routines', data));
+  return normalizeRoutine(await request('POST', '/coach/routines', stringifyJsonArray(data, 'exercises')));
 }
 
 export async function apiUpdateRoutine(id, data) {
-  return normalizeRoutine(await request('PUT', `/coach/routines/${id}`, data));
+  return normalizeRoutine(await request('PUT', `/coach/routines/${id}`, stringifyJsonArray(data, 'exercises')));
 }
 
 export async function apiDeleteRoutine(id) {
@@ -291,11 +298,11 @@ export async function apiGetDietTemplates() {
 }
 
 export async function apiCreateDietTemplate(data) {
-  return normalizeDiet(await request('POST', '/coach/diet-templates', data));
+  return normalizeDiet(await request('POST', '/coach/diet-templates', stringifyJsonArray(data, 'meals')));
 }
 
 export async function apiUpdateDietTemplate(id, data) {
-  return normalizeDiet(await request('PUT', `/coach/diet-templates/${id}`, data));
+  return normalizeDiet(await request('PUT', `/coach/diet-templates/${id}`, stringifyJsonArray(data, 'meals')));
 }
 
 export async function apiDeleteDietTemplate(id) {
@@ -309,11 +316,11 @@ export async function apiGetDiets() {
 }
 
 export async function apiCreateDiet(data) {
-  return normalizeDiet(await request('POST', '/coach/diets', data));
+  return normalizeDiet(await request('POST', '/coach/diets', stringifyJsonArray(data, 'meals')));
 }
 
 export async function apiUpdateDiet(id, data) {
-  return normalizeDiet(await request('PUT', `/coach/diets/${id}`, data));
+  return normalizeDiet(await request('PUT', `/coach/diets/${id}`, stringifyJsonArray(data, 'meals')));
 }
 
 export async function apiDeleteDiet(id) {

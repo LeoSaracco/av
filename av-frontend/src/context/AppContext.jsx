@@ -152,13 +152,13 @@ export function AppProvider({ children }) {
   const deleteClient = async (id) => { try { await api.apiDeleteClient(id); setClients(prev => prev.filter(c => c.id !== id)); showToast('Cliente eliminado', 'info'); } catch { showToast('Error', 'error'); } };
   const getClient = (id) => clients.find(c => c.id === id);
 
-  const addTemplate = async (data) => { try { const created = await api.apiCreateTemplate(data); setTemplates(prev => [...prev, created]); showToast('Template creado'); } catch { showToast('Error', 'error'); } };
-  const updateTemplate = async (id, data) => { try { const updated = await api.apiUpdateTemplate(id, data); setTemplates(prev => prev.map(t => t.id === id ? updated : t)); showToast('Template actualizado'); } catch { showToast('Error', 'error'); } };
+  const addTemplate = async (data) => { try { const created = await api.apiCreateTemplate(data); setTemplates(prev => [...prev, created]); showToast('Template creado'); return created; } catch (err) { showToast(err.message || 'Error', 'error'); throw err; } };
+  const updateTemplate = async (id, data) => { try { const updated = await api.apiUpdateTemplate(id, data); setTemplates(prev => prev.map(t => t.id === id ? updated : t)); showToast('Template actualizado'); return updated; } catch (err) { showToast(err.message || 'Error', 'error'); throw err; } };
   const deleteTemplate = async (id) => { try { await api.apiDeleteTemplate(id); setTemplates(prev => prev.filter(t => t.id !== id)); showToast('Template eliminado', 'info'); } catch { showToast('Error', 'error'); } };
   const getTemplate = (id) => templates.find(t => t.id === id);
 
-  const addRoutine = async (data) => { try { const created = await api.apiCreateRoutine(data); setRoutines(prev => [...prev, created]); showToast('Rutina creada'); } catch { showToast('Error', 'error'); } };
-  const updateRoutine = async (id, data) => { try { const updated = await api.apiUpdateRoutine(id, data); setRoutines(prev => prev.map(r => r.id === id ? updated : r)); showToast('Rutina actualizada'); } catch { showToast('Error', 'error'); } };
+  const addRoutine = async (data) => { try { const created = await api.apiCreateRoutine(data); setRoutines(prev => [...prev, created]); showToast('Rutina creada'); return created; } catch (err) { showToast(err.message || 'Error', 'error'); throw err; } };
+  const updateRoutine = async (id, data) => { try { const updated = await api.apiUpdateRoutine(id, data); setRoutines(prev => prev.map(r => r.id === id ? updated : r)); showToast('Rutina actualizada'); return updated; } catch (err) { showToast(err.message || 'Error', 'error'); throw err; } };
   const deleteRoutine = async (id) => { try { await api.apiDeleteRoutine(id); setRoutines(prev => prev.filter(r => r.id !== id)); showToast('Rutina eliminada', 'info'); } catch { showToast('Error', 'error'); } };
   const getRoutine = (id) => routines.find(r => r.id === id);
   const duplicateRoutine = async (id) => {
@@ -188,13 +188,13 @@ export function AppProvider({ children }) {
   const updateProgress = async (id, data) => { try { const updated = await api.apiUpdateProgress(id, data.weight, data.date, data.comment); setProgress(prev => prev.map(p => p.id === id ? { ...p, ...updated } : p)); showToast('Progreso actualizado'); } catch { showToast('Error', 'error'); } };
   const getProgressForClient = (clientId) => progress.filter(p => p.clientId === clientId).sort((a, b) => new Date(a.date) - new Date(b.date));
 
-  const addDietTemplate = async (data) => { try { const created = await api.apiCreateDietTemplate(data); setDietTemplates(prev => [...prev, created]); showToast('Dieta creada'); } catch { showToast('Error', 'error'); } };
-  const updateDietTemplate = async (id, data) => { try { const updated = await api.apiUpdateDietTemplate(id, data); setDietTemplates(prev => prev.map(d => d.id === id ? updated : d)); } catch { showToast('Error', 'error'); } };
+  const addDietTemplate = async (data) => { try { const created = await api.apiCreateDietTemplate(data); setDietTemplates(prev => [...prev, created]); showToast('Dieta creada'); return created; } catch (err) { showToast(err.message || 'Error', 'error'); throw err; } };
+  const updateDietTemplate = async (id, data) => { try { const updated = await api.apiUpdateDietTemplate(id, data); setDietTemplates(prev => prev.map(d => d.id === id ? updated : d)); showToast('Dieta actualizada'); return updated; } catch (err) { showToast(err.message || 'Error', 'error'); throw err; } };
   const deleteDietTemplate = async (id) => { try { await api.apiDeleteDietTemplate(id); setDietTemplates(prev => prev.filter(d => d.id !== id)); } catch { showToast('Error', 'error'); } };
   const getDietTemplate = (id) => dietTemplates.find(d => d.id === id);
 
-  const addDiet = async (data) => { try { const created = await api.apiCreateDiet(data); setDiets(prev => [...prev, created]); } catch { showToast('Error', 'error'); } };
-  const updateDiet = async (id, data) => { try { const updated = await api.apiUpdateDiet(id, data); setDiets(prev => prev.map(d => d.id === id ? updated : d)); } catch { showToast('Error', 'error'); } };
+  const addDiet = async (data) => { try { const created = await api.apiCreateDiet(data); setDiets(prev => [...prev, created]); showToast('Dieta creada'); return created; } catch (err) { showToast(err.message || 'Error', 'error'); throw err; } };
+  const updateDiet = async (id, data) => { try { const updated = await api.apiUpdateDiet(id, data); setDiets(prev => prev.map(d => d.id === id ? updated : d)); showToast('Dieta actualizada'); return updated; } catch (err) { showToast(err.message || 'Error', 'error'); throw err; } };
   const deleteDiet = async (id) => { try { await api.apiDeleteDiet(id); setDiets(prev => prev.filter(d => d.id !== id)); } catch { showToast('Error', 'error'); } };
   const getDiet = (id) => diets.find(d => d.id === id);
   const createDietFromTemplate = async (templateId, name, goal) => {
