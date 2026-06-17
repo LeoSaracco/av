@@ -10,6 +10,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
 import { ClientLayout } from '../../components/layout/ClientLayout';
 import { Modal, ConfirmModal } from '../../components/ui/Modals';
+import { inlineSpinnerStyle } from '../../utils/spinnerStyle';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 function CustomTooltip({ active, payload, label }) {
@@ -25,13 +26,6 @@ function CustomTooltip({ active, payload, label }) {
 }
 
 const emptyForm = () => ({ date: new Date().toISOString().slice(0, 10), weight: '', comment: '' });
-
-const spinnerStyle = (size, color, bg) => ({
-  width: size, height: size,
-  border: `2px solid ${bg}`, borderTopColor: color,
-  borderRadius: '50%', animation: 'spin 0.7s linear infinite',
-  display: 'inline-block', verticalAlign: 'middle'
-});
 
 export default function ClientProgress() {
   const { user } = useAuth();
@@ -213,7 +207,7 @@ export default function ClientProgress() {
           <>
             <button className="btn btn-ghost" onClick={closeModal} disabled={saving}>Cancelar</button>
             <button className="btn btn-primary" onClick={handleSave} disabled={saving} style={{ minWidth: 150, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-              {saving ? <div style={spinnerStyle(18, '#000', 'rgba(0,0,0,0.25)')} /> : (editingEntry ? 'Guardar cambios' : 'Guardar registro')}
+              {saving ? <div style={inlineSpinnerStyle(18, '#000', 'rgba(0,0,0,0.25)')} /> : (editingEntry ? 'Guardar cambios' : 'Guardar registro')}
             </button>
           </>
         }>
@@ -240,7 +234,7 @@ export default function ClientProgress() {
         onConfirm={handleDelete}
         title="Eliminar registro"
         message="Seguro que queres eliminar este registro de peso? No se puede deshacer."
-        confirmLabel={deleting ? <div style={spinnerStyle(16, '#fff', 'rgba(255,255,255,0.25)')} /> : 'Eliminar'}
+        confirmLabel={deleting ? <div style={inlineSpinnerStyle(16, '#fff', 'rgba(255,255,255,0.25)')} /> : 'Eliminar'}
         confirmDisabled={deleting}
       />
     </ClientLayout>

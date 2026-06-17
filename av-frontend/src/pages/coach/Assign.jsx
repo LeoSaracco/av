@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { CoachLayout } from '../../components/layout/CoachLayout';
+import { inlineSpinnerStyle } from '../../utils/spinnerStyle';
 import { Modal } from '../../components/ui/Modals';
 
 export default function Assign() {
@@ -141,6 +142,7 @@ function AssignedRoutineEditor({ routine, routineId }) {
   const { updateRoutine } = useApp();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(null);
+  const [saving, setSaving] = useState(false);
 
   const openEdit = () => {
     setForm({ name: routine.name, goal: routine.goal, exercises: routine.exercises.map(e => ({ ...e })) });
@@ -152,9 +154,14 @@ function AssignedRoutineEditor({ routine, routineId }) {
     exercises: f.exercises.map((e, i) => i === idx ? { ...e, [field]: field === 'sets' || field === 'reps' ? Number(val) : val } : e)
   }));
 
-  const handleSave = () => {
-    updateRoutine(routineId, form);
-    setOpen(false);
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await updateRoutine(routineId, form);
+      setOpen(false);
+    } catch { /* ignore */ } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -164,8 +171,10 @@ function AssignedRoutineEditor({ routine, routineId }) {
         title={`Editar rutina de ${routine.name}`}
         footer={
           <>
-            <button className="btn btn-ghost" onClick={() => setOpen(false)}>Cancelar</button>
-            <button className="btn btn-primary" onClick={handleSave}>Guardar</button>
+            <button className="btn btn-ghost" onClick={() => setOpen(false)} disabled={saving}>Cancelar</button>
+            <button className="btn btn-primary" onClick={handleSave} disabled={saving} style={saving ? { minWidth: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 } : {}}>
+              {saving ? <div style={inlineSpinnerStyle(18, '#000', 'rgba(0,0,0,0.25)')} /> : 'Guardar'}
+            </button>
           </>
         }>
         {form && (

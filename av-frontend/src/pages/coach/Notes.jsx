@@ -7,6 +7,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { CoachLayout } from '../../components/layout/CoachLayout';
+import { inlineSpinnerStyle } from '../../utils/spinnerStyle';
 import { Modal, ConfirmModal } from '../../components/ui/Modals';
 
 export default function Notes() {
@@ -16,17 +17,24 @@ export default function Notes() {
   const [editId, setEditId] = useState(null);
   const [noteText, setNoteText] = useState('');
   const [confirmId, setConfirmId] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const clientNotes = selectedClient ? getNotesForClient(selectedClient) : [];
   const currentClient = clients.find(c => c.id === selectedClient);
 
   const openAdd = () => { setNoteText(''); setEditId(null); setModal(true); };
   const openEdit = (n) => { setNoteText(n.text); setEditId(n.id); setModal(true); };
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!noteText.trim() || !selectedClient) return;
-    if (editId) updateNote(editId, noteText);
-    else addNote(selectedClient, noteText);
-    setModal(false);
+    setSaving(true);
+    try {
+      if (editId) await updateNote(editId, noteText);
+      else await addNote(selectedClient, noteText);
+      setModal(false);
+    } catch { /* ignore */ } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -122,8 +130,10 @@ export default function Notes() {
         title={editId ? 'Editar observación' : `Nueva observación — ${currentClient?.name}`}
         footer={
           <>
-            <button className="btn btn-ghost" onClick={() => setModal(false)}>Cancelar</button>
-            <button className="btn btn-primary" onClick={handleSave}>{editId ? 'Guardar' : 'Agregar'}</button>
+            <button className="btn btn-ghost" onClick={() => setModal(false)} disabled={saving}>Cancelar</button>
+            <button className="btn btn-primary" onClick={handleSave} disabled={saving} style={saving ? { minWidth: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 } : {}}>
+              {saving ? <div style={inlineSpinnerStyle(18, '#000', 'rgba(0,0,0,0.25)')} /> : editId ? 'Guardar' : 'Agregar'}
+            </button>
           </>
         }>
         <div className="form-group">
@@ -132,9 +142,11 @@ export default function Notes() {
         </div>
       </Modal>
 
-      <ConfirmModal open={!!confirmId} onClose={() => setConfirmId(null)}
-        onConfirm={() => deleteNote(confirmId)}
-        title="Eliminar observación" message="¿Eliminar esta observación?" />
+      <ConfirmModal open={!!confirmId} onClose={() => { if (!deleting) setConfirmId(null); }}
+        onConfirm={async () => { setDeleting(true); try { await deleteNote(confirmId); } catch { /* ignore */ } setDeleting(false); setConfirmId(null); }}
+        title="Eliminar observación" message="¿Eliminar esta observación?"
+        confirmDisabled={deleting}
+        confirmLabel={deleting ? <div style={inlineSpinnerStyle(16, '#fff', 'rgba(255,255,255,0.25)')} /> : 'Eliminar'} />
     </CoachLayout>
   );
 }

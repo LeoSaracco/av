@@ -10,6 +10,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { CoachLayout } from '../../components/layout/CoachLayout';
 import { Modal, ConfirmModal } from '../../components/ui/Modals';
+import { inlineSpinnerStyle } from '../../utils/spinnerStyle';
 
 export default function ClientDetail() {
   const { id } = useParams();
@@ -42,21 +43,33 @@ export default function ClientDetail() {
   const [selectedDietTpl, setSelectedDietTpl] = useState('');
   const [editDietModal, setEditDietModal] = useState(false);
   const [editDietForm, setEditDietForm] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  const handleAssignDiet = () => {
-    if (selectedDietTpl) {
-      const newDiet = createDietFromTemplate(selectedDietTpl, null, null);
-      if (newDiet) {
-        assignDiet(client.id, newDiet.id);
-        setAssignDietModal(false);
+  const handleAssignDiet = async () => {
+    setSaving(true);
+    try {
+      if (selectedDietTpl) {
+        const newDiet = createDietFromTemplate(selectedDietTpl, null, null);
+        if (newDiet) {
+          assignDiet(client.id, newDiet.id);
+          setAssignDietModal(false);
+        }
       }
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleSaveEditDiet = () => {
-    if (diet && editDietForm) {
-      updateDiet(diet.id, editDietForm);
-      setEditDietModal(false);
+  const handleSaveEditDiet = async () => {
+    setSaving(true);
+    try {
+      if (diet && editDietForm) {
+        updateDiet(diet.id, editDietForm);
+        setEditDietModal(false);
+      }
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -72,11 +85,16 @@ export default function ClientDetail() {
 
   const openAddNote = () => { setNoteText(''); setEditNoteId(null); setNoteModal(true); };
   const openEditNote = (n) => { setNoteText(n.text); setEditNoteId(n.id); setNoteModal(true); };
-  const handleSaveNote = () => {
+  const handleSaveNote = async () => {
     if (!noteText.trim()) return;
-    if (editNoteId) updateNote(editNoteId, noteText);
-    else addNote(id, noteText);
-    setNoteModal(false);
+    setSaving(true);
+    try {
+      if (editNoteId) updateNote(editNoteId, noteText);
+      else addNote(id, noteText);
+      setNoteModal(false);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const lastWeight = progress.length > 0 ? progress[progress.length - 1].weight : null;
@@ -391,9 +409,9 @@ export default function ClientDetail() {
         title={editNoteId ? 'Editar observación' : 'Nueva observación'}
         footer={
           <>
-            <button className="btn btn-ghost" onClick={() => setNoteModal(false)}>Cancelar</button>
-            <button className="btn btn-primary" onClick={handleSaveNote}>
-              {editNoteId ? 'Guardar cambios' : 'Agregar'}
+            <button className="btn btn-ghost" onClick={() => setNoteModal(false)} disabled={saving}>Cancelar</button>
+            <button className="btn btn-primary" onClick={handleSaveNote} disabled={saving}>
+              {saving ? <div style={inlineSpinnerStyle(18, '#000', 'rgba(0,0,0,0.25)')} /> : (editNoteId ? 'Guardar cambios' : 'Agregar')}
             </button>
           </>
         }>
@@ -404,7 +422,9 @@ export default function ClientDetail() {
       </Modal>
 
       <ConfirmModal open={!!confirmNoteId} onClose={() => setConfirmNoteId(null)}
-        onConfirm={() => deleteNote(confirmNoteId)}
+        onConfirm={async () => { setDeleting(true); try { deleteNote(confirmNoteId); } finally { setDeleting(false); setConfirmNoteId(null); } }}
+        confirmDisabled={deleting}
+        confirmLabel={deleting ? <div style={inlineSpinnerStyle(18, '#fff', 'rgba(255,255,255,0.25)')} /> : 'Eliminar'}
         title="Eliminar observación" message="¿Eliminar esta observación?" />
         
       {/* Assign Diet Modal */}
@@ -412,8 +432,10 @@ export default function ClientDetail() {
         title="Asignar plantilla de dieta"
         footer={
           <>
-            <button className="btn btn-ghost" onClick={() => setAssignDietModal(false)}>Cancelar</button>
-            <button className="btn btn-primary" disabled={!selectedDietTpl} onClick={handleAssignDiet}>Asignar Dieta</button>
+            <button className="btn btn-ghost" onClick={() => setAssignDietModal(false)} disabled={saving}>Cancelar</button>
+            <button className="btn btn-primary" disabled={!selectedDietTpl || saving} onClick={handleAssignDiet}>
+              {saving ? <div style={inlineSpinnerStyle(18, '#000', 'rgba(0,0,0,0.25)')} /> : 'Asignar Dieta'}
+            </button>
           </>
         }>
           <div className="form-group">
@@ -430,8 +452,10 @@ export default function ClientDetail() {
         title="Editar dieta del cliente"
         footer={
           <>
-            <button className="btn btn-ghost" onClick={() => setEditDietModal(false)}>Cancelar</button>
-            <button className="btn btn-primary" onClick={handleSaveEditDiet}>Guardar</button>
+            <button className="btn btn-ghost" onClick={() => setEditDietModal(false)} disabled={saving}>Cancelar</button>
+            <button className="btn btn-primary" onClick={handleSaveEditDiet} disabled={saving}>
+              {saving ? <div style={inlineSpinnerStyle(18, '#000', 'rgba(0,0,0,0.25)')} /> : 'Guardar'}
+            </button>
           </>
         }>
         {editDietForm && (

@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { CoachLayout } from '../../components/layout/CoachLayout';
 import { Modal, ConfirmModal } from '../../components/ui/Modals';
+import { inlineSpinnerStyle } from '../../utils/spinnerStyle';
 
 export default function DietTemplates() {
   const { dietTemplates, addDietTemplate, updateDietTemplate, deleteDietTemplate, uid } = useApp();
@@ -17,6 +18,7 @@ export default function DietTemplates() {
   const [confirmId, setConfirmId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '', goal: '', description: '', indications: '',
@@ -118,8 +120,8 @@ export default function DietTemplates() {
           <>
             {saveError && <span style={{ fontSize: 12, color: 'var(--color-danger)', marginRight: 'auto' }}>{saveError}</span>}
             <button className="btn btn-ghost" onClick={() => setModalOpen(false)} disabled={saving}>Cancelar</button>
-            <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
-              {saving ? 'Guardando...' : 'Guardar dieta'}
+            <button className="btn btn-primary" onClick={handleSave} disabled={saving} style={saving ? { minWidth: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 } : {}}>
+              {saving ? <div style={inlineSpinnerStyle(18, '#000', 'rgba(0,0,0,0.25)')} /> : 'Guardar dieta'}
             </button>
           </>
         }>
@@ -170,9 +172,16 @@ export default function DietTemplates() {
         </div>
       </Modal>
 
-      <ConfirmModal open={!!confirmId} onClose={() => setConfirmId(null)}
-        onConfirm={() => { deleteDietTemplate(confirmId); setConfirmId(null); }}
-        title="Eliminar plantilla" message="¿Estás seguro de eliminar esta plantilla de dieta? No afectará a las dietas ya asignadas." />
+      <ConfirmModal open={!!confirmId} onClose={() => { if (!deleting) setConfirmId(null); }}
+        onConfirm={async () => {
+          setDeleting(true);
+          try { await deleteDietTemplate(confirmId); } catch { /* toast already shown */ }
+          setDeleting(false);
+          setConfirmId(null);
+        }}
+        title="Eliminar plantilla" message="¿Estás seguro de eliminar esta plantilla de dieta? No afectará a las dietas ya asignadas."
+        confirmDisabled={deleting}
+        confirmLabel={deleting ? <div style={inlineSpinnerStyle(16, '#fff', 'rgba(255,255,255,0.25)')} /> : 'Eliminar'} />
     </CoachLayout>
   );
 }
