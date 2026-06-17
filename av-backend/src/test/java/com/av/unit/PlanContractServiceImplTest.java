@@ -38,6 +38,14 @@ class PlanContractServiceImplTest {
     @Mock private UserJpaRepository userJpaRepository;
     @Mock private OnboardingJpaRepository onboardingJpaRepository;
     @Mock private RefreshTokenJpaRepository refreshTokenJpaRepository;
+    @Mock private RoutineTemplateJpaRepository routineTemplateJpaRepository;
+    @Mock private DietTemplateJpaRepository dietTemplateJpaRepository;
+    @Mock private RoutineJpaRepository routineJpaRepository;
+    @Mock private DietJpaRepository dietJpaRepository;
+    @Mock private AssignmentJpaRepository assignmentJpaRepository;
+    @Mock private DietAssignmentJpaRepository dietAssignmentJpaRepository;
+    @Mock private NutritionThreadJpaRepository nutritionThreadJpaRepository;
+    @Mock private NoteJpaRepository noteJpaRepository;
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private JwtService jwtService;
 

@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -34,6 +35,14 @@ public class PlanContractServiceImpl implements PlanContractService {
     private final UserJpaRepository userJpaRepository;
     private final OnboardingJpaRepository onboardingJpaRepository;
     private final RefreshTokenJpaRepository refreshTokenJpaRepository;
+    private final RoutineTemplateJpaRepository routineTemplateJpaRepository;
+    private final DietTemplateJpaRepository dietTemplateJpaRepository;
+    private final RoutineJpaRepository routineJpaRepository;
+    private final DietJpaRepository dietJpaRepository;
+    private final AssignmentJpaRepository assignmentJpaRepository;
+    private final DietAssignmentJpaRepository dietAssignmentJpaRepository;
+    private final NutritionThreadJpaRepository nutritionThreadJpaRepository;
+    private final NoteJpaRepository noteJpaRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
@@ -165,6 +174,8 @@ public class PlanContractServiceImpl implements PlanContractService {
         user.setCreatedAt(now);
         userJpaRepository.save(user);
 
+        assignDefaults(clientId, user.getName(), contract.getPlanId(), request.getGoal());
+
         OnboardingEntity onboarding = new OnboardingEntity();
         onboarding.setId(UUID.randomUUID());
         onboarding.setPlanId(contract.getPlanId());
@@ -203,6 +214,151 @@ public class PlanContractServiceImpl implements PlanContractService {
                 .contractStatus(contract.getStatus())
                 .user(token)
                 .build();
+    }
+
+    private void assignDefaults(UUID clientId, String clientName, String planId, String goal) {
+        boolean includeDiet = isNutritionPlan(planId);
+
+        RoutineTemplateEntity routineTemplate = findRoutineTemplate(goal);
+        RoutineEntity routine = createRoutineFromTemplate(clientName, routineTemplate);
+        routineJpaRepository.save(routine);
+
+        AssignmentEntity assignment = new AssignmentEntity();
+        assignment.setId(UUID.randomUUID());
+        assignment.setClientId(clientId);
+        assignment.setRoutineId(routine.getId());
+        assignment.setAssignedAt(LocalDate.now());
+        assignment.setActive(true);
+        assignment.setCreatedAt(LocalDateTime.now());
+        assignmentJpaRepository.save(assignment);
+
+        audit("DEFAULT_ROUTINE_ASSIGNED", "ASSIGNMENT", assignment.getId(), null, clientId,
+                "{\"routineId\":\"" + routine.getId() + "\",\"template\":\"" + routineTemplate.getName() + "\"}");
+
+        if (includeDiet) {
+            DietTemplateEntity dietTemplate = findDietTemplate(goal);
+            DietEntity diet = createDietFromTemplate(clientName, dietTemplate);
+            dietJpaRepository.save(diet);
+
+            DietAssignmentEntity dietAssignment = new DietAssignmentEntity();
+            dietAssignment.setId(UUID.randomUUID());
+            dietAssignment.setClientId(clientId);
+            dietAssignment.setDietId(diet.getId());
+            dietAssignment.setAssignedAt(LocalDate.now());
+            dietAssignment.setActive(true);
+            dietAssignment.setCreatedAt(LocalDateTime.now());
+            dietAssignmentJpaRepository.save(dietAssignment);
+
+            audit("DEFAULT_DIET_ASSIGNED", "DIET_ASSIGNMENT", dietAssignment.getId(), null, clientId,
+                    "{\"dietId\":\"" + diet.getId() + "\",\"template\":\"" + dietTemplate.getName() + "\"}");
+        }
+
+        NutritionThreadEntity thread = new NutritionThreadEntity();
+        thread.setId(UUID.randomUUID());
+        thread.setClientId(clientId);
+        thread.setMessages("[]");
+        thread.setCreatedAt(LocalDateTime.now());
+        thread.setUpdatedAt(LocalDateTime.now());
+        nutritionThreadJpaRepository.save(thread);
+
+        NoteEntity note = new NoteEntity();
+        note.setId(UUID.randomUUID());
+        note.setClientId(clientId);
+        note.setText("Bienvenido! Ya te arme una rutina inicial basada en tus objetivos. Pronto la voy a personalizar.");
+        note.setCreatedAt(LocalDate.now());
+        note.setUpdatedAt(LocalDate.now());
+        note.setUpdatedAtTz(LocalDateTime.now());
+        noteJpaRepository.save(note);
+
+        audit("WELCOME_NOTE_CREATED", "NOTE", note.getId(), null, clientId, "{}");
+    }
+
+    private boolean isNutritionPlan(String planId) {
+        return "f2222222-2222-2222-2222-222222222222".equals(planId)
+                || "f3333333-3333-3333-3333-333333333333".equals(planId);
+    }
+
+    private boolean isWeightLossGoal(String goal) {
+        if (goal == null) return false;
+        String g = goal.toLowerCase();
+        return g.contains("bajar") || g.contains("perder") || g.contains("quemar")
+                || g.contains("grasa") || g.contains("definir") || g.contains("adelgazar")
+                || g.contains("definicion") || g.contains("peso");
+    }
+
+    private boolean isMuscleGainGoal(String goal) {
+        if (goal == null) return false;
+        String g = goal.toLowerCase();
+        return g.contains("ganar") || g.contains("masa") || g.contains("muscular")
+                || g.contains("volumen") || g.contains("hipertrofia") || g.contains("fuerza")
+                || g.contains("aumentar");
+    }
+
+    private RoutineTemplateEntity findRoutineTemplate(String goal) {
+        List<RoutineTemplateEntity> templates = routineTemplateJpaRepository.findAll();
+        if (templates.isEmpty()) throw new RuntimeException("No hay plantillas de rutina disponibles");
+
+        if (isWeightLossGoal(goal)) {
+            return templates.stream()
+                    .filter(t -> t.getName().toLowerCase().contains("cardio")
+                            || t.getGoal().toLowerCase().contains("quemar"))
+                    .findFirst()
+                    .orElse(templates.get(0));
+        }
+        if (isMuscleGainGoal(goal)) {
+            return templates.stream()
+                    .filter(t -> t.getName().toLowerCase().contains("hipertrofia")
+                            || t.getGoal().toLowerCase().contains("masa"))
+                    .findFirst()
+                    .orElse(templates.get(0));
+        }
+        return templates.get(0);
+    }
+
+    private DietTemplateEntity findDietTemplate(String goal) {
+        List<DietTemplateEntity> templates = dietTemplateJpaRepository.findAll();
+        if (templates.isEmpty()) throw new RuntimeException("No hay plantillas de dieta disponibles");
+
+        if (isWeightLossGoal(goal)) {
+            return templates.stream()
+                    .filter(t -> t.getName().toLowerCase().contains("deficit")
+                            || t.getGoal().toLowerCase().contains("perdida"))
+                    .findFirst()
+                    .orElse(templates.get(0));
+        }
+        if (isMuscleGainGoal(goal)) {
+            return templates.stream()
+                    .filter(t -> t.getName().toLowerCase().contains("volumen")
+                            || t.getGoal().toLowerCase().contains("aumento"))
+                    .findFirst()
+                    .orElse(templates.get(0));
+        }
+        return templates.get(0);
+    }
+
+    private RoutineEntity createRoutineFromTemplate(String clientName, RoutineTemplateEntity template) {
+        RoutineEntity routine = new RoutineEntity();
+        routine.setId(UUID.randomUUID());
+        routine.setName(template.getName() + " - " + clientName);
+        routine.setGoal(template.getGoal());
+        routine.setTemplateId(template.getId());
+        routine.setExercises(template.getExercises());
+        routine.setCreatedAt(LocalDate.now());
+        routine.setUpdatedAt(LocalDateTime.now());
+        return routine;
+    }
+
+    private DietEntity createDietFromTemplate(String clientName, DietTemplateEntity template) {
+        DietEntity diet = new DietEntity();
+        diet.setId(UUID.randomUUID());
+        diet.setName(template.getName() + " - " + clientName);
+        diet.setGoal(template.getGoal());
+        diet.setTemplateId(template.getId());
+        diet.setIndications(template.getIndications());
+        diet.setMeals(template.getMeals());
+        diet.setCreatedAt(LocalDate.now());
+        diet.setUpdatedAt(LocalDateTime.now());
+        return diet;
     }
 
     private PlanContractEntity findContract(UUID contractId) {

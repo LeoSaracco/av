@@ -13,9 +13,12 @@ if "%QUERY%"=="" (
 
 if "%QUERY%"=="" (
     echo No query provided.
+    pause
     exit /b 1
 )
 
 echo Running query...
 node "%~dp0db.js" "!QUERY!"
+echo.
+pause
 endlocal
