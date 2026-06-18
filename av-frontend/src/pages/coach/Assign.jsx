@@ -50,24 +50,39 @@ function SearchSelect({ options, value, onChange, placeholder, disabled, mobile 
     return () => { window.removeEventListener('scroll', close, true); window.removeEventListener('resize', close); };
   }, [open]);
 
-  const openDropdown = useCallback(() => {
-    if (disabled) return;
-    setFilter('');
-    setOpen(true);
-    if (inputRef.current) {
+  useEffect(() => {
+    if (!open || !inputRef.current) return;
+    const recalc = () => {
       const rect = inputRef.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom - 16;
-      const spaceAbove = rect.top - 16;
+      if (!rect.width) return;
+      const vv = window.visualViewport;
+      const viewH = vv ? vv.height : window.innerHeight;
+      const viewTop = vv ? vv.pageTop : 0;
+      const spaceBelow = viewH - (rect.bottom - viewTop) - 16;
+      const spaceAbove = rect.top - viewTop - 16;
       const maxH = mobile ? 260 : 200;
       const useUp = spaceBelow < maxH && spaceAbove > spaceBelow;
       setDropdownStyle({
         position: 'fixed', left: rect.left, width: rect.width, zIndex: 9999,
         ...(useUp
-          ? { bottom: window.innerHeight - rect.top + 4, maxHeight: Math.min(spaceAbove, maxH) }
+          ? { bottom: viewH + viewTop - rect.top + 4, maxHeight: Math.min(spaceAbove, maxH) }
           : { top: rect.bottom + 4, maxHeight: Math.min(spaceBelow, maxH) }),
       });
-    }
-  }, [disabled, mobile]);
+    };
+    recalc();
+    window.visualViewport?.addEventListener('resize', recalc);
+    window.visualViewport?.addEventListener('scroll', recalc);
+    return () => {
+      window.visualViewport?.removeEventListener('resize', recalc);
+      window.visualViewport?.removeEventListener('scroll', recalc);
+    };
+  }, [open, mobile]);
+
+  const openDropdown = useCallback(() => {
+    if (disabled) return;
+    setFilter('');
+    setOpen(true);
+  }, [disabled]);
 
   const filtered = options.filter(o =>
     !filter || o.label.toLowerCase().includes(filter.toLowerCase())
