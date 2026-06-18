@@ -27,12 +27,16 @@ function SearchSelect({ options, value, onChange, placeholder, disabled, mobile 
   const [dropdownStyle, setDropdownStyle] = useState({});
   const containerRef = useRef(null);
   const inputRef = useRef(null);
+  const dropdownRef = useRef(null);
   const selected = options.find(o => o.id === value);
 
   useEffect(() => {
     if (!open) return;
     const handler = (e) => {
-      if (containerRef.current && !containerRef.current.contains(e.target)) setOpen(false);
+      if (containerRef.current && !containerRef.current.contains(e.target)
+          && dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setOpen(false);
+      }
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
@@ -75,7 +79,7 @@ function SearchSelect({ options, value, onChange, placeholder, disabled, mobile 
   const optFs = mobile ? 15 : 14;
 
   const dropdown = (
-    <div style={{
+    <div ref={dropdownRef} style={{
       ...dropdownStyle,
       background: 'var(--color-surface)',
       border: '1px solid var(--color-border)',
