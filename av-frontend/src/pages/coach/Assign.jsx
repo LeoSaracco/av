@@ -170,15 +170,6 @@ export default function Assign() {
     exercises: f.exercises.map((e, i) => i === idx ? { ...e, [field]: field === 'sets' || field === 'reps' ? Number(val) : val } : e)
   }));
   const removeExercise = (idx) => setExerciseForm(f => ({ ...f, exercises: f.exercises.filter((_, i) => i !== idx) }));
-  const moveExercise = (idx, dir) => {
-    const newIdx = idx + dir;
-    if (newIdx < 0 || newIdx >= exerciseForm.exercises.length) return;
-    setExerciseForm(f => {
-      const exs = [...f.exercises];
-      [exs[idx], exs[newIdx]] = [exs[newIdx], exs[idx]];
-      return { ...f, exercises: exs };
-    });
-  };
 
   const canAdvance = (() => {
     if (step === 0) return !!selectedClientId;
@@ -203,7 +194,7 @@ export default function Assign() {
           name: exerciseForm.name,
           goal: exerciseForm.goal,
           exercises: exerciseForm.exercises,
-          templateId: selectedRoutineId,
+          templateId: selectedRoutine?.templateId || null,
         });
         routineIdToAssign = newRoutine.id;
       }
@@ -296,10 +287,6 @@ export default function Assign() {
                 {exerciseForm.exercises.map((ex, idx) => (
                   <div key={ex.id || idx} style={{ background: 'var(--color-bg-3)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: 14, marginBottom: 10 }}>
                     <div style={{ display: 'flex', gap: 6, marginBottom: 10, alignItems: 'center' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        <button style={{ background: 'none', border: 'none', color: 'var(--color-text-3)', cursor: 'pointer', padding: '1px 4px', fontSize: 12 }} onClick={() => moveExercise(idx, -1)}>▲</button>
-                        <button style={{ background: 'none', border: 'none', color: 'var(--color-text-3)', cursor: 'pointer', padding: '1px 4px', fontSize: 12 }} onClick={() => moveExercise(idx, 1)}>▼</button>
-                      </div>
                       <input className="form-input" style={{ flex: 1 }} placeholder="Nombre del ejercicio" value={ex.name} onChange={e => updateExercise(idx, 'name', e.target.value)} />
                       <button className="btn btn-sm btn-danger" onClick={() => removeExercise(idx)}>✕</button>
                     </div>
