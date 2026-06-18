@@ -5,6 +5,7 @@
  * @auth Requiere rol "coach".
  */
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import ReactDOM from 'react-dom';
 import { useApp } from '../../context/AppContext';
 import { CoachLayout } from '../../components/layout/CoachLayout';
 import { inlineSpinnerStyle } from '../../utils/spinnerStyle';
@@ -23,7 +24,7 @@ function useIsMobile() {
 function SearchSelect({ options, value, onChange, placeholder, disabled, mobile }) {
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState('');
-  const [dropUp, setDropUp] = useState(false);
+  const [dropdownStyle, setDropdownStyle] = useState({});
   const containerRef = useRef(null);
   const inputRef = useRef(null);
   const selected = options.find(o => o.id === value);
@@ -31,39 +32,83 @@ function SearchSelect({ options, value, onChange, placeholder, disabled, mobile 
   useEffect(() => {
     if (!open) return;
     const handler = (e) => {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
-        setOpen(false);
-      }
+      if (containerRef.current && !containerRef.current.contains(e.target)) setOpen(false);
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const close = () => setOpen(false);
+    window.addEventListener('scroll', close, true);
+    window.addEventListener('resize', close);
+    return () => { window.removeEventListener('scroll', close, true); window.removeEventListener('resize', close); };
   }, [open]);
 
   const openDropdown = useCallback(() => {
     if (disabled) return;
     setFilter('');
     setOpen(true);
-    if (mobile && inputRef.current) {
+    if (inputRef.current) {
       const rect = inputRef.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
-      setDropUp(spaceBelow < 240);
+      const spaceBelow = window.innerHeight - rect.bottom - 16;
+      const spaceAbove = rect.top - 16;
+      const maxH = mobile ? 260 : 200;
+      const useUp = spaceBelow < maxH && spaceAbove > spaceBelow;
+      setDropdownStyle({
+        position: 'fixed', left: rect.left, width: rect.width, zIndex: 9999,
+        ...(useUp
+          ? { bottom: window.innerHeight - rect.top + 4, maxHeight: Math.min(spaceAbove, maxH) }
+          : { top: rect.bottom + 4, maxHeight: Math.min(spaceBelow, maxH) }),
+      });
     }
   }, [disabled, mobile]);
-
-  const closeDropdown = useCallback(() => {
-    setOpen(false);
-    setFilter('');
-  }, []);
 
   const filtered = options.filter(o =>
     !filter || o.label.toLowerCase().includes(filter.toLowerCase())
   );
 
   const displayValue = open ? filter : (selected?.label || '');
-
   const inputH = mobile ? 48 : 42;
-  const optH = mobile ? 44 : 36;
-  const maxH = mobile ? Math.min(filtered.length * optH + 8, 280) : Math.min(filtered.length * optH + 8, 220);
+  const optPad = mobile ? '12px 14px' : '9px 14px';
+  const optFs = mobile ? 15 : 14;
+
+  const dropdown = (
+    <div style={{
+      ...dropdownStyle,
+      background: 'var(--color-surface)',
+      border: '1px solid var(--color-border)',
+      borderRadius: 'var(--radius-md)',
+      overflowY: 'auto', overflowX: 'hidden',
+      boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
+      WebkitOverflowScrolling: 'touch',
+    }}>
+      {filtered.length === 0 ? (
+        <div style={{ padding: '14px', fontSize: 13, color: 'var(--color-text-3)', textAlign: 'center' }}>
+          Sin resultados
+        </div>
+      ) : (
+        filtered.map(o => (
+          <div key={o.id}
+            onClick={() => { onChange(o.id); setOpen(false); }}
+            style={{
+              padding: optPad, fontSize: optFs, cursor: 'pointer',
+              fontFamily: 'var(--font-body)',
+              color: value === o.id ? 'var(--color-accent)' : 'var(--color-text)',
+              background: value === o.id ? 'var(--color-accent-dim2)' : 'transparent',
+              borderBottom: '1px solid var(--color-border)',
+              lineHeight: 1.3,
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-bg-3)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = value === o.id ? 'var(--color-accent-dim2)' : 'transparent'; }}
+          >
+            {o.label}
+          </div>
+        ))
+      )}
+    </div>
+  );
 
   return (
     <div ref={containerRef} style={{ position: 'relative' }}>
@@ -72,58 +117,14 @@ function SearchSelect({ options, value, onChange, placeholder, disabled, mobile 
         className="form-input"
         placeholder={placeholder}
         value={displayValue}
-        onChange={e => { setFilter(e.target.value); onChange(''); setOpen(true); }}
+        onChange={e => { setFilter(e.target.value); onChange(''); if (!open) openDropdown(); }}
         onFocus={openDropdown}
         onClick={openDropdown}
         disabled={disabled}
         readOnly={disabled}
         style={{ height: inputH, ...(disabled ? { opacity: 0.6, cursor: 'not-allowed' } : {}) }}
       />
-      {open && !disabled && filtered.length > 0 && (
-        <div style={{
-          position: 'absolute', left: 0, right: 0, zIndex: 60,
-          background: 'var(--color-surface)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius-md)',
-          maxHeight: maxH, overflowY: 'auto',
-          boxShadow: 'var(--shadow-lg)',
-          ...(dropUp ? { bottom: inputH + 2 } : { top: inputH + 2 }),
-          WebkitOverflowScrolling: 'touch',
-        }}>
-          {filtered.map(o => (
-            <div key={o.id}
-              onClick={() => { onChange(o.id); closeDropdown(); }}
-              style={{
-                padding: mobile ? '12px 14px' : '9px 14px',
-                fontSize: mobile ? 15 : 14,
-                cursor: 'pointer',
-                fontFamily: 'var(--font-body)',
-                color: value === o.id ? 'var(--color-accent)' : 'var(--color-text)',
-                background: value === o.id ? 'var(--color-accent-dim2)' : 'transparent',
-                borderBottom: '1px solid var(--color-border)',
-                lineHeight: 1.3,
-              }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-bg-3)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = value === o.id ? 'var(--color-accent-dim2)' : 'transparent'; }}
-            >
-              {o.label}
-            </div>
-          ))}
-        </div>
-      )}
-      {open && !disabled && filtered.length === 0 && filter && (
-        <div style={{
-          position: 'absolute', left: 0, right: 0, zIndex: 60,
-          background: 'var(--color-surface)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius-md)',
-          padding: '14px', fontSize: 13, color: 'var(--color-text-3)', textAlign: 'center',
-          boxShadow: 'var(--shadow-lg)',
-          ...(dropUp ? { bottom: inputH + 2 } : { top: inputH + 2 }),
-        }}>
-          Sin resultados
-        </div>
-      )}
+      {open && !disabled && ReactDOM.createPortal(dropdown, document.body)}
     </div>
   );
 }
