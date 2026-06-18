@@ -59,17 +59,16 @@ function SearchSelect({ options, value, onChange, placeholder, disabled, mobile,
       const viewH = vv ? vv.height : window.innerHeight;
       const viewTop = vv ? vv.offsetTop : 0;
       const spaceBelow = viewH - (rect.bottom - viewTop) - 16;
-      const modalTop = document.querySelector('.modal-box')?.getBoundingClientRect().top ?? 0;
-      const maxUp = rect.top - modalTop - 8;
       const constraint = constrainTopRef?.current?.getBoundingClientRect();
-      const safeTop = constraint ? constraint.bottom + 8 : modalTop;
-      const safeUp = rect.top - safeTop - 8;
+      const headerBottom = document.querySelector('.modal-header')?.getBoundingClientRect()?.bottom ?? 0;
+      const safeTop = constraint ? constraint.bottom + 8 : headerBottom + 8;
+      const safeUp = rect.top - safeTop;
       const maxH = mobile ? 260 : 200;
-      const useUp = spaceBelow < 120 && safeUp > 0;
+      const useUp = spaceBelow < 120 && safeUp >= 60;
       setDropdownStyle({
         position: 'fixed', left: rect.left, width: rect.width, zIndex: 9999,
         ...(useUp
-          ? { bottom: viewH + viewTop - rect.top + 4, maxHeight: Math.min(safeUp, maxUp, maxH) }
+          ? { bottom: viewH + viewTop - rect.top + 4, maxHeight: Math.min(safeUp, maxH) }
           : { top: rect.bottom + 4, maxHeight: Math.min(spaceBelow, maxH) }),
       });
     };
