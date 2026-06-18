@@ -3,7 +3,7 @@
  * @description Componentes de UI reutilizables para notificaciones toast,
  *              ventanas modales genéricas y modales de confirmación de eliminación.
  */
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 
 /**
@@ -37,10 +37,22 @@ export function Toast() {
  * @returns {JSX.Element|null} Elemento modal o null si no está abierto
  */
 export function Modal({ open, onClose, title, children, footer }) {
+  const boxRef = useRef(null);
+  useEffect(() => {
+    if (!open) return;
+    const adjust = () => {
+      const vv = window.visualViewport;
+      if (!vv || !boxRef.current) return;
+      boxRef.current.style.maxHeight = `${vv.height * 0.92}px`;
+    };
+    adjust();
+    window.visualViewport?.addEventListener('resize', adjust);
+    return () => window.visualViewport?.removeEventListener('resize', adjust);
+  }, [open]);
   if (!open) return null;
   return (
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="modal-box animate-slide">
+      <div ref={boxRef} className="modal-box animate-slide">
         <div className="modal-header">
           <h3>{title}</h3>
           <button className="btn-icon btn" onClick={onClose} aria-label="Cerrar">

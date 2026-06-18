@@ -56,20 +56,27 @@ function SearchSelect({ options, value, onChange, placeholder, disabled, mobile,
       const rect = inputRef.current.getBoundingClientRect();
       if (!rect.width) return;
       const vv = window.visualViewport;
-      const viewH = vv ? vv.height : window.innerHeight;
-      const viewTop = vv ? vv.offsetTop : 0;
-      const spaceBelow = viewH - (rect.bottom - viewTop) - 16;
+      const vpH = vv ? vv.height : window.innerHeight;
+      const vpTop = vv ? vv.offsetTop : 0;
+      const vpLeft = vv ? vv.offsetLeft : 0;
+      // iOS Safari: getBoundingClientRect → layout viewport; position:fixed → needs compensation
+      const inputTop = rect.top - vpTop;
+      const inputBottom = rect.bottom - vpTop;
+      const spaceBelow = vpH - inputBottom - 8;
       const constraint = constrainTopRef?.current?.getBoundingClientRect();
-      const headerBottom = document.querySelector('.modal-header')?.getBoundingClientRect()?.bottom ?? 0;
-      const safeTop = constraint ? constraint.bottom + 8 : headerBottom + 8;
-      const safeUp = rect.top - safeTop;
-      const maxH = mobile ? 260 : 200;
-      const useUp = spaceBelow < 120 && safeUp >= 60;
+      const modalBoxTop = document.querySelector('.modal-box')?.getBoundingClientRect()?.top ?? 0;
+      const upperRef = constraint ? constraint.bottom : modalBoxTop;
+      const spaceAbove = inputTop - (upperRef - vpTop) - 8;
+      const openUp = spaceBelow < 120 && spaceAbove > spaceBelow;
+      const maxH = Math.min(220, openUp ? Math.max(0, spaceAbove) : Math.max(0, spaceBelow));
       setDropdownStyle({
-        position: 'fixed', left: rect.left, width: rect.width, zIndex: 9999,
-        ...(useUp
-          ? { bottom: viewH + viewTop - rect.top + 4, maxHeight: Math.min(safeUp, maxH) }
-          : { top: rect.bottom + 4, maxHeight: Math.min(spaceBelow, maxH) }),
+        position: 'fixed',
+        left: rect.left - vpLeft,
+        width: rect.width,
+        zIndex: 9999,
+        maxHeight: maxH,
+        top: openUp ? 'auto' : inputBottom + vpTop + 4,
+        bottom: openUp ? vpH - inputTop + vpTop + 4 : 'auto',
       });
     };
     recalc();
@@ -79,7 +86,7 @@ function SearchSelect({ options, value, onChange, placeholder, disabled, mobile,
       window.visualViewport?.removeEventListener('resize', recalc);
       window.visualViewport?.removeEventListener('scroll', recalc);
     };
-  }, [open, mobile, constrainTopRef]);
+  }, [open, constrainTopRef]);
 
   const openDropdown = useCallback(() => {
     if (disabled) return;
