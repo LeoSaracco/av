@@ -21,6 +21,8 @@ export default function Assign() {
   const [assigning, setAssigning] = useState(false);
   const [saveError, setSaveError] = useState('');
 
+  const isCambiar = !!(modalClientId && modalRoutineId);
+
   const openModal = (clientId, routineId) => {
     setModalClientId(clientId || '');
     setModalRoutineId(routineId || '');
@@ -183,28 +185,23 @@ export default function Assign() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div className="form-group">
             <label className="form-label">Cliente *</label>
-            <input className="form-input" list="assign-clients" placeholder="🔍 Buscar cliente..."
-              value={modalClient ? modalClient.name : ''}
-              onChange={e => {
-                const match = clients.find(c => c.name.toLowerCase() === e.target.value.toLowerCase());
-                setModalClientId(match ? match.id : '');
-              }} />
-            <datalist id="assign-clients">
-              {clients.map(c => <option key={c.id} value={c.name}>{c.name} — {c.email}</option>)}
-            </datalist>
+            <select className="form-input"
+              value={modalClientId}
+              onChange={e => setModalClientId(e.target.value)}
+              disabled={isCambiar}>
+              <option value="">— Seleccionar cliente —</option>
+              {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
           </div>
 
           <div className="form-group">
             <label className="form-label">Rutina *</label>
-            <input className="form-input" list="assign-routines" placeholder="🔍 Buscar rutina..."
-              value={modalRoutine ? modalRoutine.name : ''}
-              onChange={e => {
-                const match = routines.find(r => r.name.toLowerCase() === e.target.value.toLowerCase());
-                setModalRoutineId(match ? match.id : '');
-              }} />
-            <datalist id="assign-routines">
-              {routines.map(r => <option key={r.id} value={r.name}>{r.name} — {r.goal}</option>)}
-            </datalist>
+            <select className="form-input"
+              value={modalRoutineId}
+              onChange={e => setModalRoutineId(e.target.value)}>
+              <option value="">— Seleccionar rutina —</option>
+              {routines.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+            </select>
           </div>
 
           {modalClientId && modalRoutineId && (
