@@ -329,187 +329,99 @@ export default function Assign() {
         </div>
       )}
 
-      {modalOpen && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 100,
-          display: 'flex', alignItems: isMobile ? 'flex-end' : 'center', justifyContent: 'center',
-          background: 'rgba(0,0,0,0.7)', animation: 'fadeIn 0.2s ease',
-        }} onClick={(e) => { if (e.target === e.currentTarget && !assigning) closeModal(); }}>
-          <div style={{
-            background: 'var(--color-bg)',
-            borderRadius: isMobile ? '16px 16px 0 0' : 'var(--radius-lg)',
-            width: isMobile ? '100%' : 520,
-            maxHeight: isMobile ? '90vh' : '80vh',
-            display: 'flex', flexDirection: 'column',
-            animation: isMobile ? 'slideUp 0.25s ease' : 'scaleIn 0.2s ease',
-          }} onClick={e => e.stopPropagation()}>
-            <div style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: isMobile ? '16px 16px 0' : '20px 24px 0',
-            }}>
-              <h2 style={{ fontSize: isMobile ? 17 : 18, fontFamily: 'var(--font-main)', margin: 0 }}>
-                {mode === 'reassign' ? 'Reasignar rutina' : 'Asignar rutina'}
-              </h2>
-              <button onClick={closeModal} disabled={assigning} style={{
-                background: 'none', border: 'none', color: 'var(--color-text-3)', cursor: 'pointer',
-                fontSize: 20, padding: isMobile ? '8px' : '4px', lineHeight: 1,
-              }}>✕</button>
-            </div>
+      <Modal open={modalOpen} onClose={closeModal}
+        title={mode === 'reassign' ? 'Reasignar rutina' : 'Asignar rutina'}
+        footer={
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', flexWrap: 'wrap' }}>
+            {saveError && <span style={{ fontSize: 12, color: 'var(--color-danger)', flex: '1 0 100%', marginBottom: 4 }}>{saveError}</span>}
+            {step > 0 && !isLastStep && (
+              <button className="btn btn-ghost" onClick={prevStep} disabled={assigning}>← Anterior</button>
+            )}
+            <div style={{ flex: 1 }} />
+            <button className="btn btn-ghost" onClick={closeModal} disabled={assigning}>Cancelar</button>
+            {!isLastStep ? (
+              <button className="btn btn-primary" onClick={nextStep} disabled={!canAdvance || assigning}>
+                Siguiente →
+              </button>
+            ) : (
+              <button className="btn btn-primary" onClick={handleAssign}
+                disabled={assigning || !canSave}
+                style={assigning ? { minWidth: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 } : {}}>
+                {assigning ? <div style={inlineSpinnerStyle(18, '#000', 'rgba(0,0,0,0.25)')} /> : 'Guardar'}
+              </button>
+            )}
+          </div>
+        }>
+        <StepIndicator steps={steps} current={step} mobile={isMobile} />
 
-            <div style={{
-              padding: isMobile ? '12px 16px 0' : '16px 24px 0',
-              borderBottom: '1px solid var(--color-border)',
-            }}>
-              <StepIndicator steps={steps} current={step} mobile={isMobile} />
-            </div>
-
-            <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '16px' : '20px 24px' }}>
-              {step === 0 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  {isCambiar ? (
-                    <div style={{
-                      background: 'var(--color-bg-3)', border: '1px solid var(--color-border)',
-                      borderRadius: 'var(--radius-md)', padding: isMobile ? '14px' : '16px',
-                    }}>
-                      <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 4 }}>{modalClient?.name}</div>
-                      <div style={{ fontSize: 12, color: 'var(--color-text-3)', marginBottom: 8 }}>{modalClient?.email}</div>
-                      {existingRoutine && (
-                        <div style={{ fontSize: 13, color: 'var(--color-accent)', fontWeight: 600 }}>
-                          💪 Rutina actual: {existingRoutine.name}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <>
-                      <p style={{ fontSize: 13, color: 'var(--color-text-2)', margin: 0 }}>
-                        Buscá el socio al que querés asignarle una rutina
-                      </p>
-                      <SearchSelect
-                        options={clientOptions}
-                        value={modalClientId}
-                        onChange={setModalClientId}
-                        placeholder="🔍 Buscar socio..."
-                        mobile={isMobile}
-                      />
-                      {modalClient && (
-                        <div style={{
-                          background: 'var(--color-accent-dim2)', border: '1px solid rgba(0,255,0,0.15)',
-                          borderRadius: 'var(--radius-md)', padding: '12px 14px', fontSize: 13,
-                        }}>
-                          <div style={{ fontWeight: 600, fontFamily: 'var(--font-main)' }}>👤 {modalClient.name}</div>
-                          <div style={{ color: 'var(--color-text-3)', marginTop: 2 }}>{modalClient.email}</div>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              )}
-
-              {step === 1 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <div onClick={isCambiar ? undefined : () => { prevStep(); }} style={{
-                    fontSize: 13, color: 'var(--color-accent)', fontWeight: 600, cursor: isCambiar ? 'default' : 'pointer',
-                    marginBottom: 4,
-                  }}>
-                    👤 {modalClient?.name}
-                  </div>
-                  {isCambiar && existingRoutine && (
-                    <div style={{
-                      background: 'rgba(255,200,0,0.08)', border: '1px solid rgba(255,200,0,0.2)',
-                      borderRadius: 'var(--radius-sm)', padding: '10px 12px', fontSize: 12,
-                      color: 'var(--color-warning)',
-                    }}>
-                      ⚠ Rutina anterior: {existingRoutine.name} — será reemplazada
-                    </div>
-                  )}
-                  <p style={{ fontSize: 13, color: 'var(--color-text-2)', margin: 0 }}>
-                    {isCambiar ? 'Elegí la nueva rutina' : 'Elegí la rutina que querés asignarle'}
-                  </p>
-                  <SearchSelect
-                    options={routineOptions}
-                    value={modalRoutineId}
-                    onChange={setModalRoutineId}
-                    placeholder="🔍 Buscar rutina..."
-                    mobile={isMobile}
-                  />
-                  {modalRoutine && (
-                    <div style={{
-                      background: 'var(--color-accent-dim2)', border: '1px solid rgba(0,255,0,0.15)',
-                      borderRadius: 'var(--radius-md)', padding: '12px 14px', fontSize: 13,
-                    }}>
-                      <div style={{ fontWeight: 600, fontFamily: 'var(--font-main)' }}>💪 {modalRoutine.name}</div>
-                      <div style={{ color: 'var(--color-text-3)', marginTop: 2 }}>
-                        {modalRoutine.exercises?.length || 0} ejercicios
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {step === 2 && mode === 'reassign' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                  <div style={{
-                    background: 'var(--color-accent-dim2)', border: '1px solid rgba(0,255,0,0.15)',
-                    borderRadius: 'var(--radius-md)', padding: isMobile ? '12px' : '14px', fontSize: 13,
-                    color: 'var(--color-text)', lineHeight: 1.5,
-                  }}>
-                    💡 {existingRoutine?.name} → <strong style={{ color: 'var(--color-accent)' }}>{modalRoutine?.name}</strong>
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Motivo de reasignación *</label>
-                    <select className="form-input" value={reason} onChange={e => setReason(e.target.value)}
-                      style={{ height: isMobile ? 48 : 42 }}>
-                      <option value="">— Seleccionar motivo —</option>
-                      <option value="OBJETIVO_CUMPLIDO">Cumplió el objetivo</option>
-                      <option value="CAMBIO_ESTRATEGIA">Cambio de estrategia</option>
-                      <option value="NO_CUMPLIO">No cumplió el objetivo</option>
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Observaciones (opcional)</label>
-                    <textarea className="form-input" rows={isMobile ? 3 : 2} value={observations}
-                      onChange={e => setObservations(e.target.value)}
-                      placeholder="Ej: Excelente progreso, pasamos a un split de 4 días..." />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div style={{
-              padding: isMobile ? '12px 16px 16px' : '16px 24px 20px',
-              borderTop: '1px solid var(--color-border)',
-              display: 'flex', gap: 8, flexDirection: isMobile ? 'column' : 'row',
-            }}>
-              {saveError && (
-                <div style={{ fontSize: 12, color: 'var(--color-danger)', padding: '4px 0', flex: 1 }}>
-                  {saveError}
-                </div>
-              )}
-              <div style={{ display: 'flex', gap: 8, flexDirection: isMobile ? 'column-reverse' : 'row', flex: 1, justifyContent: 'flex-end' }}>
-                {step > 0 && !isLastStep && (
-                  <button className="btn btn-ghost" onClick={prevStep} disabled={assigning}>
-                    ← Anterior
-                  </button>
-                )}
-                <button className="btn btn-ghost" onClick={closeModal} disabled={assigning}>
-                  Cancelar
-                </button>
-                {!isLastStep ? (
-                  <button className="btn btn-primary" onClick={nextStep} disabled={!canAdvance || assigning}>
-                    Siguiente →
-                  </button>
-                ) : (
-                  <button className="btn btn-primary" onClick={handleAssign}
-                    disabled={assigning || !canSave}
-                    style={assigning ? { minWidth: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 } : {}}>
-                    {assigning ? <div style={inlineSpinnerStyle(18, '#000', 'rgba(0,0,0,0.25)')} /> : 'Guardar'}
-                  </button>
+        {step === 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {isCambiar ? (
+              <div style={{ background: 'var(--color-bg-3)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '14px' }}>
+                <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 4 }}>{modalClient?.name}</div>
+                <div style={{ fontSize: 12, color: 'var(--color-text-3)', marginBottom: 8 }}>{modalClient?.email}</div>
+                {existingRoutine && (
+                  <div style={{ fontSize: 13, color: 'var(--color-accent)', fontWeight: 600 }}>💪 Rutina actual: {existingRoutine.name}</div>
                 )}
               </div>
+            ) : (
+              <>
+                <p style={{ fontSize: 13, color: 'var(--color-text-2)', margin: 0 }}>Buscá el socio al que querés asignarle una rutina</p>
+                <SearchSelect options={clientOptions} value={modalClientId} onChange={setModalClientId} placeholder="🔍 Buscar socio..." mobile={isMobile} />
+                {modalClient && (
+                  <div style={{ background: 'var(--color-accent-dim2)', border: '1px solid rgba(0,255,0,0.15)', borderRadius: 'var(--radius-md)', padding: '12px 14px', fontSize: 13 }}>
+                    <div style={{ fontWeight: 600, fontFamily: 'var(--font-main)' }}>👤 {modalClient.name}</div>
+                    <div style={{ color: 'var(--color-text-3)', marginTop: 2 }}>{modalClient.email}</div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
+        {step === 1 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div onClick={isCambiar ? undefined : () => prevStep()} style={{ fontSize: 13, color: 'var(--color-accent)', fontWeight: 600, cursor: isCambiar ? 'default' : 'pointer', marginBottom: 4 }}>
+              👤 {modalClient?.name}
+            </div>
+            {isCambiar && existingRoutine && (
+              <div style={{ background: 'rgba(255,200,0,0.08)', border: '1px solid rgba(255,200,0,0.2)', borderRadius: 'var(--radius-sm)', padding: '10px 12px', fontSize: 12, color: 'var(--color-warning)' }}>
+                ⚠ Rutina anterior: {existingRoutine.name} — será reemplazada
+              </div>
+            )}
+            <p style={{ fontSize: 13, color: 'var(--color-text-2)', margin: 0 }}>{isCambiar ? 'Elegí la nueva rutina' : 'Elegí la rutina que querés asignarle'}</p>
+            <SearchSelect options={routineOptions} value={modalRoutineId} onChange={setModalRoutineId} placeholder="🔍 Buscar rutina..." mobile={isMobile} />
+            {modalRoutine && (
+              <div style={{ background: 'var(--color-accent-dim2)', border: '1px solid rgba(0,255,0,0.15)', borderRadius: 'var(--radius-md)', padding: '12px 14px', fontSize: 13 }}>
+                <div style={{ fontWeight: 600, fontFamily: 'var(--font-main)' }}>💪 {modalRoutine.name}</div>
+                <div style={{ color: 'var(--color-text-3)', marginTop: 2 }}>{modalRoutine.exercises?.length || 0} ejercicios</div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {step === 2 && mode === 'reassign' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ background: 'var(--color-accent-dim2)', border: '1px solid rgba(0,255,0,0.15)', borderRadius: 'var(--radius-md)', padding: '14px', fontSize: 13, color: 'var(--color-text)', lineHeight: 1.5 }}>
+              💡 {existingRoutine?.name} → <strong style={{ color: 'var(--color-accent)' }}>{modalRoutine?.name}</strong>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Motivo de reasignación *</label>
+              <select className="form-input" value={reason} onChange={e => setReason(e.target.value)}>
+                <option value="">— Seleccionar motivo —</option>
+                <option value="OBJETIVO_CUMPLIDO">Cumplió el objetivo</option>
+                <option value="CAMBIO_ESTRATEGIA">Cambio de estrategia</option>
+                <option value="NO_CUMPLIO">No cumplió el objetivo</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Observaciones (opcional)</label>
+              <textarea className="form-input" rows={3} value={observations} onChange={e => setObservations(e.target.value)}
+                placeholder="Ej: Excelente progreso, pasamos a un split de 4 días..." />
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
     </CoachLayout>
   );
 }
