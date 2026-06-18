@@ -1,15 +1,13 @@
 /**
- * @file Panel de asignación de rutinas a clientes con grilla de cards,
- *       buscador global, y modal con steps + SearchSelect responsive.
+ * @file Panel de asignación de rutinas a clientes con grilla de cards
+ *       y formulario full-page con steps para asignar/reasignar rutinas.
  * @route /coach/assign
  * @auth Requiere rol "coach".
  */
-import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import ReactDOM from 'react-dom';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { CoachLayout } from '../../components/layout/CoachLayout';
 import { inlineSpinnerStyle } from '../../utils/spinnerStyle';
-import { Modal } from '../../components/ui/Modals';
 
 function useIsMobile() {
   const [mobile, setMobile] = useState(() => window.innerWidth < 480);
@@ -21,139 +19,41 @@ function useIsMobile() {
   return mobile;
 }
 
-function SearchSelect({ options, value, onChange, placeholder, disabled, mobile, constrainTopRef }) {
-  const [open, setOpen] = useState(false);
+function InlineSearch({ options, value, onChange, placeholder }) {
   const [filter, setFilter] = useState('');
-  const [dropdownStyle, setDropdownStyle] = useState({});
-  const containerRef = useRef(null);
-  const inputRef = useRef(null);
-  const dropdownRef = useRef(null);
   const selected = options.find(o => o.id === value);
-
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e) => {
-      if (containerRef.current && !containerRef.current.contains(e.target)
-          && dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    const close = () => setOpen(false);
-    window.addEventListener('scroll', close, true);
-    window.addEventListener('resize', close);
-    return () => { window.removeEventListener('scroll', close, true); window.removeEventListener('resize', close); };
-  }, [open]);
-
-  useEffect(() => {
-    if (!open || !inputRef.current) return;
-    const recalc = () => {
-      const rect = inputRef.current.getBoundingClientRect();
-      if (!rect.width) return;
-      const vv = window.visualViewport;
-      const vpH = vv ? vv.height : window.innerHeight;
-      const vpTop = vv ? vv.offsetTop : 0;
-      const vpLeft = vv ? vv.offsetLeft : 0;
-      // iOS Safari: getBoundingClientRect → layout viewport; position:fixed → needs compensation
-      const inputTop = rect.top - vpTop;
-      const inputBottom = rect.bottom - vpTop;
-      const spaceBelow = vpH - inputBottom - 8;
-      const constraint = constrainTopRef?.current?.getBoundingClientRect();
-      const modalBoxTop = document.querySelector('.modal-box')?.getBoundingClientRect()?.top ?? 0;
-      const upperRef = constraint ? constraint.bottom : modalBoxTop;
-      const spaceAbove = inputTop - (upperRef - vpTop) - 8;
-      const openUp = spaceBelow < 120 && spaceAbove > spaceBelow;
-      const maxH = Math.min(220, openUp ? Math.max(0, spaceAbove) : Math.max(0, spaceBelow));
-      setDropdownStyle({
-        position: 'fixed',
-        left: rect.left - vpLeft,
-        width: rect.width,
-        zIndex: 9999,
-        maxHeight: maxH,
-        top: openUp ? 'auto' : inputBottom + vpTop + 4,
-        bottom: openUp ? vpH - inputTop + vpTop + 4 : 'auto',
-      });
-    };
-    recalc();
-    window.visualViewport?.addEventListener('resize', recalc);
-    window.visualViewport?.addEventListener('scroll', recalc);
-    return () => {
-      window.visualViewport?.removeEventListener('resize', recalc);
-      window.visualViewport?.removeEventListener('scroll', recalc);
-    };
-  }, [open, constrainTopRef]);
-
-  const openDropdown = useCallback(() => {
-    if (disabled) return;
-    setFilter('');
-    setOpen(true);
-  }, [disabled]);
-
   const filtered = options.filter(o =>
     !filter || o.label.toLowerCase().includes(filter.toLowerCase())
   );
 
-  const displayValue = open ? filter : (selected?.label || '');
-  const inputH = mobile ? 48 : 42;
-  const optPad = mobile ? '12px 14px' : '9px 14px';
-  const optFs = mobile ? 15 : 14;
-
-  const dropdown = (
-    <div ref={dropdownRef} style={{
-      ...dropdownStyle,
-      background: 'var(--color-surface)',
-      border: '1px solid var(--color-border)',
-      borderRadius: 'var(--radius-md)',
-      overflowY: 'auto', overflowX: 'hidden',
-      boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
-      WebkitOverflowScrolling: 'touch',
-    }}>
-      {filtered.length === 0 ? (
-        <div style={{ padding: '14px', fontSize: 13, color: 'var(--color-text-3)', textAlign: 'center' }}>
-          Sin resultados
+  if (value && selected) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--color-accent-dim2)', border: '1px solid rgba(0,255,0,0.15)', borderRadius: 'var(--radius-md)', padding: '12px 14px' }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 600, fontSize: 14, fontFamily: 'var(--font-main)' }}>{selected.label}</div>
+          {selected.subtitle && <div style={{ fontSize: 12, color: 'var(--color-text-3)', marginTop: 2 }}>{selected.subtitle}</div>}
         </div>
-      ) : (
-        filtered.map(o => (
-          <div key={o.id}
-            onClick={() => { onChange(o.id); setOpen(false); }}
-            style={{
-              padding: optPad, fontSize: optFs, cursor: 'pointer',
-              fontFamily: 'var(--font-body)',
-              color: value === o.id ? 'var(--color-accent)' : 'var(--color-text)',
-              background: value === o.id ? 'var(--color-accent-dim2)' : 'transparent',
-              borderBottom: '1px solid var(--color-border)',
-              lineHeight: 1.3,
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-bg-3)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = value === o.id ? 'var(--color-accent-dim2)' : 'transparent'; }}
-          >
-            {o.label}
-          </div>
-        ))
-      )}
-    </div>
-  );
+        <button className="btn btn-sm btn-ghost" onClick={() => { onChange(''); setFilter(''); }}>Cambiar</button>
+      </div>
+    );
+  }
 
   return (
-    <div ref={containerRef} style={{ position: 'relative' }}>
-      <input
-        ref={inputRef}
-        className="form-input"
-        placeholder={placeholder}
-        value={displayValue}
-        onChange={e => { setFilter(e.target.value); onChange(''); if (!open) openDropdown(); }}
-        onFocus={openDropdown}
-        onClick={openDropdown}
-        disabled={disabled}
-        readOnly={disabled}
-        style={{ height: inputH, ...(disabled ? { opacity: 0.6, cursor: 'not-allowed' } : {}) }}
-      />
-      {open && !disabled && ReactDOM.createPortal(dropdown, document.body)}
+    <div>
+      <input className="form-input" placeholder={placeholder} value={filter} onChange={e => setFilter(e.target.value)} autoFocus />
+      <div style={{ maxHeight: 260, overflowY: 'auto', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', marginTop: 8, background: 'var(--color-surface)' }}>
+        {filtered.length === 0 ? (
+          <div style={{ padding: 14, fontSize: 13, color: 'var(--color-text-3)', textAlign: 'center' }}>Sin resultados</div>
+        ) : filtered.map(o => (
+          <div key={o.id} onClick={() => { onChange(o.id); setFilter(''); }}
+            style={{ padding: '10px 14px', cursor: 'pointer', borderBottom: '1px solid var(--color-border)', fontSize: 14, lineHeight: 1.3 }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-bg-3)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}>
+            {o.label}
+            {o.subtitle && <div style={{ fontSize: 12, color: 'var(--color-text-3)', marginTop: 2 }}>{o.subtitle}</div>}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -173,7 +73,7 @@ function StepIndicator({ steps, current, mobile }) {
             fontFamily: 'var(--font-main)',
             textAlign: 'center',
           }}>
-            {current === i ? '●' : i < current ? '○' : '○'}<br />{label}
+            {current === i ? '●' : '○'}<br />{label}
           </div>
           {i < steps.length - 1 && (
             <div style={{
@@ -188,79 +88,131 @@ function StepIndicator({ steps, current, mobile }) {
   );
 }
 
+const EMPTY_EX = { name: '', sets: 3, reps: 10, rest: '60s', notes: '' };
+
 export default function Assign() {
-  const { clients, routines, assignRoutine, getAssignmentForClient, getRoutine } = useApp();
+  const { clients, routines, assignRoutine, addRoutine, getAssignmentForClient, getRoutine } = useApp();
   const isMobile = useIsMobile();
+
   const [search, setSearch] = useState('');
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalClientId, setModalClientId] = useState('');
-  const [modalRoutineId, setModalRoutineId] = useState('');
+  const [view, setView] = useState('grid');
+  const [mode, setMode] = useState('assign');
   const [step, setStep] = useState(0);
+  const [selectedClientId, setSelectedClientId] = useState('');
+  const [selectedRoutineId, setSelectedRoutineId] = useState('');
+  const [existingRoutineId, setExistingRoutineId] = useState('');
+  const [exerciseForm, setExerciseForm] = useState({ name: '', goal: '', exercises: [] });
+  const [originalSnapshot, setOriginalSnapshot] = useState('');
   const [reason, setReason] = useState('');
   const [observations, setObservations] = useState('');
-  const [assigning, setAssigning] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
-  const [mode, setMode] = useState('assign');
-  const stepperRef = useRef(null);
 
-  const steps = mode === 'reassign' ? ['Socio', 'Rutina', 'Motivo'] : ['Socio', 'Rutina'];
-  const totalSteps = steps.length;
+  const selectedClient = clients.find(c => c.id === selectedClientId);
+  const selectedRoutine = routines.find(r => r.id === selectedRoutineId);
+  const existingRoutine = existingRoutineId ? getRoutine(existingRoutineId) : null;
 
-  const modalClient = clients.find(c => c.id === modalClientId);
-  const modalRoutine = routines.find(r => r.id === modalRoutineId);
-  const existingAssignment = modalClientId ? getAssignmentForClient(modalClientId) : null;
-  const existingRoutine = existingAssignment ? getRoutine(existingAssignment.routineId) : null;
-  const isCambiar = mode === 'reassign';
+  const steps = mode === 'reassign'
+    ? ['Socio', 'Rutina', 'Ejercicios', 'Motivo']
+    : ['Socio', 'Rutina', 'Ejercicios', 'Confirmar'];
+  const isLastStep = step === steps.length - 1;
 
   const clientOptions = useMemo(() =>
-    clients.map(c => ({ id: c.id, label: c.name })), [clients]);
+    clients.map(c => ({ id: c.id, label: c.name, subtitle: c.email })), [clients]);
   const routineOptions = useMemo(() =>
-    routines.map(r => ({ id: r.id, label: r.name })), [routines]);
+    routines.map(r => ({ id: r.id, label: r.name, subtitle: `${r.exercises?.length || 0} ejercicios` })), [routines]);
 
-  const openModal = (clientId, routineId) => {
-    setModalClientId(clientId || '');
-    setModalRoutineId(routineId || '');
-    setMode(clientId && routineId ? 'reassign' : 'assign');
-    setStep(0);
+  const openForm = (clientId = '', routineId = '') => {
+    setView('form');
+    setMode(routineId ? 'reassign' : 'assign');
+    setSelectedClientId(clientId);
+    setSelectedRoutineId('');
+    setExistingRoutineId(routineId);
+    setExerciseForm({ name: '', goal: '', exercises: [] });
+    setOriginalSnapshot('');
     setReason('');
     setObservations('');
     setSaveError('');
-    setModalOpen(true);
+    setStep(clientId ? 1 : 0);
   };
 
-  const closeModal = () => {
-    if (assigning) return;
-    setModalOpen(false);
-    setModalClientId('');
-    setModalRoutineId('');
-    setMode('assign');
+  const closeForm = () => {
+    setView('grid');
     setStep(0);
+    setSelectedClientId('');
+    setSelectedRoutineId('');
+    setExistingRoutineId('');
+    setExerciseForm({ name: '', goal: '', exercises: [] });
+    setOriginalSnapshot('');
     setReason('');
     setObservations('');
     setSaveError('');
   };
 
-  const nextStep = () => {
-    if (step === 0 && !modalClientId) return;
-    if (step === 1 && !modalRoutineId) return;
-    setSaveError('');
-    setStep(s => Math.min(s + 1, totalSteps - 1));
+  const handleRoutineSelect = (routineId) => {
+    setSelectedRoutineId(routineId);
+    if (routineId) {
+      const r = routines.find(rt => rt.id === routineId);
+      if (r) {
+        const exercises = (r.exercises || []).map(e => ({ ...e }));
+        setExerciseForm({ name: r.name, goal: r.goal || '', exercises });
+        setOriginalSnapshot(JSON.stringify({ name: r.name, goal: r.goal || '', exercises: r.exercises || [] }));
+      }
+    } else {
+      setExerciseForm({ name: '', goal: '', exercises: [] });
+      setOriginalSnapshot('');
+    }
   };
-  const prevStep = () => { setSaveError(''); setStep(s => Math.max(s - 1, 0)); };
 
-  const handleAssign = async () => {
-    if (isCambiar && step < totalSteps - 1) { nextStep(); return; }
-    if (!modalClientId || !modalRoutineId) return;
-    if (mode === 'reassign' && !reason) return;
-    setAssigning(true);
+  const addExercise = () => setExerciseForm(f => ({ ...f, exercises: [...f.exercises, { ...EMPTY_EX, id: Date.now().toString() }] }));
+  const updateExercise = (idx, field, val) => setExerciseForm(f => ({
+    ...f,
+    exercises: f.exercises.map((e, i) => i === idx ? { ...e, [field]: field === 'sets' || field === 'reps' ? Number(val) : val } : e)
+  }));
+  const removeExercise = (idx) => setExerciseForm(f => ({ ...f, exercises: f.exercises.filter((_, i) => i !== idx) }));
+  const moveExercise = (idx, dir) => {
+    const newIdx = idx + dir;
+    if (newIdx < 0 || newIdx >= exerciseForm.exercises.length) return;
+    setExerciseForm(f => {
+      const exs = [...f.exercises];
+      [exs[idx], exs[newIdx]] = [exs[newIdx], exs[idx]];
+      return { ...f, exercises: exs };
+    });
+  };
+
+  const canAdvance = (() => {
+    if (step === 0) return !!selectedClientId;
+    if (step === 1) return !!selectedRoutineId;
+    if (step === 2) return exerciseForm.exercises.length > 0;
+    if (step === 3 && mode === 'reassign') return !!reason;
+    return true;
+  })();
+
+  const nextStep = () => { if (canAdvance && step < steps.length - 1) { setSaveError(''); setStep(s => s + 1); } };
+  const prevStep = () => { if (step > 0) { setSaveError(''); setStep(s => s - 1); } };
+
+  const handleSave = async () => {
+    setSaving(true);
     setSaveError('');
     try {
-      await assignRoutine(modalClientId, modalRoutineId, undefined, reason || undefined, observations || undefined);
-      closeModal();
+      const current = JSON.stringify({ name: exerciseForm.name, goal: exerciseForm.goal, exercises: exerciseForm.exercises });
+      const modified = current !== originalSnapshot;
+      let routineIdToAssign = selectedRoutineId;
+      if (modified) {
+        const newRoutine = await addRoutine({
+          name: exerciseForm.name,
+          goal: exerciseForm.goal,
+          exercises: exerciseForm.exercises,
+          templateId: selectedRoutineId,
+        });
+        routineIdToAssign = newRoutine.id;
+      }
+      await assignRoutine(selectedClientId, routineIdToAssign, undefined, reason || undefined, observations || undefined);
+      closeForm();
     } catch (err) {
       setSaveError(err.message || 'Error al asignar rutina');
     } finally {
-      setAssigning(false);
+      setSaving(false);
     }
   };
 
@@ -286,16 +238,144 @@ export default function Assign() {
     });
   }, [filteredClients, getAssignmentForClient]);
 
-  const isLastStep = step === totalSteps - 1;
-  const canAdvance = step === 0 ? !!modalClientId : step === 1 ? !!modalRoutineId : !!reason;
-  const canSave = !!(modalClientId && modalRoutineId && (mode === 'assign' || reason));
+  // ── Form view ────────────────────────────────────────────────────────────────
+  if (view === 'form') {
+    const showPrev = mode === 'reassign' ? step > 1 : step > 0;
+    return (
+      <CoachLayout>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 8 }}>
+          <button className="btn btn-ghost" onClick={closeForm} style={{ fontSize: 14 }}>← Volver a asignaciones</button>
+          <h2 style={{ fontSize: 18, fontFamily: 'var(--font-main)', margin: 0 }}>{mode === 'reassign' ? 'Reasignar rutina' : 'Asignar rutina'}</h2>
+        </div>
 
+        <StepIndicator steps={steps} current={step} mobile={isMobile} />
+
+        <div style={{ maxWidth: 600, margin: '0 auto' }}>
+          {step === 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <p style={{ fontSize: 13, color: 'var(--color-text-2)', margin: 0 }}>Buscá el socio al que querés asignarle una rutina</p>
+              <InlineSearch options={clientOptions} value={selectedClientId} onChange={setSelectedClientId} placeholder="🔍 Buscar socio..." />
+            </div>
+          )}
+
+          {step === 1 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ fontSize: 13, color: 'var(--color-accent)', fontWeight: 600 }}>👤 {selectedClient?.name}</div>
+              {mode === 'reassign' && existingRoutine && (
+                <div style={{ background: 'rgba(255,200,0,0.08)', border: '1px solid rgba(255,200,0,0.2)', borderRadius: 'var(--radius-sm)', padding: '10px 12px', fontSize: 12, color: 'var(--color-warning)' }}>
+                  ⚠ Rutina anterior: {existingRoutine.name} — será reemplazada
+                </div>
+              )}
+              <p style={{ fontSize: 13, color: 'var(--color-text-2)', margin: 0 }}>{mode === 'reassign' ? 'Elegí la nueva rutina base' : 'Elegí la rutina base'}</p>
+              <InlineSearch options={routineOptions} value={selectedRoutineId} onChange={handleRoutineSelect} placeholder="🔍 Buscar rutina..." />
+            </div>
+          )}
+
+          {step === 2 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ fontSize: 13, color: 'var(--color-accent)', fontWeight: 600 }}>👤 {selectedClient?.name} · 💪 {selectedRoutine?.name}</div>
+              <div style={{ background: 'rgba(0,150,255,0.06)', border: '1px solid rgba(0,150,255,0.15)', borderRadius: 'var(--radius-sm)', padding: '8px 12px', fontSize: 12, color: 'var(--color-text-2)' }}>
+                ℹ Personalizá la rutina para este socio. El template original no se modifica.
+              </div>
+              <div className="form-group">
+                <label className="form-label">Nombre rutina</label>
+                <input className="form-input" value={exerciseForm.name} onChange={e => setExerciseForm(f => ({ ...f, name: e.target.value }))} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Objetivo</label>
+                <input className="form-input" placeholder="Ej: Ganar masa muscular" value={exerciseForm.goal} onChange={e => setExerciseForm(f => ({ ...f, goal: e.target.value }))} />
+              </div>
+              <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <span style={{ fontWeight: 600, fontSize: 14 }}>Ejercicios ({exerciseForm.exercises.length})</span>
+                  <button className="btn btn-sm btn-secondary" onClick={addExercise}>+ Agregar</button>
+                </div>
+                {exerciseForm.exercises.length === 0 && (
+                  <div style={{ textAlign: 'center', padding: '16px 0', color: 'var(--color-text-3)', fontSize: 13 }}>Sin ejercicios. Agregá el primero.</div>
+                )}
+                {exerciseForm.exercises.map((ex, idx) => (
+                  <div key={ex.id || idx} style={{ background: 'var(--color-bg-3)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: 14, marginBottom: 10 }}>
+                    <div style={{ display: 'flex', gap: 6, marginBottom: 10, alignItems: 'center' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <button style={{ background: 'none', border: 'none', color: 'var(--color-text-3)', cursor: 'pointer', padding: '1px 4px', fontSize: 12 }} onClick={() => moveExercise(idx, -1)}>▲</button>
+                        <button style={{ background: 'none', border: 'none', color: 'var(--color-text-3)', cursor: 'pointer', padding: '1px 4px', fontSize: 12 }} onClick={() => moveExercise(idx, 1)}>▼</button>
+                      </div>
+                      <input className="form-input" style={{ flex: 1 }} placeholder="Nombre del ejercicio" value={ex.name} onChange={e => updateExercise(idx, 'name', e.target.value)} />
+                      <button className="btn btn-sm btn-danger" onClick={() => removeExercise(idx)}>✕</button>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                      <div className="form-group"><label className="form-label" style={{ fontSize: 11 }}>Series</label><input className="form-input" type="number" min={1} value={ex.sets} onChange={e => updateExercise(idx, 'sets', e.target.value)} /></div>
+                      <div className="form-group"><label className="form-label" style={{ fontSize: 11 }}>Reps</label><input className="form-input" type="number" min={1} value={ex.reps} onChange={e => updateExercise(idx, 'reps', e.target.value)} /></div>
+                      <div className="form-group"><label className="form-label" style={{ fontSize: 11 }}>Descanso</label><input className="form-input" placeholder="60s" value={ex.rest} onChange={e => updateExercise(idx, 'rest', e.target.value)} /></div>
+                    </div>
+                    <div className="form-group" style={{ marginTop: 8 }}><label className="form-label" style={{ fontSize: 11 }}>Notas</label><input className="form-input" placeholder="Clave técnica, variante..." value={ex.notes} onChange={e => updateExercise(idx, 'notes', e.target.value)} /></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {step === 3 && mode === 'reassign' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{ background: 'var(--color-accent-dim2)', border: '1px solid rgba(0,255,0,0.15)', borderRadius: 'var(--radius-md)', padding: '14px', fontSize: 13, lineHeight: 1.5 }}>
+                💡 {existingRoutine?.name} → <strong style={{ color: 'var(--color-accent)' }}>{exerciseForm.name}</strong>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Motivo de reasignación *</label>
+                <select className="form-input" value={reason} onChange={e => setReason(e.target.value)}>
+                  <option value="">— Seleccionar motivo —</option>
+                  <option value="OBJETIVO_CUMPLIDO">Cumplió el objetivo</option>
+                  <option value="CAMBIO_ESTRATEGIA">Cambio de estrategia</option>
+                  <option value="NO_CUMPLIO">No cumplió el objetivo</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Observaciones (opcional)</label>
+                <textarea className="form-input" rows={3} value={observations} onChange={e => setObservations(e.target.value)}
+                  placeholder="Ej: Excelente progreso, pasamos a un split de 4 días..." />
+              </div>
+            </div>
+          )}
+
+          {step === 3 && mode === 'assign' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{ background: 'var(--color-accent-dim2)', border: '1px solid rgba(0,255,0,0.15)', borderRadius: 'var(--radius-md)', padding: '14px', fontSize: 13 }}>
+                <div style={{ fontWeight: 600, fontFamily: 'var(--font-main)', marginBottom: 4 }}>👤 {selectedClient?.name}</div>
+                <div style={{ fontWeight: 600 }}>💪 {exerciseForm.name}</div>
+                <div style={{ color: 'var(--color-text-3)', marginTop: 4 }}>
+                  {exerciseForm.exercises.length} ejercicios{exerciseForm.exercises.length > 0 && ` · ${exerciseForm.exercises.slice(0, 3).map(e => e.name).filter(Boolean).join(', ')}${exerciseForm.exercises.length > 3 ? `, +${exerciseForm.exercises.length - 3} más` : ''}`}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {saveError && <div style={{ fontSize: 12, color: 'var(--color-danger)', marginTop: 12 }}>{saveError}</div>}
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 24 }}>
+            <div>{showPrev && <button className="btn btn-ghost" onClick={prevStep} disabled={saving}>← Anterior</button>}</div>
+            <div>
+              {!isLastStep ? (
+                <button className="btn btn-primary" onClick={nextStep} disabled={!canAdvance}>Siguiente →</button>
+              ) : (
+                <button className="btn btn-primary" onClick={handleSave} disabled={saving || !canAdvance}
+                  style={saving ? { minWidth: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 } : {}}>
+                  {saving ? <div style={inlineSpinnerStyle(18, '#000', 'rgba(0,0,0,0.25)')} /> : 'Guardar'}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </CoachLayout>
+    );
+  }
+
+  // ── Grid view ────────────────────────────────────────────────────────────────
   return (
     <CoachLayout>
       <div className="page-header">
         <div>
           <h1>Asignación de rutinas</h1>
-          <p>Asigná rutinas a tus clientes y editalas de forma independiente</p>
+          <p>Asigná rutinas a tus clientes y personalizalas para cada uno</p>
         </div>
       </div>
 
@@ -304,9 +384,7 @@ export default function Assign() {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-3)" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
           <input placeholder="Buscar cliente o rutina..." value={search} onChange={e => setSearch(e.target.value)} />
         </div>
-        <button className="btn btn-primary" onClick={() => openModal('', '')}>
-          + Asignar rutina
-        </button>
+        <button className="btn btn-primary" onClick={() => openForm('', '')}>+ Asignar rutina</button>
       </div>
 
       {sortedClients.length === 0 ? (
@@ -344,15 +422,12 @@ export default function Assign() {
                       </div>
                       <div style={{ fontSize: 11, color: 'var(--color-text-3)' }}>{routine.exercises?.length || 0} ejercicios · Asignada {assignment.assignedAt}</div>
                     </div>
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <button className="btn btn-sm btn-primary" onClick={() => openModal(c.id, assignment.routineId)}>Cambiar</button>
-                      <AssignedRoutineEditor routine={routine} routineId={assignment.routineId} />
-                    </div>
+                    <button className="btn btn-sm btn-primary" onClick={() => openForm(c.id, assignment.routineId)}>Cambiar</button>
                   </>
                 ) : (
                   <>
                     <div style={{ padding: '8px 0', fontSize: 13, color: 'var(--color-text-3)', fontStyle: 'italic' }}>Sin rutina asignada</div>
-                    <button className="btn btn-sm btn-primary" onClick={() => openModal(c.id, '')}>Asignar</button>
+                    <button className="btn btn-sm btn-primary" onClick={() => openForm(c.id, '')}>Asignar</button>
                   </>
                 )}
               </div>
@@ -360,163 +435,6 @@ export default function Assign() {
           })}
         </div>
       )}
-
-      <Modal open={modalOpen} onClose={closeModal}
-        title={mode === 'reassign' ? 'Reasignar rutina' : 'Asignar rutina'}
-        footer={
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', flexWrap: 'wrap' }}>
-            {saveError && <span style={{ fontSize: 12, color: 'var(--color-danger)', flex: '1 0 100%', marginBottom: 4 }}>{saveError}</span>}
-            {step > 0 && !isLastStep && (
-              <button className="btn btn-ghost" onClick={prevStep} disabled={assigning}>← Anterior</button>
-            )}
-            <div style={{ flex: 1 }} />
-            <button className="btn btn-ghost" onClick={closeModal} disabled={assigning}>Cancelar</button>
-            {!isLastStep ? (
-              <button className="btn btn-primary" onClick={nextStep} disabled={!canAdvance || assigning}>
-                Siguiente →
-              </button>
-            ) : (
-              <button className="btn btn-primary" onClick={handleAssign}
-                disabled={assigning || !canSave}
-                style={assigning ? { minWidth: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 } : {}}>
-                {assigning ? <div style={inlineSpinnerStyle(18, '#000', 'rgba(0,0,0,0.25)')} /> : 'Guardar'}
-              </button>
-            )}
-          </div>
-        }>
-        <div ref={stepperRef}><StepIndicator steps={steps} current={step} mobile={isMobile} /></div>
-
-        {step === 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {isCambiar ? (
-              <div style={{ background: 'var(--color-bg-3)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '14px' }}>
-                <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 4 }}>{modalClient?.name}</div>
-                <div style={{ fontSize: 12, color: 'var(--color-text-3)', marginBottom: 8 }}>{modalClient?.email}</div>
-                {existingRoutine && (
-                  <div style={{ fontSize: 13, color: 'var(--color-accent)', fontWeight: 600 }}>💪 Rutina actual: {existingRoutine.name}</div>
-                )}
-              </div>
-            ) : (
-              <>
-                <p style={{ fontSize: 13, color: 'var(--color-text-2)', margin: 0 }}>Buscá el socio al que querés asignarle una rutina</p>
-                <SearchSelect options={clientOptions} value={modalClientId} onChange={setModalClientId} placeholder="🔍 Buscar socio..." mobile={isMobile} constrainTopRef={stepperRef} />
-                {modalClient && (
-                  <div style={{ background: 'var(--color-accent-dim2)', border: '1px solid rgba(0,255,0,0.15)', borderRadius: 'var(--radius-md)', padding: '12px 14px', fontSize: 13 }}>
-                    <div style={{ fontWeight: 600, fontFamily: 'var(--font-main)' }}>👤 {modalClient.name}</div>
-                    <div style={{ color: 'var(--color-text-3)', marginTop: 2 }}>{modalClient.email}</div>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        )}
-
-        {step === 1 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div onClick={isCambiar ? undefined : () => prevStep()} style={{ fontSize: 13, color: 'var(--color-accent)', fontWeight: 600, cursor: isCambiar ? 'default' : 'pointer', marginBottom: 4 }}>
-              👤 {modalClient?.name}
-            </div>
-            {isCambiar && existingRoutine && (
-              <div style={{ background: 'rgba(255,200,0,0.08)', border: '1px solid rgba(255,200,0,0.2)', borderRadius: 'var(--radius-sm)', padding: '10px 12px', fontSize: 12, color: 'var(--color-warning)' }}>
-                ⚠ Rutina anterior: {existingRoutine.name} — será reemplazada
-              </div>
-            )}
-            <p style={{ fontSize: 13, color: 'var(--color-text-2)', margin: 0 }}>{isCambiar ? 'Elegí la nueva rutina' : 'Elegí la rutina que querés asignarle'}</p>
-            <SearchSelect options={routineOptions} value={modalRoutineId} onChange={setModalRoutineId} placeholder="🔍 Buscar rutina..." mobile={isMobile} constrainTopRef={stepperRef} />
-            {modalRoutine && (
-              <div style={{ background: 'var(--color-accent-dim2)', border: '1px solid rgba(0,255,0,0.15)', borderRadius: 'var(--radius-md)', padding: '12px 14px', fontSize: 13 }}>
-                <div style={{ fontWeight: 600, fontFamily: 'var(--font-main)' }}>💪 {modalRoutine.name}</div>
-                <div style={{ color: 'var(--color-text-3)', marginTop: 2 }}>{modalRoutine.exercises?.length || 0} ejercicios</div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {step === 2 && mode === 'reassign' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <div style={{ background: 'var(--color-accent-dim2)', border: '1px solid rgba(0,255,0,0.15)', borderRadius: 'var(--radius-md)', padding: '14px', fontSize: 13, color: 'var(--color-text)', lineHeight: 1.5 }}>
-              💡 {existingRoutine?.name} → <strong style={{ color: 'var(--color-accent)' }}>{modalRoutine?.name}</strong>
-            </div>
-            <div className="form-group">
-              <label className="form-label">Motivo de reasignación *</label>
-              <select className="form-input" value={reason} onChange={e => setReason(e.target.value)}>
-                <option value="">— Seleccionar motivo —</option>
-                <option value="OBJETIVO_CUMPLIDO">Cumplió el objetivo</option>
-                <option value="CAMBIO_ESTRATEGIA">Cambio de estrategia</option>
-                <option value="NO_CUMPLIO">No cumplió el objetivo</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label className="form-label">Observaciones (opcional)</label>
-              <textarea className="form-input" rows={3} value={observations} onChange={e => setObservations(e.target.value)}
-                placeholder="Ej: Excelente progreso, pasamos a un split de 4 días..." />
-            </div>
-          </div>
-        )}
-      </Modal>
     </CoachLayout>
-  );
-}
-
-// ── Inline editor for assigned routine ─────────────────────────────────────────
-function AssignedRoutineEditor({ routine, routineId }) {
-  const { updateRoutine } = useApp();
-  const [open, setOpen] = useState(false);
-  const [form, setForm] = useState(null);
-  const [saving, setSaving] = useState(false);
-
-  const openEdit = () => {
-    const exercises = Array.isArray(routine.exercises)
-      ? routine.exercises
-      : (() => { try { return JSON.parse(routine.exercises || '[]'); } catch { return []; } })();
-    setForm({ name: routine.name, goal: routine.goal, exercises: exercises.map(e => ({ ...e })) });
-    setOpen(true);
-  };
-
-  const updateEx = (idx, field, val) => setForm(f => ({
-    ...f,
-    exercises: f.exercises.map((e, i) => i === idx ? { ...e, [field]: field === 'sets' || field === 'reps' ? Number(val) : val } : e)
-  }));
-
-  const handleSave = async () => {
-    setSaving(true);
-    try { await updateRoutine(routineId, form); setOpen(false); } catch { /* ignore */ } finally { setSaving(false); }
-  };
-
-  return (
-    <>
-      <button className="btn btn-sm btn-secondary" onClick={openEdit}>Editar rutina</button>
-      <Modal open={open} onClose={() => setOpen(false)}
-        title={`Editar rutina de ${routine.name}`}
-        footer={
-          <>
-            <button className="btn btn-ghost" onClick={() => setOpen(false)} disabled={saving}>Cancelar</button>
-            <button className="btn btn-primary" onClick={handleSave} disabled={saving} style={saving ? { minWidth: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 } : {}}>
-              {saving ? <div style={inlineSpinnerStyle(18, '#000', 'rgba(0,0,0,0.25)')} /> : 'Guardar'}
-            </button>
-          </>
-        }>
-        {form && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <div style={{ background: 'rgba(0,255,0,0.06)', border: '1px solid rgba(0,255,0,0.15)', borderRadius: 'var(--radius-sm)', padding: '8px 12px', fontSize: 12, color: 'var(--color-accent)' }}>
-              ✓ Editás la rutina asignada. El template original no se modifica.
-            </div>
-            <div className="form-group"><label className="form-label">Nombre</label><input className="form-input" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} /></div>
-            <div className="form-group"><label className="form-label">Objetivo</label><input className="form-input" value={form.goal} onChange={e => setForm(f => ({ ...f, goal: e.target.value }))} /></div>
-            {form.exercises.map((ex, idx) => (
-              <div key={ex.id || idx} style={{ background: 'var(--color-bg-3)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: 12 }}>
-                <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 8 }}>{ex.name}</div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-                  <div className="form-group"><label className="form-label" style={{ fontSize: 11 }}>Series</label><input className="form-input" type="number" min={1} value={ex.sets} onChange={e => updateEx(idx, 'sets', e.target.value)} /></div>
-                  <div className="form-group"><label className="form-label" style={{ fontSize: 11 }}>Reps</label><input className="form-input" type="number" min={1} value={ex.reps} onChange={e => updateEx(idx, 'reps', e.target.value)} /></div>
-                  <div className="form-group"><label className="form-label" style={{ fontSize: 11 }}>Descanso</label><input className="form-input" value={ex.rest} onChange={e => updateEx(idx, 'rest', e.target.value)} /></div>
-                </div>
-                <div className="form-group" style={{ marginTop: 8 }}><label className="form-label" style={{ fontSize: 11 }}>Notas</label><input className="form-input" value={ex.notes} onChange={e => updateEx(idx, 'notes', e.target.value)} /></div>
-              </div>
-            ))}
-          </div>
-        )}
-      </Modal>
-    </>
   );
 }
