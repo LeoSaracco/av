@@ -21,7 +21,7 @@ function useIsMobile() {
   return mobile;
 }
 
-function SearchSelect({ options, value, onChange, placeholder, disabled, mobile }) {
+function SearchSelect({ options, value, onChange, placeholder, disabled, mobile, constrainTopRef }) {
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState('');
   const [dropdownStyle, setDropdownStyle] = useState({});
@@ -59,15 +59,17 @@ function SearchSelect({ options, value, onChange, placeholder, disabled, mobile 
       const viewH = vv ? vv.height : window.innerHeight;
       const viewTop = vv ? vv.offsetTop : 0;
       const spaceBelow = viewH - (rect.bottom - viewTop) - 16;
-      const spaceAbove = rect.top - viewTop - 16;
       const modalTop = document.querySelector('.modal-box')?.getBoundingClientRect().top ?? 0;
       const maxUp = rect.top - modalTop - 8;
+      const constraint = constrainTopRef?.current?.getBoundingClientRect();
+      const safeTop = constraint ? constraint.bottom + 8 : modalTop;
+      const safeUp = rect.top - safeTop - 8;
       const maxH = mobile ? 260 : 200;
-      const useUp = spaceBelow < maxH && spaceAbove > spaceBelow;
+      const useUp = spaceBelow < 120 && safeUp > 0;
       setDropdownStyle({
         position: 'fixed', left: rect.left, width: rect.width, zIndex: 9999,
         ...(useUp
-          ? { bottom: viewH + viewTop - rect.top + 4, maxHeight: Math.min(spaceAbove, maxUp, maxH) }
+          ? { bottom: viewH + viewTop - rect.top + 4, maxHeight: Math.min(safeUp, maxUp, maxH) }
           : { top: rect.bottom + 4, maxHeight: Math.min(spaceBelow, maxH) }),
       });
     };
@@ -78,7 +80,7 @@ function SearchSelect({ options, value, onChange, placeholder, disabled, mobile 
       window.visualViewport?.removeEventListener('resize', recalc);
       window.visualViewport?.removeEventListener('scroll', recalc);
     };
-  }, [open, mobile]);
+  }, [open, mobile, constrainTopRef]);
 
   const openDropdown = useCallback(() => {
     if (disabled) return;
@@ -193,6 +195,7 @@ export default function Assign() {
   const [assigning, setAssigning] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [mode, setMode] = useState('assign');
+  const stepperRef = useRef(null);
 
   const steps = mode === 'reassign' ? ['Socio', 'Rutina', 'Motivo'] : ['Socio', 'Rutina'];
   const totalSteps = steps.length;
@@ -375,7 +378,7 @@ export default function Assign() {
             )}
           </div>
         }>
-        <StepIndicator steps={steps} current={step} mobile={isMobile} />
+        <div ref={stepperRef}><StepIndicator steps={steps} current={step} mobile={isMobile} /></div>
 
         {step === 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -390,7 +393,7 @@ export default function Assign() {
             ) : (
               <>
                 <p style={{ fontSize: 13, color: 'var(--color-text-2)', margin: 0 }}>Buscá el socio al que querés asignarle una rutina</p>
-                <SearchSelect options={clientOptions} value={modalClientId} onChange={setModalClientId} placeholder="🔍 Buscar socio..." mobile={isMobile} />
+                <SearchSelect options={clientOptions} value={modalClientId} onChange={setModalClientId} placeholder="🔍 Buscar socio..." mobile={isMobile} constrainTopRef={stepperRef} />
                 {modalClient && (
                   <div style={{ background: 'var(--color-accent-dim2)', border: '1px solid rgba(0,255,0,0.15)', borderRadius: 'var(--radius-md)', padding: '12px 14px', fontSize: 13 }}>
                     <div style={{ fontWeight: 600, fontFamily: 'var(--font-main)' }}>👤 {modalClient.name}</div>
@@ -413,7 +416,7 @@ export default function Assign() {
               </div>
             )}
             <p style={{ fontSize: 13, color: 'var(--color-text-2)', margin: 0 }}>{isCambiar ? 'Elegí la nueva rutina' : 'Elegí la rutina que querés asignarle'}</p>
-            <SearchSelect options={routineOptions} value={modalRoutineId} onChange={setModalRoutineId} placeholder="🔍 Buscar rutina..." mobile={isMobile} />
+            <SearchSelect options={routineOptions} value={modalRoutineId} onChange={setModalRoutineId} placeholder="🔍 Buscar rutina..." mobile={isMobile} constrainTopRef={stepperRef} />
             {modalRoutine && (
               <div style={{ background: 'var(--color-accent-dim2)', border: '1px solid rgba(0,255,0,0.15)', borderRadius: 'var(--radius-md)', padding: '12px 14px', fontSize: 13 }}>
                 <div style={{ fontWeight: 600, fontFamily: 'var(--font-main)' }}>💪 {modalRoutine.name}</div>
