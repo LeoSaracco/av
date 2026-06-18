@@ -175,9 +175,8 @@ export default function Assign() {
   const [observations, setObservations] = useState('');
   const [assigning, setAssigning] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const [mode, setMode] = useState('assign');
 
-  const isCambiar = !!(modalClientId && modalRoutineId);
-  const mode = isCambiar ? 'reassign' : 'assign';
   const steps = mode === 'reassign' ? ['Socio', 'Rutina', 'Motivo'] : ['Socio', 'Rutina'];
   const totalSteps = steps.length;
 
@@ -185,6 +184,7 @@ export default function Assign() {
   const modalRoutine = routines.find(r => r.id === modalRoutineId);
   const existingAssignment = modalClientId ? getAssignmentForClient(modalClientId) : null;
   const existingRoutine = existingAssignment ? getRoutine(existingAssignment.routineId) : null;
+  const isCambiar = mode === 'reassign';
 
   const clientOptions = useMemo(() =>
     clients.map(c => ({ id: c.id, label: c.name })), [clients]);
@@ -194,6 +194,7 @@ export default function Assign() {
   const openModal = (clientId, routineId) => {
     setModalClientId(clientId || '');
     setModalRoutineId(routineId || '');
+    setMode(clientId && routineId ? 'reassign' : 'assign');
     setStep(0);
     setReason('');
     setObservations('');
@@ -206,6 +207,7 @@ export default function Assign() {
     setModalOpen(false);
     setModalClientId('');
     setModalRoutineId('');
+    setMode('assign');
     setStep(0);
     setReason('');
     setObservations('');
