@@ -57,15 +57,17 @@ function SearchSelect({ options, value, onChange, placeholder, disabled, mobile 
       if (!rect.width) return;
       const vv = window.visualViewport;
       const viewH = vv ? vv.height : window.innerHeight;
-      const viewTop = vv ? vv.pageTop : 0;
+      const viewTop = vv ? vv.offsetTop : 0;
       const spaceBelow = viewH - (rect.bottom - viewTop) - 16;
       const spaceAbove = rect.top - viewTop - 16;
+      const modalTop = document.querySelector('.modal-box')?.getBoundingClientRect().top ?? 0;
+      const maxUp = rect.top - modalTop - 8;
       const maxH = mobile ? 260 : 200;
       const useUp = spaceBelow < maxH && spaceAbove > spaceBelow;
       setDropdownStyle({
         position: 'fixed', left: rect.left, width: rect.width, zIndex: 9999,
         ...(useUp
-          ? { bottom: viewH + viewTop - rect.top + 4, maxHeight: Math.min(spaceAbove, maxH) }
+          ? { bottom: viewH + viewTop - rect.top + 4, maxHeight: Math.min(spaceAbove, maxUp, maxH) }
           : { top: rect.bottom + 4, maxHeight: Math.min(spaceBelow, maxH) }),
       });
     };

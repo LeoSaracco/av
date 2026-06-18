@@ -308,6 +308,8 @@ select.form-input { appearance: none; cursor: pointer; }
 }
 @media (max-width: 640px) {
   .modal-box {
+    width: 100%;
+    max-width: 100%;
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
     max-height: 85vh;
     max-height: 85dvh;
