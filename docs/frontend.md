@@ -44,6 +44,25 @@ pages/components -> context -> apiClient -> backend
 
 Loader.jsx: spinner reutilizable con color verde (--color-accent). Soporta 3 modos: fullPage (overlay centrado), inline (flex row), y default (solo spinner). Tamanos: sm (20px), md (32px), lg (48px).
 
+### SearchSelect
+
+Componente interno en `Assign.jsx`. Buscador + dropdown custom sin dependencias.
+Reemplaza `<select>` cuando hay mas de ~10 opciones y el usuario necesita
+buscar/filtrar. Props: `options`, `value`, `onChange`, `placeholder`, `disabled`,
+`mobile`. Dropdown con `position: absolute`, `z-index: 60`, `max-height` dinamico.
+En mobile hace `dropUp` si no hay espacio abajo. Cierre al click fuera via
+`mousedown` listener en `document`.
+
+### StepIndicator
+
+Indicador visual de pasos (`●━━○━━○`) para flujos multi-etapa dentro de modales.
+Usado en el modal de Asignar/Reasignar rutina.
+
+### `useIsMobile()` hook
+
+Hook que detecta `window.innerWidth < 480` y se actualiza en `resize`.
+Usado en modales y componentes para adaptar layout mobile vs desktop.
+
 ## Fix visuales - Junio 2026
 
 - word-break en titulo de rutina (ClientDashboard)

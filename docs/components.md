@@ -372,3 +372,148 @@ Convierte `RuntimeException` en JSON 400 con campo `message`. El frontend
 | onClose bloqueado | `onClose` de ConfirmModal no cierra si `deleting` |
 | Gap en cards | Siempre declarar `gap` inline (14, 12, o 10) |
 | No catch vacio | Usar `catch { /* ignore */ }` con comentario |
+| SearchSelect | Usar en vez de `<select>` cuando hay mas de 10 opciones |
+| Steps | Usar modal con steps cuando el flujo tiene 2+ campos relacionados |
+| Mobile-first | Todo modal nuevo debe soportar mobile con `useIsMobile()` |
+
+---
+
+## 15. SearchSelect
+
+**Ubicacion:** componente interno en `Assign.jsx`. Reutilizable copiando
+el codigo a otros archivos (no es un export compartido todavia).
+
+Buscador + dropdown custom sin dependencias. Reemplaza `<select>` cuando
+hay mas de ~10 opciones y el usuario necesita buscar/filtrar.
+
+### Props
+
+| Prop | Tipo | Descripcion |
+|------|------|-------------|
+| `options` | `{ id: string, label: string }[]` | Lista de opciones |
+| `value` | `string` | ID seleccionado |
+| `onChange` | `(id: string) => void` | Callback al seleccionar |
+| `placeholder` | `string` | Texto cuando esta vacio |
+| `disabled` | `boolean` | Deshabilita el campo (sin dropdown, solo lectura) |
+| `mobile` | `boolean` | Ajusta altura de input/opciones y touch targets |
+
+### Comportamiento
+
+| Accion | Efecto |
+|--------|--------|
+| Focus / click | Abre dropdown con todas las opciones |
+| Tipear | Filtra opciones por `label` en tiempo real, resetea seleccion previa |
+| Click en opcion | Selecciona, cierra dropdown, muestra nombre en input |
+| Click fuera | Cierra dropdown (`mousedown` listener en `document`) |
+| `dropUp` | En mobile, si no hay espacio abajo, el dropdown aparece **arriba** del input |
+
+### Mobile vs Desktop
+
+| Aspecto | Mobile (<480px) | Desktop |
+|---------|-----------------|---------|
+| Altura input | 48px | 42px |
+| Altura opcion | 44px | 36px |
+| Max-height | 280px | 220px |
+| Scroll | `-webkit-overflow-scrolling: touch` | Normal |
+| `dropUp` | Si (calcula espacio disponible) | No (siempre abajo) |
+
+### Implementacion
+
+```jsx
+function SearchSelect({ options, value, onChange, placeholder, disabled, mobile }) {
+  const [open, setOpen] = useState(false);
+  const [filter, setFilter] = useState('');
+  const [dropUp, setDropUp] = useState(false);
+  const containerRef = useRef(null);
+
+  // Cerrar al click fuera
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target))
+        setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  // Dropdown: position absolute, z-index 60, max-height dinamico
+  // ...
+}
+```
+
+---
+
+## 16. Modal con Steps
+
+Patron para flujos de 2-3 pasos dentro de un modal. Usado en el modal
+de Asignar/Reasignar rutina en `#/coach/assign`.
+
+### StepIndicator
+
+```
+●━━━━━━━━○━━━━━━━━○
+Socio     Rutina    Motivo
+```
+
+- `●` = step actual (verde `--color-accent`)
+- `○` = step completado (gris `--color-text-2`)
+- `○` = step futuro (gris claro `--color-text-3`)
+- `━━` = linea: verde si completada, gris si pendiente
+
+### Footer por step
+
+| Step | Botones |
+|------|---------|
+| Primero (0) | `Cancelar` + `Siguiente →` |
+| Intermedio (1) | `← Anterior` + `Siguiente →` |
+| Ultimo (2) | `← Anterior` + `Guardar` con spinner |
+
+### Navegacion
+
+```js
+const nextStep = () => setStep(s => Math.min(s + 1, totalSteps - 1));
+const prevStep = () => setStep(s => Math.max(s - 1, 0));
+```
+
+### Mobile vs Desktop
+
+| Aspecto | Mobile (<480px) | Desktop |
+|---------|-----------------|---------|
+| Modal | Full-screen, `border-radius: 16px 16px 0 0` | 520px centrado, `border-radius: 16px`, max 80vh |
+| Footer | Botones stacked `column` | Botones side-by-side `row` |
+| Animacion | `slideUp 0.25s` | `scaleIn 0.2s` |
+| Padding | 16px | 24px |
+
+### Estados del componente
+
+```js
+step           → 0 | 1 | 2
+modalClientId  → string
+modalRoutineId → string
+reason         → string (solo step 2 en modo reassign)
+observations   → string
+assigning      → boolean
+mode           → 'assign' (2 steps) | 'reassign' (3 steps)
+isCambiar      → boolean (cliente fijo)
+```
+
+---
+
+## 17. `useIsMobile()` hook
+
+Hook interno que detecta `window.innerWidth < 480` y se actualiza
+en cada `resize`. Usado para condicionales de layout en modales
+y componentes.
+
+```jsx
+function useIsMobile() {
+  const [mobile, setMobile] = useState(() => window.innerWidth < 480);
+  useEffect(() => {
+    const onResize = () => setMobile(window.innerWidth < 480);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  return mobile;
+}
+```
