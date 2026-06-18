@@ -1,38 +1,198 @@
 /**
  * @file Panel de asignación de rutinas a clientes con grilla de cards,
- *       buscador global, y modal unificado para asignar y reasignar.
+ *       buscador global, y modal con steps + SearchSelect responsive.
  * @route /coach/assign
  * @auth Requiere rol "coach".
  */
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useApp } from '../../context/AppContext';
 import { CoachLayout } from '../../components/layout/CoachLayout';
 import { inlineSpinnerStyle } from '../../utils/spinnerStyle';
 import { Modal } from '../../components/ui/Modals';
 
+function useIsMobile() {
+  const [mobile, setMobile] = useState(() => window.innerWidth < 480);
+  useEffect(() => {
+    const onResize = () => setMobile(window.innerWidth < 480);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  return mobile;
+}
+
+function SearchSelect({ options, value, onChange, placeholder, disabled, mobile }) {
+  const [open, setOpen] = useState(false);
+  const [filter, setFilter] = useState('');
+  const [dropUp, setDropUp] = useState(false);
+  const containerRef = useRef(null);
+  const inputRef = useRef(null);
+  const selected = options.find(o => o.id === value);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  const openDropdown = useCallback(() => {
+    if (disabled) return;
+    setFilter('');
+    setOpen(true);
+    if (mobile && inputRef.current) {
+      const rect = inputRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      setDropUp(spaceBelow < 240);
+    }
+  }, [disabled, mobile]);
+
+  const closeDropdown = useCallback(() => {
+    setOpen(false);
+    setFilter('');
+  }, []);
+
+  const filtered = options.filter(o =>
+    !filter || o.label.toLowerCase().includes(filter.toLowerCase())
+  );
+
+  const displayValue = open ? filter : (selected?.label || '');
+
+  const inputH = mobile ? 48 : 42;
+  const optH = mobile ? 44 : 36;
+  const maxH = mobile ? Math.min(filtered.length * optH + 8, 280) : Math.min(filtered.length * optH + 8, 220);
+
+  return (
+    <div ref={containerRef} style={{ position: 'relative' }}>
+      <input
+        ref={inputRef}
+        className="form-input"
+        placeholder={placeholder}
+        value={displayValue}
+        onChange={e => { setFilter(e.target.value); onChange(''); setOpen(true); }}
+        onFocus={openDropdown}
+        onClick={openDropdown}
+        disabled={disabled}
+        readOnly={disabled}
+        style={{ height: inputH, ...(disabled ? { opacity: 0.6, cursor: 'not-allowed' } : {}) }}
+      />
+      {open && !disabled && filtered.length > 0 && (
+        <div style={{
+          position: 'absolute', left: 0, right: 0, zIndex: 60,
+          background: 'var(--color-surface)',
+          border: '1px solid var(--color-border)',
+          borderRadius: 'var(--radius-md)',
+          maxHeight: maxH, overflowY: 'auto',
+          boxShadow: 'var(--shadow-lg)',
+          ...(dropUp ? { bottom: inputH + 2 } : { top: inputH + 2 }),
+          WebkitOverflowScrolling: 'touch',
+        }}>
+          {filtered.map(o => (
+            <div key={o.id}
+              onClick={() => { onChange(o.id); closeDropdown(); }}
+              style={{
+                padding: mobile ? '12px 14px' : '9px 14px',
+                fontSize: mobile ? 15 : 14,
+                cursor: 'pointer',
+                fontFamily: 'var(--font-body)',
+                color: value === o.id ? 'var(--color-accent)' : 'var(--color-text)',
+                background: value === o.id ? 'var(--color-accent-dim2)' : 'transparent',
+                borderBottom: '1px solid var(--color-border)',
+                lineHeight: 1.3,
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-bg-3)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = value === o.id ? 'var(--color-accent-dim2)' : 'transparent'; }}
+            >
+              {o.label}
+            </div>
+          ))}
+        </div>
+      )}
+      {open && !disabled && filtered.length === 0 && filter && (
+        <div style={{
+          position: 'absolute', left: 0, right: 0, zIndex: 60,
+          background: 'var(--color-surface)',
+          border: '1px solid var(--color-border)',
+          borderRadius: 'var(--radius-md)',
+          padding: '14px', fontSize: 13, color: 'var(--color-text-3)', textAlign: 'center',
+          boxShadow: 'var(--shadow-lg)',
+          ...(dropUp ? { bottom: inputH + 2 } : { top: inputH + 2 }),
+        }}>
+          Sin resultados
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StepIndicator({ steps, current, mobile }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: mobile ? 6 : 12,
+      marginBottom: mobile ? 16 : 20, padding: '0 8px', userSelect: 'none',
+    }}>
+      {steps.map((label, i) => (
+        <React.Fragment key={label}>
+          <div style={{
+            fontSize: mobile ? 11 : 13,
+            fontWeight: current === i ? 700 : 400,
+            color: current === i ? 'var(--color-accent)' : i < current ? 'var(--color-text-2)' : 'var(--color-text-3)',
+            fontFamily: 'var(--font-main)',
+            textAlign: 'center',
+          }}>
+            {current === i ? '●' : i < current ? '○' : '○'}<br />{label}
+          </div>
+          {i < steps.length - 1 && (
+            <div style={{
+              flex: 1, height: 2, maxWidth: mobile ? 24 : 48,
+              background: i < current ? 'var(--color-accent)' : 'var(--color-border)',
+              borderRadius: 1, marginTop: -8,
+            }} />
+          )}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+}
+
 export default function Assign() {
   const { clients, routines, assignRoutine, getAssignmentForClient, getRoutine } = useApp();
+  const isMobile = useIsMobile();
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [modalClientId, setModalClientId] = useState('');
   const [modalRoutineId, setModalRoutineId] = useState('');
+  const [step, setStep] = useState(0);
   const [reason, setReason] = useState('');
   const [observations, setObservations] = useState('');
   const [assigning, setAssigning] = useState(false);
   const [saveError, setSaveError] = useState('');
-  const [clientFilter, setClientFilter] = useState('');
-  const [routineFilter, setRoutineFilter] = useState('');
 
   const isCambiar = !!(modalClientId && modalRoutineId);
+  const mode = isCambiar ? 'reassign' : 'assign';
+  const steps = mode === 'reassign' ? ['Socio', 'Rutina', 'Motivo'] : ['Socio', 'Rutina'];
+  const totalSteps = steps.length;
+
+  const modalClient = clients.find(c => c.id === modalClientId);
+  const modalRoutine = routines.find(r => r.id === modalRoutineId);
+  const existingAssignment = modalClientId ? getAssignmentForClient(modalClientId) : null;
+  const existingRoutine = existingAssignment ? getRoutine(existingAssignment.routineId) : null;
+
+  const clientOptions = useMemo(() =>
+    clients.map(c => ({ id: c.id, label: c.name })), [clients]);
+  const routineOptions = useMemo(() =>
+    routines.map(r => ({ id: r.id, label: r.name })), [routines]);
 
   const openModal = (clientId, routineId) => {
     setModalClientId(clientId || '');
     setModalRoutineId(routineId || '');
+    setStep(0);
     setReason('');
     setObservations('');
     setSaveError('');
-    setClientFilter('');
-    setRoutineFilter('');
     setModalOpen(true);
   };
 
@@ -41,34 +201,24 @@ export default function Assign() {
     setModalOpen(false);
     setModalClientId('');
     setModalRoutineId('');
+    setStep(0);
     setReason('');
     setObservations('');
     setSaveError('');
-    setClientFilter('');
-    setRoutineFilter('');
   };
 
-  const modalClient = clients.find(c => c.id === modalClientId);
-  const modalRoutine = routines.find(r => r.id === modalRoutineId);
-  const existingAssignment = modalClientId ? getAssignmentForClient(modalClientId) : null;
-  const existingRoutine = existingAssignment ? getRoutine(existingAssignment.routineId) : null;
-  const isReassign = !!existingRoutine;
-
-  const filteredModalClients = useMemo(() => {
-    if (!clientFilter) return clients;
-    const q = clientFilter.toLowerCase();
-    return clients.filter(c => c.name.toLowerCase().includes(q));
-  }, [clients, clientFilter]);
-
-  const filteredModalRoutines = useMemo(() => {
-    if (!routineFilter) return routines;
-    const q = routineFilter.toLowerCase();
-    return routines.filter(r => r.name.toLowerCase().includes(q));
-  }, [routines, routineFilter]);
+  const nextStep = () => {
+    if (step === 0 && !modalClientId) return;
+    if (step === 1 && !modalRoutineId) return;
+    setSaveError('');
+    setStep(s => Math.min(s + 1, totalSteps - 1));
+  };
+  const prevStep = () => { setSaveError(''); setStep(s => Math.max(s - 1, 0)); };
 
   const handleAssign = async () => {
+    if (isCambiar && step < totalSteps - 1) { nextStep(); return; }
     if (!modalClientId || !modalRoutineId) return;
-    if (isReassign && !reason) return;
+    if (mode === 'reassign' && !reason) return;
     setAssigning(true);
     setSaveError('');
     try {
@@ -86,10 +236,10 @@ export default function Assign() {
     const q = search.toLowerCase();
     return clients.filter(c => {
       if (c.name.toLowerCase().includes(q)) return true;
-      const assignment = getAssignmentForClient(c.id);
-      if (!assignment) return false;
-      const routine = getRoutine(assignment.routineId);
-      return routine?.name?.toLowerCase().includes(q);
+      const a = getAssignmentForClient(c.id);
+      if (!a) return false;
+      const r = getRoutine(a.routineId);
+      return r?.name?.toLowerCase().includes(q);
     });
   }, [clients, search, getAssignmentForClient, getRoutine]);
 
@@ -102,6 +252,10 @@ export default function Assign() {
       return a.name.localeCompare(b.name);
     });
   }, [filteredClients, getAssignmentForClient]);
+
+  const isLastStep = step === totalSteps - 1;
+  const canAdvance = step === 0 ? !!modalClientId : step === 1 ? !!modalRoutineId : !!reason;
+  const canSave = !!(modalClientId && modalRoutineId && (mode === 'assign' || reason));
 
   return (
     <CoachLayout>
@@ -148,37 +302,24 @@ export default function Assign() {
                 {routine ? (
                   <>
                     <div style={{ background: 'var(--color-bg-3)', borderRadius: 'var(--radius-sm)', padding: '12px' }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-accent)', marginBottom: 4 }}>
-                        💪 {routine.name}
-                      </div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-accent)', marginBottom: 4 }}>💪 {routine.name}</div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 6 }}>
                         {routine.exercises?.slice(0, 3).map(e => (
                           <span key={e.id} style={{ fontSize: 10, background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', padding: '2px 6px', color: 'var(--color-text-2)' }}>{e.name}</span>
                         ))}
-                        {(routine.exercises?.length || 0) > 3 && (
-                          <span style={{ fontSize: 10, color: 'var(--color-text-3)', padding: '2px 4px' }}>+{routine.exercises.length - 3} más</span>
-                        )}
+                        {(routine.exercises?.length || 0) > 3 && <span style={{ fontSize: 10, color: 'var(--color-text-3)', padding: '2px 4px' }}>+{routine.exercises.length - 3} más</span>}
                       </div>
-                      <div style={{ fontSize: 11, color: 'var(--color-text-3)' }}>
-                        {routine.exercises?.length || 0} ejercicios · Asignada {assignment.assignedAt}
-                      </div>
+                      <div style={{ fontSize: 11, color: 'var(--color-text-3)' }}>{routine.exercises?.length || 0} ejercicios · Asignada {assignment.assignedAt}</div>
                     </div>
-
                     <div style={{ display: 'flex', gap: 8 }}>
-                      <button className="btn btn-sm btn-primary" onClick={() => openModal(c.id, assignment.routineId)}>
-                        Cambiar
-                      </button>
+                      <button className="btn btn-sm btn-primary" onClick={() => openModal(c.id, assignment.routineId)}>Cambiar</button>
                       <AssignedRoutineEditor routine={routine} routineId={assignment.routineId} />
                     </div>
                   </>
                 ) : (
                   <>
-                    <div style={{ padding: '8px 0', fontSize: 13, color: 'var(--color-text-3)', fontStyle: 'italic' }}>
-                      Sin rutina asignada
-                    </div>
-                    <button className="btn btn-sm btn-primary" onClick={() => openModal(c.id, '')}>
-                      Asignar
-                    </button>
+                    <div style={{ padding: '8px 0', fontSize: 13, color: 'var(--color-text-3)', fontStyle: 'italic' }}>Sin rutina asignada</div>
+                    <button className="btn btn-sm btn-primary" onClick={() => openModal(c.id, '')}>Asignar</button>
                   </>
                 )}
               </div>
@@ -187,69 +328,136 @@ export default function Assign() {
         </div>
       )}
 
-      <Modal open={modalOpen} onClose={closeModal}
-        title={isReassign ? 'Reasignar rutina' : 'Asignar rutina'}
-        footer={
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}>
-            {saveError && <span style={{ fontSize: 12, color: 'var(--color-danger)', marginRight: 'auto', flex: 1 }}>{saveError}</span>}
-            <button className="btn btn-ghost" onClick={closeModal} disabled={assigning}>Cancelar</button>
-            <button className="btn btn-primary" onClick={handleAssign}
-              disabled={assigning || !modalClientId || !modalRoutineId || (isReassign && !reason)}
-              style={assigning ? { minWidth: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 } : {}}>
-              {assigning ? <div style={inlineSpinnerStyle(18, '#000', 'rgba(0,0,0,0.25)')} /> : 'Guardar'}
-            </button>
-          </div>
-        }>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div className="form-group">
-            <label className="form-label">Cliente *</label>
-            <input className="form-input" placeholder="🔍 Buscar cliente..."
-              value={clientFilter}
-              onChange={e => { setClientFilter(e.target.value); if (!isCambiar) setModalClientId(''); }}
-              disabled={isCambiar} />
-            <select className="form-input" style={{ marginTop: 4 }}
-              value={modalClientId}
-              onChange={e => setModalClientId(e.target.value)}
-              disabled={isCambiar}>
-              <option value="">— Seleccionar —</option>
-              {filteredModalClients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-          </div>
+      {modalOpen && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 100,
+          display: 'flex', alignItems: isMobile ? 'flex-end' : 'center', justifyContent: 'center',
+          background: 'rgba(0,0,0,0.7)', animation: 'fadeIn 0.2s ease',
+        }} onClick={(e) => { if (e.target === e.currentTarget && !assigning) closeModal(); }}>
+          <div style={{
+            background: 'var(--color-bg)',
+            borderRadius: isMobile ? '16px 16px 0 0' : 'var(--radius-lg)',
+            width: isMobile ? '100%' : 520,
+            maxHeight: isMobile ? '90vh' : '80vh',
+            display: 'flex', flexDirection: 'column',
+            animation: isMobile ? 'slideUp 0.25s ease' : 'scaleIn 0.2s ease',
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: isMobile ? '16px 16px 0' : '20px 24px 0',
+            }}>
+              <h2 style={{ fontSize: isMobile ? 17 : 18, fontFamily: 'var(--font-main)', margin: 0 }}>
+                {mode === 'reassign' ? 'Reasignar rutina' : 'Asignar rutina'}
+              </h2>
+              <button onClick={closeModal} disabled={assigning} style={{
+                background: 'none', border: 'none', color: 'var(--color-text-3)', cursor: 'pointer',
+                fontSize: 20, padding: isMobile ? '8px' : '4px', lineHeight: 1,
+              }}>✕</button>
+            </div>
 
-          <div className="form-group">
-            <label className="form-label">Rutina *</label>
-            <input className="form-input" placeholder="🔍 Buscar rutina..."
-              value={routineFilter}
-              onChange={e => { setRoutineFilter(e.target.value); setModalRoutineId(''); }} />
-            <select className="form-input" style={{ marginTop: 4 }}
-              value={modalRoutineId}
-              onChange={e => setModalRoutineId(e.target.value)}>
-              <option value="">— Seleccionar —</option>
-              {filteredModalRoutines.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
-            </select>
-          </div>
+            <div style={{
+              padding: isMobile ? '12px 16px 0' : '16px 24px 0',
+              borderBottom: '1px solid var(--color-border)',
+            }}>
+              <StepIndicator steps={steps} current={step} mobile={isMobile} />
+            </div>
 
-          {modalClientId && modalRoutineId && (
-            <div style={{ background: 'var(--color-accent-dim2)', border: '1px solid rgba(0,255,0,0.15)', borderRadius: 'var(--radius-md)', padding: '14px', fontSize: 13, display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {isReassign ? (
-                <div style={{ color: 'var(--color-text)', lineHeight: 1.5 }}>
-                  💡 <strong>{modalClient?.name}</strong> ya tiene asignada{' '}
-                  <strong style={{ color: 'var(--color-accent)' }}>{existingRoutine.name}</strong>.
-                  <br />Se reasignará a{' '}
-                  <strong style={{ color: 'var(--color-accent)' }}>{modalRoutine?.name}</strong>.
-                </div>
-              ) : (
-                <div style={{ color: 'var(--color-text-2)', lineHeight: 1.5 }}>
-                  Se asignará <strong style={{ color: 'var(--color-text)' }}>{modalRoutine?.name}</strong> a{' '}
-                  <strong style={{ color: 'var(--color-accent)' }}>{modalClient?.name}</strong>
+            <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '16px' : '20px 24px' }}>
+              {step === 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {isCambiar ? (
+                    <div style={{
+                      background: 'var(--color-bg-3)', border: '1px solid var(--color-border)',
+                      borderRadius: 'var(--radius-md)', padding: isMobile ? '14px' : '16px',
+                    }}>
+                      <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 4 }}>{modalClient?.name}</div>
+                      <div style={{ fontSize: 12, color: 'var(--color-text-3)', marginBottom: 8 }}>{modalClient?.email}</div>
+                      {existingRoutine && (
+                        <div style={{ fontSize: 13, color: 'var(--color-accent)', fontWeight: 600 }}>
+                          💪 Rutina actual: {existingRoutine.name}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <>
+                      <p style={{ fontSize: 13, color: 'var(--color-text-2)', margin: 0 }}>
+                        Buscá el socio al que querés asignarle una rutina
+                      </p>
+                      <SearchSelect
+                        options={clientOptions}
+                        value={modalClientId}
+                        onChange={setModalClientId}
+                        placeholder="🔍 Buscar socio..."
+                        mobile={isMobile}
+                      />
+                      {modalClient && (
+                        <div style={{
+                          background: 'var(--color-accent-dim2)', border: '1px solid rgba(0,255,0,0.15)',
+                          borderRadius: 'var(--radius-md)', padding: '12px 14px', fontSize: 13,
+                        }}>
+                          <div style={{ fontWeight: 600, fontFamily: 'var(--font-main)' }}>👤 {modalClient.name}</div>
+                          <div style={{ color: 'var(--color-text-3)', marginTop: 2 }}>{modalClient.email}</div>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
               )}
 
-              {isReassign && (
-                <>
-                  <div className="form-group" style={{ marginTop: 4 }}>
+              {step === 1 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div onClick={isCambiar ? undefined : () => { prevStep(); }} style={{
+                    fontSize: 13, color: 'var(--color-accent)', fontWeight: 600, cursor: isCambiar ? 'default' : 'pointer',
+                    marginBottom: 4,
+                  }}>
+                    👤 {modalClient?.name}
+                  </div>
+                  {isCambiar && existingRoutine && (
+                    <div style={{
+                      background: 'rgba(255,200,0,0.08)', border: '1px solid rgba(255,200,0,0.2)',
+                      borderRadius: 'var(--radius-sm)', padding: '10px 12px', fontSize: 12,
+                      color: 'var(--color-warning)',
+                    }}>
+                      ⚠ Rutina anterior: {existingRoutine.name} — será reemplazada
+                    </div>
+                  )}
+                  <p style={{ fontSize: 13, color: 'var(--color-text-2)', margin: 0 }}>
+                    {isCambiar ? 'Elegí la nueva rutina' : 'Elegí la rutina que querés asignarle'}
+                  </p>
+                  <SearchSelect
+                    options={routineOptions}
+                    value={modalRoutineId}
+                    onChange={setModalRoutineId}
+                    placeholder="🔍 Buscar rutina..."
+                    mobile={isMobile}
+                  />
+                  {modalRoutine && (
+                    <div style={{
+                      background: 'var(--color-accent-dim2)', border: '1px solid rgba(0,255,0,0.15)',
+                      borderRadius: 'var(--radius-md)', padding: '12px 14px', fontSize: 13,
+                    }}>
+                      <div style={{ fontWeight: 600, fontFamily: 'var(--font-main)' }}>💪 {modalRoutine.name}</div>
+                      <div style={{ color: 'var(--color-text-3)', marginTop: 2 }}>
+                        {modalRoutine.exercises?.length || 0} ejercicios
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {step === 2 && mode === 'reassign' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  <div style={{
+                    background: 'var(--color-accent-dim2)', border: '1px solid rgba(0,255,0,0.15)',
+                    borderRadius: 'var(--radius-md)', padding: isMobile ? '12px' : '14px', fontSize: 13,
+                    color: 'var(--color-text)', lineHeight: 1.5,
+                  }}>
+                    💡 {existingRoutine?.name} → <strong style={{ color: 'var(--color-accent)' }}>{modalRoutine?.name}</strong>
+                  </div>
+                  <div className="form-group">
                     <label className="form-label">Motivo de reasignación *</label>
-                    <select className="form-input" value={reason} onChange={e => setReason(e.target.value)}>
+                    <select className="form-input" value={reason} onChange={e => setReason(e.target.value)}
+                      style={{ height: isMobile ? 48 : 42 }}>
                       <option value="">— Seleccionar motivo —</option>
                       <option value="OBJETIVO_CUMPLIDO">Cumplió el objetivo</option>
                       <option value="CAMBIO_ESTRATEGIA">Cambio de estrategia</option>
@@ -258,16 +466,49 @@ export default function Assign() {
                   </div>
                   <div className="form-group">
                     <label className="form-label">Observaciones (opcional)</label>
-                    <textarea className="form-input" rows={2} value={observations}
+                    <textarea className="form-input" rows={isMobile ? 3 : 2} value={observations}
                       onChange={e => setObservations(e.target.value)}
                       placeholder="Ej: Excelente progreso, pasamos a un split de 4 días..." />
                   </div>
-                </>
+                </div>
               )}
             </div>
-          )}
+
+            <div style={{
+              padding: isMobile ? '12px 16px 16px' : '16px 24px 20px',
+              borderTop: '1px solid var(--color-border)',
+              display: 'flex', gap: 8, flexDirection: isMobile ? 'column' : 'row',
+            }}>
+              {saveError && (
+                <div style={{ fontSize: 12, color: 'var(--color-danger)', padding: '4px 0', flex: 1 }}>
+                  {saveError}
+                </div>
+              )}
+              <div style={{ display: 'flex', gap: 8, flexDirection: isMobile ? 'column-reverse' : 'row', flex: 1, justifyContent: 'flex-end' }}>
+                {step > 0 && !isLastStep && (
+                  <button className="btn btn-ghost" onClick={prevStep} disabled={assigning}>
+                    ← Anterior
+                  </button>
+                )}
+                <button className="btn btn-ghost" onClick={closeModal} disabled={assigning}>
+                  Cancelar
+                </button>
+                {!isLastStep ? (
+                  <button className="btn btn-primary" onClick={nextStep} disabled={!canAdvance || assigning}>
+                    Siguiente →
+                  </button>
+                ) : (
+                  <button className="btn btn-primary" onClick={handleAssign}
+                    disabled={assigning || !canSave}
+                    style={assigning ? { minWidth: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 } : {}}>
+                    {assigning ? <div style={inlineSpinnerStyle(18, '#000', 'rgba(0,0,0,0.25)')} /> : 'Guardar'}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
-      </Modal>
+      )}
     </CoachLayout>
   );
 }
@@ -294,12 +535,7 @@ function AssignedRoutineEditor({ routine, routineId }) {
 
   const handleSave = async () => {
     setSaving(true);
-    try {
-      await updateRoutine(routineId, form);
-      setOpen(false);
-    } catch { /* ignore */ } finally {
-      setSaving(false);
-    }
+    try { await updateRoutine(routineId, form); setOpen(false); } catch { /* ignore */ } finally { setSaving(false); }
   };
 
   return (
@@ -320,35 +556,17 @@ function AssignedRoutineEditor({ routine, routineId }) {
             <div style={{ background: 'rgba(0,255,0,0.06)', border: '1px solid rgba(0,255,0,0.15)', borderRadius: 'var(--radius-sm)', padding: '8px 12px', fontSize: 12, color: 'var(--color-accent)' }}>
               ✓ Editás la rutina asignada. El template original no se modifica.
             </div>
-            <div className="form-group">
-              <label className="form-label">Nombre</label>
-              <input className="form-input" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Objetivo</label>
-              <input className="form-input" value={form.goal} onChange={e => setForm(f => ({ ...f, goal: e.target.value }))} />
-            </div>
+            <div className="form-group"><label className="form-label">Nombre</label><input className="form-input" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} /></div>
+            <div className="form-group"><label className="form-label">Objetivo</label><input className="form-input" value={form.goal} onChange={e => setForm(f => ({ ...f, goal: e.target.value }))} /></div>
             {form.exercises.map((ex, idx) => (
               <div key={ex.id || idx} style={{ background: 'var(--color-bg-3)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: 12 }}>
                 <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 8 }}>{ex.name}</div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-                  <div className="form-group">
-                    <label className="form-label" style={{ fontSize: 11 }}>Series</label>
-                    <input className="form-input" type="number" min={1} value={ex.sets} onChange={e => updateEx(idx, 'sets', e.target.value)} />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label" style={{ fontSize: 11 }}>Reps</label>
-                    <input className="form-input" type="number" min={1} value={ex.reps} onChange={e => updateEx(idx, 'reps', e.target.value)} />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label" style={{ fontSize: 11 }}>Descanso</label>
-                    <input className="form-input" value={ex.rest} onChange={e => updateEx(idx, 'rest', e.target.value)} />
-                  </div>
+                  <div className="form-group"><label className="form-label" style={{ fontSize: 11 }}>Series</label><input className="form-input" type="number" min={1} value={ex.sets} onChange={e => updateEx(idx, 'sets', e.target.value)} /></div>
+                  <div className="form-group"><label className="form-label" style={{ fontSize: 11 }}>Reps</label><input className="form-input" type="number" min={1} value={ex.reps} onChange={e => updateEx(idx, 'reps', e.target.value)} /></div>
+                  <div className="form-group"><label className="form-label" style={{ fontSize: 11 }}>Descanso</label><input className="form-input" value={ex.rest} onChange={e => updateEx(idx, 'rest', e.target.value)} /></div>
                 </div>
-                <div className="form-group" style={{ marginTop: 8 }}>
-                  <label className="form-label" style={{ fontSize: 11 }}>Notas</label>
-                  <input className="form-input" value={ex.notes} onChange={e => updateEx(idx, 'notes', e.target.value)} />
-                </div>
+                <div className="form-group" style={{ marginTop: 8 }}><label className="form-label" style={{ fontSize: 11 }}>Notas</label><input className="form-input" value={ex.notes} onChange={e => updateEx(idx, 'notes', e.target.value)} /></div>
               </div>
             ))}
           </div>
