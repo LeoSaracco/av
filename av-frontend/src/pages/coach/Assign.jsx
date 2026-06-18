@@ -20,6 +20,8 @@ export default function Assign() {
   const [observations, setObservations] = useState('');
   const [assigning, setAssigning] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const [clientFilter, setClientFilter] = useState('');
+  const [routineFilter, setRoutineFilter] = useState('');
 
   const isCambiar = !!(modalClientId && modalRoutineId);
 
@@ -29,6 +31,8 @@ export default function Assign() {
     setReason('');
     setObservations('');
     setSaveError('');
+    setClientFilter('');
+    setRoutineFilter('');
     setModalOpen(true);
   };
 
@@ -40,6 +44,8 @@ export default function Assign() {
     setReason('');
     setObservations('');
     setSaveError('');
+    setClientFilter('');
+    setRoutineFilter('');
   };
 
   const modalClient = clients.find(c => c.id === modalClientId);
@@ -47,6 +53,18 @@ export default function Assign() {
   const existingAssignment = modalClientId ? getAssignmentForClient(modalClientId) : null;
   const existingRoutine = existingAssignment ? getRoutine(existingAssignment.routineId) : null;
   const isReassign = !!existingRoutine;
+
+  const filteredModalClients = useMemo(() => {
+    if (!clientFilter) return clients;
+    const q = clientFilter.toLowerCase();
+    return clients.filter(c => c.name.toLowerCase().includes(q));
+  }, [clients, clientFilter]);
+
+  const filteredModalRoutines = useMemo(() => {
+    if (!routineFilter) return routines;
+    const q = routineFilter.toLowerCase();
+    return routines.filter(r => r.name.toLowerCase().includes(q));
+  }, [routines, routineFilter]);
 
   const handleAssign = async () => {
     if (!modalClientId || !modalRoutineId) return;
@@ -185,22 +203,29 @@ export default function Assign() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div className="form-group">
             <label className="form-label">Cliente *</label>
-            <select className="form-input"
+            <input className="form-input" placeholder="🔍 Buscar cliente..."
+              value={clientFilter}
+              onChange={e => { setClientFilter(e.target.value); if (!isCambiar) setModalClientId(''); }}
+              disabled={isCambiar} />
+            <select className="form-input" style={{ marginTop: 4 }}
               value={modalClientId}
               onChange={e => setModalClientId(e.target.value)}
               disabled={isCambiar}>
-              <option value="">— Seleccionar cliente —</option>
-              {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              <option value="">— Seleccionar —</option>
+              {filteredModalClients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
 
           <div className="form-group">
             <label className="form-label">Rutina *</label>
-            <select className="form-input"
+            <input className="form-input" placeholder="🔍 Buscar rutina..."
+              value={routineFilter}
+              onChange={e => { setRoutineFilter(e.target.value); setModalRoutineId(''); }} />
+            <select className="form-input" style={{ marginTop: 4 }}
               value={modalRoutineId}
               onChange={e => setModalRoutineId(e.target.value)}>
-              <option value="">— Seleccionar rutina —</option>
-              {routines.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+              <option value="">— Seleccionar —</option>
+              {filteredModalRoutines.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
             </select>
           </div>
 
