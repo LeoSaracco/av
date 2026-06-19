@@ -131,7 +131,7 @@ export default function Login() {
                 <div style={{ display: 'flex', gap: 10 }}>
                   <button className="btn btn-ghost" onClick={closeReset}>Cancelar</button>
                   <button className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }} onClick={handleSendResetCode} disabled={resetLoading || !resetEmail}>
-                    {resetLoading ? 'Enviando...' : 'Enviar codigo'}
+                    {resetLoading ? <div style={inlineSpinnerStyle(18, '#000', 'rgba(0,0,0,0.25)')} /> : 'Enviar código'}
                   </button>
                 </div>
               </div>
@@ -160,7 +160,7 @@ export default function Login() {
                   </div>
                 )}
                 <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={handleResetPassword} disabled={resetLoading || !resetCode || !resetPassword}>
-                  {resetLoading ? 'Actualizando...' : 'Cambiar contraseña'}
+                  {resetLoading ? <div style={inlineSpinnerStyle(18, '#000', 'rgba(0,0,0,0.25)')} /> : 'Cambiar contraseña'}
                 </button>
                 <button className="btn btn-ghost" onClick={closeReset}>Cancelar</button>
               </div>
