@@ -40,4 +40,8 @@ public class NutritionThreadEntity {
     /** Last-update timestamp. */
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    /** When the coach last read this thread (null = never). */
+    @Column(name = "last_read_at")
+    private LocalDateTime lastReadAt;
 }

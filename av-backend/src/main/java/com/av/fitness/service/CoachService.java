@@ -295,4 +295,38 @@ public interface CoachService {
      * @return ThreadResponse containing the updated thread
      */
     ThreadResponse sendThreadMessage(UUID clientId, String message);
+
+    /**
+     * Creates a personalised diet from a template.
+     *
+     * @param request the template ID and optional name/goal overrides
+     * @return DietResponse containing the created diet
+     */
+    DietResponse createDietFromTemplate(DietFromTemplateRequest request);
+
+    /**
+     * Assigns a diet to a client, deactivating any previous active assignment.
+     *
+     * @param clientId the client UUID
+     * @param request  the diet assignment payload
+     * @return DietAssignmentResponse containing the created assignment
+     */
+    DietAssignmentResponse assignDiet(UUID clientId, DietAssignmentRequest request);
+
+    /**
+     * Retrieves lightweight notification previews for all client threads
+     * owned by the authenticated coach.
+     *
+     * @return list of {@link ThreadNotificationResponse} ordered by unread first,
+     *         then most recent updatedAt
+     */
+    List<ThreadNotificationResponse> getNotifications();
+
+    /**
+     * Marks the nutrition thread for the given client as read by the coach
+     * (sets {@code last_read_at} to now).
+     *
+     * @param clientId the client UUID
+     */
+    void markThreadRead(UUID clientId);
 }

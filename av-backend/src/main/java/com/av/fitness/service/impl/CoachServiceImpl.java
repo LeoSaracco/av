@@ -1,11 +1,14 @@
 package com.av.fitness.service.impl;
 
 import com.av.fitness.dto.coach.*;
+import com.av.fitness.dto.MessageDto;
 import com.av.fitness.dto.ProgressResponse;
 import com.av.fitness.dto.ThreadResponse;
 import com.av.fitness.model.*;
 import com.av.fitness.repository.*;
 import com.av.fitness.service.CoachService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -13,8 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -36,8 +38,10 @@ public class CoachServiceImpl implements CoachService {
     private final AssignmentJpaRepository assignmentJpaRepository;
     private final ProgressJpaRepository progressJpaRepository;
     private final NutritionThreadJpaRepository nutritionThreadJpaRepository;
+    private final DietAssignmentJpaRepository dietAssignmentJpaRepository;
     private final AuditEventJpaRepository auditEventJpaRepository;
     private final ModelMapper modelMapper;
+    private final ObjectMapper objectMapper;
 
     // ── Clients ──
 
@@ -492,12 +496,42 @@ public class CoachServiceImpl implements CoachService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Parses the messages JSONB string into a List of MessageDto.
+     *
+     * @param messagesJson the raw JSON string from the database
+     * @return parsed list, or empty list on failure
+     */
+    private List<MessageDto> parseMessages(String messagesJson) {
+        if (messagesJson == null || messagesJson.isBlank() || "[]".equals(messagesJson)) {
+            return new ArrayList<>();
+        }
+        try {
+            return objectMapper.readValue(messagesJson, new TypeReference<List<MessageDto>>() {});
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Maps a NutritionThreadEntity to ThreadResponse with parsed messages.
+     */
+    private ThreadResponse mapThreadToResponse(NutritionThreadEntity entity) {
+        return ThreadResponse.builder()
+                .id(entity.getId())
+                .clientId(entity.getClientId())
+                .messages(parseMessages(entity.getMessages()))
+                .lastReadAt(entity.getLastReadAt())
+                .updatedAt(entity.getUpdatedAt())
+                .build();
+    }
+
     /** Retrieves the nutrition messaging thread for a client. */
     @Override
     public ThreadResponse getThreadForClient(UUID clientId) {
         NutritionThreadEntity entity = nutritionThreadJpaRepository.findByClientId(clientId)
                 .orElseThrow(() -> new RuntimeException("Hilo no encontrado para el cliente"));
-        return modelMapper.map(entity, ThreadResponse.class);
+        return mapThreadToResponse(entity);
     }
 
     /**
@@ -527,6 +561,137 @@ public class CoachServiceImpl implements CoachService {
         entity.setUpdatedAt(LocalDateTime.now());
 
         nutritionThreadJpaRepository.save(entity);
-        return modelMapper.map(entity, ThreadResponse.class);
+        return mapThreadToResponse(entity);
+    }
+
+    // ── Diet from template ───────────────────────────────────────────
+
+    /**
+     * Creates a personalised diet by copying a diet template.
+     *
+     * @param request the template ID and optional overrides
+     * @return the created diet
+     */
+    @Override
+    public DietResponse createDietFromTemplate(DietFromTemplateRequest request) {
+        DietTemplateEntity template = dietTemplateJpaRepository.findById(request.getTemplateId())
+                .orElseThrow(() -> new RuntimeException("Template de dieta no encontrado"));
+
+        DietEntity diet = new DietEntity();
+        diet.setId(UUID.randomUUID());
+        diet.setName(request.getName() != null && !request.getName().isBlank()
+                ? request.getName() : template.getName());
+        diet.setGoal(request.getGoal() != null && !request.getGoal().isBlank()
+                ? request.getGoal() : template.getGoal());
+        diet.setTemplateId(template.getId());
+        diet.setIndications(template.getIndications());
+        diet.setMeals(template.getMeals());
+        diet.setCreatedAt(LocalDate.now());
+        diet.setUpdatedAt(LocalDateTime.now());
+
+        dietJpaRepository.save(diet);
+        return modelMapper.map(diet, DietResponse.class);
+    }
+
+    // ── Diet assignment ──────────────────────────────────────────────
+
+    /**
+     * Assigns a diet to a client, deactivating any previous active assignment.
+     *
+     * @param clientId the client UUID
+     * @param request  the diet assignment payload
+     * @return the created diet assignment
+     */
+    @Override
+    public DietAssignmentResponse assignDiet(UUID clientId, DietAssignmentRequest request) {
+        clientJpaRepository.findById(clientId)
+                .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+
+        dietJpaRepository.findById(request.getDietId())
+                .orElseThrow(() -> new RuntimeException("Dieta no encontrada"));
+
+        dietAssignmentJpaRepository.findAll().stream()
+                .filter(a -> a.getClientId().equals(clientId) && Boolean.TRUE.equals(a.getActive()))
+                .forEach(a -> { a.setActive(false); a.setCreatedAt(a.getCreatedAt()); });
+
+        DietAssignmentEntity assignment = new DietAssignmentEntity();
+        assignment.setId(UUID.randomUUID());
+        assignment.setClientId(clientId);
+        assignment.setDietId(request.getDietId());
+        assignment.setAssignedAt(LocalDate.now());
+        assignment.setActive(true);
+        assignment.setCreatedAt(LocalDateTime.now());
+
+        dietAssignmentJpaRepository.save(assignment);
+        return modelMapper.map(assignment, DietAssignmentResponse.class);
+    }
+
+    // ── Notifications ────────────────────────────────────────────────
+
+    /**
+     * Builds lightweight notification previews for all client threads.
+     *
+     * @return notifications ordered by unread first, then most recent
+     */
+    @Override
+    public List<ThreadNotificationResponse> getNotifications() {
+        List<ClientEntity> clients = clientJpaRepository.findAll();
+        if (clients.isEmpty()) return List.of();
+
+        List<UUID> clientIds = clients.stream().map(ClientEntity::getId).toList();
+        List<NutritionThreadEntity> threads = nutritionThreadJpaRepository.findAllByClientIdIn(clientIds);
+
+        Map<UUID, NutritionThreadEntity> threadMap = threads.stream()
+                .collect(Collectors.toMap(NutritionThreadEntity::getClientId, t -> t, (a, b) -> a));
+
+        Map<UUID, String> dietNames = new HashMap<>();
+        dietAssignmentJpaRepository.findAll().stream()
+                .filter(a -> Boolean.TRUE.equals(a.getActive()))
+                .forEach(a -> dietNames.put(a.getClientId(),
+                        dietJpaRepository.findById(a.getDietId()).map(DietEntity::getName).orElse(null)));
+
+        List<ThreadNotificationResponse> result = new ArrayList<>();
+
+        for (ClientEntity client : clients) {
+            NutritionThreadEntity thread = threadMap.get(client.getId());
+            if (thread == null) continue;
+
+            List<MessageDto> parsed = parseMessages(thread.getMessages());
+            MessageDto lastMsg = parsed.isEmpty() ? null : parsed.get(parsed.size() - 1);
+
+            boolean unread = thread.getLastReadAt() == null
+                    || thread.getUpdatedAt().isAfter(thread.getLastReadAt());
+
+            result.add(ThreadNotificationResponse.builder()
+                    .threadId(thread.getId())
+                    .clientId(client.getId())
+                    .clientName(client.getName())
+                    .dietName(dietNames.get(client.getId()))
+                    .lastMessage(lastMsg != null ? lastMsg.getText() : null)
+                    .lastSender(lastMsg != null ? lastMsg.getSender() : null)
+                    .updatedAt(thread.getUpdatedAt())
+                    .unread(unread)
+                    .build());
+        }
+
+        result.sort(Comparator
+                .comparing(ThreadNotificationResponse::isUnread).reversed()
+                .thenComparing(ThreadNotificationResponse::getUpdatedAt,
+                        Comparator.nullsLast(Comparator.reverseOrder())));
+
+        return result;
+    }
+
+    /**
+     * Marks the nutrition thread as read by setting last_read_at to now.
+     *
+     * @param clientId the client UUID
+     */
+    @Override
+    public void markThreadRead(UUID clientId) {
+        nutritionThreadJpaRepository.findByClientId(clientId).ifPresent(entity -> {
+            entity.setLastReadAt(LocalDateTime.now());
+            nutritionThreadJpaRepository.save(entity);
+        });
     }
 }

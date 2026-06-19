@@ -155,6 +155,18 @@ public class CoachController {
         return ResponseEntity.ok(coachService.createDiet(request));
     }
 
+    /**
+     * Creates a personalised diet from a template.
+     *
+     * @param request the template ID and optional name/goal overrides
+     * @return the created diet
+     */
+    @PostMapping("/diets/from-template")
+    public ResponseEntity<DietResponse> createDietFromTemplate(
+            @Valid @RequestBody DietFromTemplateRequest request) {
+        return ResponseEntity.ok(coachService.createDietFromTemplate(request));
+    }
+
     /** Updates an existing diet. */
     @PutMapping("/diets/{id}")
     public ResponseEntity<DietResponse> updateDiet(
@@ -297,5 +309,45 @@ public class CoachController {
             @PathVariable UUID id,
             @RequestBody Map<String, String> body) {
         return ResponseEntity.ok(coachService.sendThreadMessage(id, body.get("message")));
+    }
+
+    /**
+     * Marks the nutrition thread as read for the coach.
+     *
+     * @param clientId the client UUID
+     * @return HTTP 200 OK
+     */
+    @PutMapping("/threads/{clientId}/read")
+    public ResponseEntity<Void> markThreadRead(@PathVariable UUID clientId) {
+        coachService.markThreadRead(clientId);
+        return ResponseEntity.ok().build();
+    }
+
+    // ── Diet Assignment ──────────────────────────────────────────────
+
+    /**
+     * Assigns a diet to a client, deactivating any previous active assignment.
+     *
+     * @param clientId the client UUID
+     * @param request  the diet assignment payload
+     * @return the created diet assignment
+     */
+    @PostMapping("/clients/{clientId}/diet-assignment")
+    public ResponseEntity<DietAssignmentResponse> assignDiet(
+            @PathVariable UUID clientId,
+            @Valid @RequestBody DietAssignmentRequest request) {
+        return ResponseEntity.ok(coachService.assignDiet(clientId, request));
+    }
+
+    // ── Notifications ────────────────────────────────────────────────
+
+    /**
+     * Retrieves lightweight notification previews for all client threads.
+     *
+     * @return list of {@link ThreadNotificationResponse}
+     */
+    @GetMapping("/notifications")
+    public ResponseEntity<List<ThreadNotificationResponse>> getNotifications() {
+        return ResponseEntity.ok(coachService.getNotifications());
     }
 }

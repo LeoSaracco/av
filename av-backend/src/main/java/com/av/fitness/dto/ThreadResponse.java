@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -19,6 +21,10 @@ public class ThreadResponse {
     private UUID id;
     /** The client who owns this thread. */
     private UUID clientId;
-    /** JSON-serialized array of messages in the thread. */
-    private String messages;
+    /** Parsed array of messages in the thread. */
+    private List<MessageDto> messages;
+    /** Last time the coach read this thread (null = never). */
+    private LocalDateTime lastReadAt;
+    /** Last time a message was added. */
+    private LocalDateTime updatedAt;
 }

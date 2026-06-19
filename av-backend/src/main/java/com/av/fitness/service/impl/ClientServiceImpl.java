@@ -3,11 +3,14 @@ package com.av.fitness.service.impl;
 import com.av.fitness.dto.coach.DietResponse;
 import com.av.fitness.dto.coach.NoteResponse;
 import com.av.fitness.dto.coach.RoutineResponse;
+import com.av.fitness.dto.MessageDto;
 import com.av.fitness.dto.ProgressResponse;
 import com.av.fitness.dto.ThreadResponse;
 import com.av.fitness.model.*;
 import com.av.fitness.repository.*;
 import com.av.fitness.service.ClientService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -15,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -36,6 +40,7 @@ public class ClientServiceImpl implements ClientService {
     private final NoteJpaRepository noteJpaRepository;
     private final NutritionThreadJpaRepository nutritionThreadJpaRepository;
     private final ModelMapper modelMapper;
+    private final ObjectMapper objectMapper;
 
     /**
      * Finds the active routine assignment for the given client and maps it to a response.
@@ -160,23 +165,22 @@ public class ClientServiceImpl implements ClientService {
      * Returns the nutrition thread for the given client.
      *
      * @param clientId the authenticated client's ID
-     * @return the nutrition thread mapped to {@link ThreadResponse}
+     * @return the nutrition thread with parsed messages
      * @throws RuntimeException if no thread is found
      */
     @Override
     public ThreadResponse getMyThread(UUID clientId) {
         NutritionThreadEntity entity = nutritionThreadJpaRepository.findByClientId(clientId)
                 .orElseThrow(() -> new RuntimeException("Hilo no encontrado"));
-        return modelMapper.map(entity, ThreadResponse.class);
+        return mapThreadToResponse(entity);
     }
 
     /**
      * Appends a JSON message to the client's nutrition thread messages array.
-     * The message is sent with sender {@code CLIENT} and the current timestamp.
      *
      * @param clientId the authenticated client's ID
      * @param message  the text content of the message
-     * @return the updated nutrition thread mapped to {@link ThreadResponse}
+     * @return the updated nutrition thread with parsed messages
      * @throws RuntimeException if the thread is not found
      */
     @Override
@@ -199,6 +203,33 @@ public class ClientServiceImpl implements ClientService {
         entity.setUpdatedAt(LocalDateTime.now());
 
         nutritionThreadJpaRepository.save(entity);
-        return modelMapper.map(entity, ThreadResponse.class);
+        return mapThreadToResponse(entity);
+    }
+
+    /**
+     * Parses the messages JSONB string into a List of MessageDto.
+     */
+    private List<MessageDto> parseMessages(String messagesJson) {
+        if (messagesJson == null || messagesJson.isBlank() || "[]".equals(messagesJson)) {
+            return new ArrayList<>();
+        }
+        try {
+            return objectMapper.readValue(messagesJson, new TypeReference<List<MessageDto>>() {});
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Maps a NutritionThreadEntity to ThreadResponse with parsed messages.
+     */
+    private ThreadResponse mapThreadToResponse(NutritionThreadEntity entity) {
+        return ThreadResponse.builder()
+                .id(entity.getId())
+                .clientId(entity.getClientId())
+                .messages(parseMessages(entity.getMessages()))
+                .lastReadAt(entity.getLastReadAt())
+                .updatedAt(entity.getUpdatedAt())
+                .build();
     }
 }
