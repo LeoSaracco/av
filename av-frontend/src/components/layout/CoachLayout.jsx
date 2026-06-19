@@ -5,6 +5,7 @@
  *              Adaptable a dispositivos móviles con sidebar colapsable.
  */
 import React, { useEffect, useState } from 'react';
+import { LogOut } from 'lucide-react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
@@ -113,9 +114,11 @@ export function CoachLayout({ children }) {
             <MenuIcon size={18} />
           </button>
           <span style={{ fontFamily: 'var(--font-main)', fontWeight: 700 }}>Adrián Vila</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <div className="topbar-actions">
             <NotificationBell onClick={(e) => { setBellEl(e.currentTarget); setBellOpen(o => !o); }} />
-            <div style={{ width: 36 }} />
+            <button className="btn btn-ghost btn-sm logout-icon-btn" onClick={handleLogout} aria-label="Cerrar sesion">
+              <LogOut size={17} />
+            </button>
           </div>
         </div>
 

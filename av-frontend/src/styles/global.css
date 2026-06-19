@@ -470,6 +470,45 @@ select.form-input { appearance: none; cursor: pointer; }
   z-index: 50;
 }
 
+.topbar-brand,
+.coach-topbar > span,
+.client-navbar > a:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-main);
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--color-text);
+}
+
+.coach-topbar > span {
+  font-weight: 700;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.logout-icon-btn {
+  color: var(--color-error);
+  border-color: rgba(255, 59, 59, 0.28);
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.logout-icon-btn:hover,
+.logout-icon-btn:focus-visible {
+  background: rgba(255, 59, 59, 0.14);
+  border-color: rgba(255, 59, 59, 0.42);
+  color: var(--color-error);
+}
+
 .coach-content {
   flex: 1;
   padding: 28px 32px;
@@ -615,9 +654,25 @@ tbody tr:hover { background: var(--color-surface); }
   z-index: 100;
   overflow: hidden;
 }
+.client-navbar-brand {
+  flex: 1;
+}
 @media (max-width: 400px) {
   .client-navbar { padding: 0 12px; }
   .client-navbar .btn-sm { font-size: 12px; padding: 4px 8px; }
+  .client-logout-btn span { display: none; }
+}
+@media (max-width: 768px) {
+  .logout-icon-btn {
+    width: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    padding: 0;
+  }
+  .client-navbar > a:first-child,
+  .coach-topbar > span {
+    flex: 1;
+  }
 }
 .client-bottom-nav {
   position: fixed;

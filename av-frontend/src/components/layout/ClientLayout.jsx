@@ -5,6 +5,7 @@
  *              Incluye campanita de notificaciones con polling cada 30s.
  */
 import React, { useEffect } from 'react';
+import { LogOut } from 'lucide-react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
@@ -46,12 +47,15 @@ export function ClientLayout({ children }) {
         <NavLink to="/" style={{ fontFamily: 'var(--font-main)', fontWeight: 800, fontSize: 18, color: 'var(--color-text)' }}>
           Adrián Vila
         </NavLink>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div className="topbar-actions">
           <NotificationBell onClick={() => { markMyThreadRead(); navigate('/client/chat'); }} />
           <div className="avatar" style={{ width: 34, height: 34, fontSize: 13 }}>
             {user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
           </div>
-          <button className="btn btn-ghost btn-sm" onClick={handleLogout}>Salir</button>
+          <button className="btn btn-ghost btn-sm logout-icon-btn client-logout-btn" onClick={handleLogout} aria-label="Cerrar sesion">
+            <LogOut size={17} />
+            <span>Salir</span>
+          </button>
         </div>
       </nav>
 
