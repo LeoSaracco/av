@@ -26,6 +26,11 @@ export default function Login() {
   const [resetError, setResetError] = useState('');
   const [resetLoading, setResetLoading] = useState(false);
 
+  /**
+   * Autentica al usuario contra la API. Redirige a /coach o /client
+   * según el rol devuelto. Muestra error en el formulario si falla.
+   * @param {Event} e - Evento submit del formulario
+   */
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
@@ -40,6 +45,10 @@ export default function Login() {
     }
   };
 
+  /**
+   * Envía el código de recuperación al email ingresado.
+   * @async
+   */
   const handleSendResetCode = async () => {
     setResetLoading(true);
     setResetError('');
@@ -54,6 +63,11 @@ export default function Login() {
     }
   };
 
+  /**
+   * Valida y envía la nueva contraseña junto al código de verificación.
+   * Requiere al menos 6 caracteres.
+   * @async
+   */
   const handleResetPassword = async () => {
     if (resetPassword.length < 6) {
       setResetError('La contraseña debe tener al menos 6 caracteres');
