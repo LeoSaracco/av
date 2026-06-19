@@ -12,7 +12,7 @@ import { inlineSpinnerStyle } from '../../utils/spinnerStyle';
 
 export default function ClientChat() {
   const { user } = useAuth();
-  const { getDietAssignmentForClient, getDiet, getNutritionThreadForClient, addNutritionMessage, markThreadRead } = useApp();
+  const { getDietAssignmentForClient, getDiet, getNutritionThreadForClient, addNutritionMessage, loadThreadForClient, markMyThreadRead } = useApp();
   const navigate = useNavigate();
   const [inputMsg, setInputMsg] = useState('');
   const [sending, setSending] = useState(false);
@@ -25,10 +25,12 @@ export default function ClientChat() {
   const diet = dietAssignment ? getDiet(dietAssignment.dietId) : null;
 
   useEffect(() => {
-    if (clientId) {
-      try { markThreadRead(clientId); } catch { /* ignore */ }
-    }
-  }, [clientId, markThreadRead]);
+    if (clientId) loadThreadForClient(clientId);
+  }, [clientId, loadThreadForClient]);
+
+  useEffect(() => {
+    markMyThreadRead();
+  }, [markMyThreadRead]);
 
   useEffect(() => {
     if (chatEndRef.current) chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -53,7 +55,7 @@ export default function ClientChat() {
 
   return (
     <ClientLayout>
-      <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - var(--navbar-height, 60px) - 80px)' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - var(--navbar-height, 60px) - 80px)', height: 'calc(100dvh - var(--navbar-height, 60px) - 80px)' }}>
         {/* Header */}
         <div style={{
           display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px',

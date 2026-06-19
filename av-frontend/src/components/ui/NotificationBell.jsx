@@ -31,7 +31,6 @@ export default function NotificationBell({ onClick }) {
         opacity: hasNotifications ? 1 : 0.5,
         transition: 'color 0.2s ease, opacity 0.2s ease, transform 0.2s ease',
         transform: hasNotifications ? 'scale(1.1)' : 'scale(1)',
-        animation: hasNotifications ? 'pulse 2s ease-in-out infinite' : 'none',
       }}
     >
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none"

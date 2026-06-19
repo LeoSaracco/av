@@ -130,6 +130,9 @@ export function AppProvider({ children }) {
         setDiets([diet]);
         setDietAssignments([{ clientId, dietId: diet.id, assignedAt: diet.assignedAt || '', active: true }]);
       }
+      api.apiGetMyThread().then(t => {
+        if (t) setNutritionThreads(prev => prev.filter(x => x.clientId !== clientId).concat(t));
+      }).catch(() => {});
       setProgress(myProgress.map(item => ({ ...item, clientId })));
       setNotes(myNotes.map(item => ({ ...item, clientId })));
       setClientLoaded(true);
@@ -225,10 +228,20 @@ export function AppProvider({ children }) {
     } catch { showToast('Error al enviar mensaje', 'error'); }
   };
 
+  const loadThreadForClient = async (clientId) => {
+    try {
+      const thread = await api.apiGetClientThread(clientId);
+      setNutritionThreads(prev => prev.filter(t => t.clientId !== clientId).concat(thread));
+    } catch { /* ignore */ }
+  };
+
   const fetchNotifications = async () => {
     try {
       const data = await api.apiGetNotifications();
-      setNotifications(data);
+      setNotifications(prev => {
+        if (JSON.stringify(prev) === JSON.stringify(data)) return prev;
+        return data;
+      });
       setUnreadCount(data.filter(n => n.unread).length);
     } catch { /* ignore */ }
   };
@@ -236,7 +249,10 @@ export function AppProvider({ children }) {
   const fetchClientNotifications = async () => {
     try {
       const data = await api.apiGetMyNotifications();
-      setUnreadCount(data?.unread ? 1 : 0);
+      setUnreadCount(prev => {
+        const next = data?.unread ? 1 : 0;
+        return prev === next ? prev : next;
+      });
     } catch { /* ignore */ }
   };
 
@@ -245,6 +261,13 @@ export function AppProvider({ children }) {
       await api.apiMarkThreadRead(clientId);
       setNotifications(prev => prev.map(n => n.clientId === clientId ? { ...n, unread: false } : n));
       setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch { /* ignore */ }
+  };
+
+  const markMyThreadRead = async () => {
+    try {
+      await api.apiMarkMyThreadRead();
+      setUnreadCount(0);
     } catch { /* ignore */ }
   };
 
@@ -293,7 +316,7 @@ export function AppProvider({ children }) {
       clients, templates, routines, assignments, notes, progress, products, plans, cart, loaded, loadError,
       coachLoaded, clientLoaded, productsLoaded, loadCoachData, loadClientData, loadProducts,
       dietTemplates, diets, dietAssignments, nutritionThreads, onboardingSubmissions,
-      notifications, unreadCount, fetchNotifications, fetchClientNotifications, markThreadRead, markAllThreadsRead,
+      notifications, unreadCount, fetchNotifications, fetchClientNotifications, markThreadRead, markMyThreadRead, markAllThreadsRead,
       addClient, updateClient, deleteClient, getClient,
       addTemplate, updateTemplate, deleteTemplate, getTemplate,
       addRoutine, updateRoutine, deleteRoutine, duplicateRoutine, getRoutine, createRoutineFromTemplate,
@@ -303,7 +326,7 @@ export function AppProvider({ children }) {
       addDietTemplate, updateDietTemplate, deleteDietTemplate, getDietTemplate,
       addDiet, updateDiet, deleteDiet, getDiet, createDietFromTemplate,
       assignDiet, getDietAssignmentForClient,
-      getNutritionThreadForClient, addNutritionMessage,
+      getNutritionThreadForClient, addNutritionMessage, loadThreadForClient,
       addToCart, removeFromCart, updateCartQty, clearCart, cartTotal, cartCount,
       createOnboardingSubmission, getOnboardingByEmail,
       toast, showToast, uid,

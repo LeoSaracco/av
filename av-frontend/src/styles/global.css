@@ -613,6 +613,11 @@ tbody tr:hover { background: var(--color-surface); }
   position: sticky;
   top: 0;
   z-index: 100;
+  overflow: hidden;
+}
+@media (max-width: 400px) {
+  .client-navbar { padding: 0 12px; }
+  .client-navbar .btn-sm { font-size: 12px; padding: 4px 8px; }
 }
 .client-bottom-nav {
   position: fixed;

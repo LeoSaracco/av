@@ -35,7 +35,7 @@ function useIsMobile() {
 export default function CoachNutrition() {
   const {
     clients, getDiet, getDietAssignmentForClient,
-    getNutritionThreadForClient, addNutritionMessage,
+    getNutritionThreadForClient, addNutritionMessage, loadThreadForClient,
     notifications, fetchNotifications, markThreadRead,
   } = useApp();
   const navigate = useNavigate();
@@ -52,6 +52,10 @@ export default function CoachNutrition() {
   useEffect(() => {
     fetchNotifications();
   }, [fetchNotifications]);
+
+  useEffect(() => {
+    if (activeClientId) loadThreadForClient(activeClientId);
+  }, [activeClientId, loadThreadForClient]);
 
   const activeClient = useMemo(() =>
     clients.find(c => c.id === activeClientId), [clients, activeClientId]);
@@ -121,7 +125,7 @@ export default function CoachNutrition() {
 
   return (
     <CoachLayout>
-      <div style={{ display: 'flex', height: 'calc(100vh - var(--navbar-height, 60px) - 60px)', gap: 0, border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+      <div style={{ display: 'flex', minHeight: 'calc(100vh - var(--navbar-height, 60px) - 60px)', height: 'calc(100dvh - var(--navbar-height, 60px) - 60px)', gap: 0, border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
 
         {/* ── Lista de chats ─────────────────────────────────────────────── */}
         {(!isMobile || showList) && (
