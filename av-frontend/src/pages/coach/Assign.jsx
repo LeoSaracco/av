@@ -107,6 +107,7 @@ export default function Assign() {
   const [observations, setObservations] = useState('');
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const [newExerciseId, setNewExerciseId] = useState('');
 
   const selectedClient = clients.find(c => c.id === selectedClientId);
   const selectedRoutine = routines.find(r => r.id === selectedRoutineId);
@@ -133,6 +134,7 @@ export default function Assign() {
     setReason('');
     setObservations('');
     setSaveError('');
+    setNewExerciseId('');
     setStep(clientId ? 1 : 0);
   };
 
@@ -147,6 +149,7 @@ export default function Assign() {
     setReason('');
     setObservations('');
     setSaveError('');
+    setNewExerciseId('');
   };
 
   const handleRoutineSelect = (routineId) => {
@@ -164,7 +167,11 @@ export default function Assign() {
     }
   };
 
-  const addExercise = () => setExerciseForm(f => ({ ...f, exercises: [...f.exercises, { ...EMPTY_EX, id: Date.now().toString() }] }));
+  const addExercise = () => {
+    const id = Date.now().toString();
+    setExerciseForm(f => ({ ...f, exercises: [{ ...EMPTY_EX, id }, ...f.exercises] }));
+    setNewExerciseId(id);
+  };
   const updateExercise = (idx, field, val) => setExerciseForm(f => ({
     ...f,
     exercises: f.exercises.map((e, i) => i === idx ? { ...e, [field]: field === 'sets' || field === 'reps' ? Number(val) : val } : e)
@@ -284,9 +291,17 @@ export default function Assign() {
                 {exerciseForm.exercises.length === 0 && (
                   <div style={{ textAlign: 'center', padding: '16px 0', color: 'var(--color-text-3)', fontSize: 13 }}>Sin ejercicios. Agregá el primero.</div>
                 )}
-                {exerciseForm.exercises.map((ex, idx) => (
-                  <div key={ex.id || idx} style={{ background: 'var(--color-bg-3)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: 14, marginBottom: 10 }}>
+                {exerciseForm.exercises.map((ex, idx) => {
+                  const isNew = ex.id === newExerciseId && newExerciseId !== '';
+                  return (
+                  <div key={ex.id || idx} style={{
+                    background: isNew ? 'var(--color-accent-dim2)' : 'var(--color-bg-3)',
+                    border: isNew ? '1px solid rgba(0,255,0,0.2)' : '1px solid var(--color-border)',
+                    borderLeft: isNew ? '3px solid var(--color-accent)' : '3px solid transparent',
+                    borderRadius: 'var(--radius-md)', padding: 14, marginBottom: 10, transition: 'border-color 0.3s ease, background 0.3s ease',
+                  }}>
                     <div style={{ display: 'flex', gap: 6, marginBottom: 10, alignItems: 'center' }}>
+                      {isNew && <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-accent)', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>Nuevo</span>}
                       <input className="form-input" style={{ flex: 1 }} placeholder="Nombre del ejercicio" value={ex.name} onChange={e => updateExercise(idx, 'name', e.target.value)} />
                       <button className="btn btn-sm btn-danger" onClick={() => removeExercise(idx)}>✕</button>
                     </div>
@@ -297,7 +312,8 @@ export default function Assign() {
                     </div>
                     <div className="form-group" style={{ marginTop: 8 }}><label className="form-label" style={{ fontSize: 11 }}>Notas</label><input className="form-input" placeholder="Clave técnica, variante..." value={ex.notes} onChange={e => updateExercise(idx, 'notes', e.target.value)} /></div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
