@@ -126,37 +126,6 @@ export default function CoachDashboard() {
             </div>
           )}
         </div>
-
-        {/* Quick actions */}
-        <div className="card">
-          <h3 style={{ fontSize: 16, marginBottom: 16 }}>Acciones rápidas</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {[
-              { emoji: '👤', label: 'Nuevo cliente', path: '/coach/clients', action: 'add' },
-              { emoji: '📋', label: 'Nuevo template', path: '/coach/templates' },
-              { emoji: '🥗', label: 'Dieta base', path: '/coach/diet-templates' },
-              { emoji: '💪', label: 'Nueva rutina', path: '/coach/routines' },
-              { emoji: '🔗', label: 'Asignar rutina', path: '/coach/assign' },
-            ].map(a => (
-              <button key={a.label}
-                onClick={() => navigate(a.path)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
-                  background: 'var(--color-bg-3)', border: '1px solid var(--color-border)',
-                  borderRadius: 'var(--radius-md)', cursor: 'pointer', transition: 'var(--transition)',
-                  color: 'var(--color-text)', fontFamily: 'var(--font-body)', textAlign: 'left',
-                  width: '100%',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-surface)'; e.currentTarget.style.borderColor = 'var(--color-accent)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'var(--color-bg-3)'; e.currentTarget.style.borderColor = 'var(--color-border)'; }}
-              >
-                <span style={{ fontSize: 20 }}>{a.emoji}</span>
-                <span style={{ fontWeight: 500, fontSize: 14 }}>{a.label}</span>
-                <span style={{ marginLeft: 'auto', color: 'var(--color-text-3)' }}>→</span>
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
     </CoachLayout>
   );

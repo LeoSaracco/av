@@ -517,3 +517,35 @@ function useIsMobile() {
   return mobile;
 }
 ```
+
+---
+
+## Mockups obligatorios para cambios visuales
+
+Ante cualquier ajuste de UI/UX (formularios, navegacion, estados de carga,
+componentes visuales), se debe presentar un mockup ASCII **antes** de implementar.
+
+**Formato:**
+- Usar bordes `┌┐└┘├┤┬┴┼│─` para diagramar la UI
+- Etiquetar `ANTES → AHORA` para mostrar el delta visual
+- Marcar comportamientos nuevos con `←` y el cambio (hover, onClick, spinner)
+- Mantener los mockups proporcionales al layout real (mobile/desktop segun corresponda)
+- Incluir en los mockups: colores, estados (hover/disabled/loading), y navegacion
+
+**Ejemplo:**
+```
+┌─────────────────────────┐
+│  ANTES                  │
+│  ┌────────────────────┐ │
+│  │  Ingresando...     │ │  ← texto gris, sin animacion
+│  └────────────────────┘ │
+│                         │
+│  AHORA                  │
+│  ┌────────────────────┐ │
+│  │        ◌           │ │  ← spinner blanco girando
+│  └────────────────────┘ │
+└─────────────────────────┘
+```
+
+Esta regla es de cumplimiento obligatorio. No se aceptan cambios visuales
+sin mockup previo aprobado.

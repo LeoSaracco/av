@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { apiForgotPassword, apiResetPassword } from '../api/apiClient';
+import { inlineSpinnerStyle } from '../utils/spinnerStyle';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -184,7 +185,7 @@ export default function Login() {
                 </div>
               )}
               <button className="btn btn-primary" type="submit" style={{ width: '100%', justifyContent: 'center' }} disabled={loading}>
-                {loading ? 'Ingresando...' : 'Iniciar sesion'}
+                {loading ? <div style={inlineSpinnerStyle(18, '#fff', 'rgba(255,255,255,0.25)')} /> : 'Iniciar sesión'}
               </button>
               <div style={{ textAlign: 'center' }}>
                 <button type="button" onClick={() => { setShowReset(true); setResetEmail(email); }} style={{ background: 'none', border: 'none', color: 'var(--color-text-2)', fontSize: 12, cursor: 'pointer' }}>
