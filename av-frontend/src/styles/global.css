@@ -293,6 +293,10 @@ select.form-input { appearance: none; cursor: pointer; }
     align-items: flex-end;
     padding: 0;
   }
+  .confirm-modal {
+    align-items: center;
+    padding: 20px;
+  }
 }
 .modal-box {
   background: var(--color-surface);
@@ -313,6 +317,11 @@ select.form-input { appearance: none; cursor: pointer; }
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
     max-height: 85vh;
     max-height: 85dvh;
+  }
+  .confirm-modal .modal-box {
+    border-radius: var(--radius-xl);
+    max-height: 80vh;
+    max-height: 80dvh;
   }
 }
 .modal-header {
