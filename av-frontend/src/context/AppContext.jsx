@@ -228,6 +228,9 @@ export function AppProvider({ children }) {
     } catch { showToast('Error al enviar mensaje', 'error'); }
   };
 
+  /**
+   * Fetches and caches a client's full nutrition thread from the backend.
+   */
   const loadThreadForClient = async (clientId) => {
     try {
       const thread = await api.apiGetClientThread(clientId);
@@ -246,6 +249,10 @@ export function AppProvider({ children }) {
     } catch { /* ignore */ }
   };
 
+  /**
+   * Fetches the single notification for the authenticated client.
+   * Sets unreadCount to 1 if there are unread coach messages, 0 otherwise.
+   */
   const fetchClientNotifications = async () => {
     try {
       const data = await api.apiGetMyNotifications();
@@ -264,6 +271,7 @@ export function AppProvider({ children }) {
     } catch { /* ignore */ }
   };
 
+  /** Marks the current client's own thread as read. */
   const markMyThreadRead = async () => {
     try {
       await api.apiMarkMyThreadRead();

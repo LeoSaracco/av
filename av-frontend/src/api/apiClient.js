@@ -208,10 +208,12 @@ export async function apiSendMessage(text) {
   return normalizeThread(await request('POST', '/me/thread/message', { message: text }));
 }
 
+/** Marks the client's own nutrition thread as read. */
 export async function apiMarkMyThreadRead() {
   return request('PUT', '/me/thread/read');
 }
 
+/** Returns the client's unread-coach-message notification. */
 export async function apiGetMyNotifications() {
   return request('GET', '/me/notifications');
 }
@@ -369,14 +371,17 @@ export async function apiSendCoachMessage(clientId, text) {
   return normalizeThread(await request('POST', `/coach/clients/${clientId}/thread/message`, { message: text }));
 }
 
+/** Returns lightweight notification previews for all client threads. */
 export async function apiGetNotifications() {
   return request('GET', '/coach/notifications');
 }
 
+/** Marks a client's thread as read by the coach. */
 export async function apiMarkThreadRead(clientId) {
   return request('PUT', `/coach/threads/${clientId}/read`);
 }
 
+/** Assigns a diet to a client via the backend, deactivating previous. */
 export async function apiAssignDiet(clientId, dietId) {
   return request('POST', `/coach/clients/${clientId}/diet-assignment`, { dietId });
 }
