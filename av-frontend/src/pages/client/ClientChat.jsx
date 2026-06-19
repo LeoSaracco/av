@@ -137,9 +137,9 @@ export default function ClientChat() {
           <button onClick={handleSend} disabled={!inputMsg.trim() || sending}
             style={{
               width: 48, height: 48, borderRadius: 24, border: 'none',
-              background: inputMsg.trim() ? 'var(--color-accent)' : 'var(--color-bg-3)',
-              color: inputMsg.trim() ? '#000' : 'var(--color-text-3)',
-              cursor: inputMsg.trim() ? 'pointer' : 'default',
+              background: (inputMsg.trim() || sending) ? 'var(--color-accent)' : 'var(--color-bg-3)',
+              color: (inputMsg.trim() || sending) ? '#000' : 'var(--color-text-3)',
+              cursor: (inputMsg.trim() || sending) ? 'pointer' : 'default',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 18, flexShrink: 0, transition: 'background 0.15s ease',
             }}>

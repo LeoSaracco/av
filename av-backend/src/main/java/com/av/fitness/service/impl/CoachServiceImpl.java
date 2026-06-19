@@ -659,8 +659,9 @@ public class CoachServiceImpl implements CoachService {
             List<MessageDto> parsed = parseMessages(thread.getMessages());
             MessageDto lastMsg = parsed.isEmpty() ? null : parsed.get(parsed.size() - 1);
 
-            boolean unread = thread.getLastReadAt() == null
-                    || thread.getUpdatedAt().isAfter(thread.getLastReadAt());
+            boolean unread = "CLIENT".equals(lastMsg != null ? lastMsg.getSender() : null)
+                    && (thread.getLastReadAt() == null
+                    || thread.getUpdatedAt().isAfter(thread.getLastReadAt()));
 
             result.add(ThreadNotificationResponse.builder()
                     .threadId(thread.getId())
