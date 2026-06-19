@@ -1,6 +1,6 @@
 # Pipeline y despliegue - Railway + GitHub Actions
 
-Actualizado: 2026-06-19
+Actualizado: 2026-06-17
 
 ## Repositorio
 
@@ -98,43 +98,6 @@ Jobs:
   - Postgres service `postgres:16-alpine`
   - `./mvnw --batch-mode test`
   - `./mvnw --batch-mode package -DskipTests`
-- SonarQube:
-  - depende de Frontend y Backend
-  - usa checkout con `fetch-depth: 0` para preservar blame/historial
-  - genera coverage frontend con `npm run test:coverage`
-  - genera coverage backend con JaCoCo via Maven
-  - ejecuta `SonarSource/sonarqube-scan-action`
-  - usa `sonar.qualitygate.wait=true` y `sonar.qualitygate.timeout=600`
-  - falla el CI si el Quality Gate de SonarQube queda en rojo
-
-Requisitos SonarQube en GitHub:
-
-| Nombre | Tipo | Uso |
-|---|---|---|
-| `SONAR_TOKEN` | secret | token de analisis del proyecto SonarQube |
-| `SONAR_HOST_URL` | secret | URL publica del servidor SonarQube |
-| `SONAR_PROJECT_KEY` | variable | project key existente en SonarQube |
-
-Para cargarlos:
-
-```powershell
-gh secret set SONAR_TOKEN --repo LeoSaracco/av
-gh secret set SONAR_HOST_URL --repo LeoSaracco/av
-gh variable set SONAR_PROJECT_KEY --repo LeoSaracco/av --body "<project-key>"
-```
-
-Quality Gate exigente:
-
-- El gate se configura y asigna desde SonarQube al proyecto indicado por `SONAR_PROJECT_KEY`.
-- El pipeline no crea ni modifica el gate; solo bloquea el CI si SonarQube responde `FAILED`.
-- Configuracion recomendada para este repo:
-  - New code coverage >= 90%
-  - New duplicated lines <= 3%
-  - Reliability rating = A
-  - Security rating = A
-  - Maintainability rating = A
-  - Security hotspots reviewed = 100%
-  - No blocker/critical issues en new code
 
 ### Deploy
 
@@ -142,12 +105,11 @@ Archivo: `.github/workflows/deploy-railway.yml`
 
 Disparadores:
 
-- `workflow_run` cuando `CI` termina
+- `push` a `master`
 - `workflow_dispatch`
 
 Pasos:
 
-- solo despliega automaticamente si `CI` termino exitoso para un `push` a `master`
 - instala Railway CLI
 - despliega `av-frontend` con `--path-as-root`, `--project` y `--environment production`
 - despliega `av-backend` con `--path-as-root`, `--project` y `--environment production`
@@ -176,8 +138,7 @@ push/PR a master
   -> CI
   -> lint/build/tests/audit frontend
   -> tests/package backend
-  -> SonarQube scan + Quality Gate estricto
-  -> si es push a master y CI queda verde, Deploy Railway via workflow_run
+  -> si es push a master, deploy Railway
   -> verificar /actuator/health y frontend
 ```
 
