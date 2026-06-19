@@ -52,9 +52,7 @@ public class ClientServiceImpl implements ClientService {
      */
     @Override
     public RoutineResponse getMyRoutine(UUID clientId) {
-        AssignmentEntity assignment = assignmentJpaRepository.findAll().stream()
-                .filter(a -> a.getClientId().equals(clientId) && a.getActive())
-                .findFirst()
+        AssignmentEntity assignment = assignmentJpaRepository.findByClientIdAndActive(clientId, true)
                 .orElseThrow(() -> new RuntimeException("No hay rutina activa asignada"));
 
         RoutineEntity routine = routineJpaRepository.findById(assignment.getRoutineId())
@@ -71,9 +69,7 @@ public class ClientServiceImpl implements ClientService {
      */
     @Override
     public DietResponse getMyDiet(UUID clientId) {
-        DietAssignmentEntity assignment = dietAssignmentJpaRepository.findAll().stream()
-                .filter(a -> a.getClientId().equals(clientId) && a.getActive())
-                .findFirst()
+        DietAssignmentEntity assignment = dietAssignmentJpaRepository.findByClientIdAndActive(clientId, true)
                 .orElseThrow(() -> new RuntimeException("No hay dieta activa asignada"));
 
         DietEntity diet = dietJpaRepository.findById(assignment.getDietId())

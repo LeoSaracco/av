@@ -396,9 +396,7 @@ public class CoachServiceImpl implements CoachService {
     public AssignmentResponse createAssignment(AssignmentRequest request) {
         LocalDate today = LocalDate.now();
 
-        assignmentJpaRepository.findAll().stream()
-                .filter(a -> a.getClientId().equals(request.getClientId()) && a.getActive())
-                .findFirst()
+        assignmentJpaRepository.findByClientIdAndActive(request.getClientId(), true)
                 .ifPresent(prev -> {
                     prev.setActive(false);
                     assignmentJpaRepository.save(prev);
@@ -480,8 +478,7 @@ public class CoachServiceImpl implements CoachService {
     /** Retrieves all assignments for a client. */
     @Override
     public List<AssignmentResponse> getAssignmentsForClient(UUID clientId) {
-        return assignmentJpaRepository.findAll().stream()
-                .filter(a -> a.getClientId().equals(clientId))
+        return assignmentJpaRepository.findByClientId(clientId).stream()
                 .map(e -> modelMapper.map(e, AssignmentResponse.class))
                 .collect(Collectors.toList());
     }
@@ -610,9 +607,8 @@ public class CoachServiceImpl implements CoachService {
         dietJpaRepository.findById(request.getDietId())
                 .orElseThrow(() -> new RuntimeException("Dieta no encontrada"));
 
-        dietAssignmentJpaRepository.findAll().stream()
-                .filter(a -> a.getClientId().equals(clientId) && Boolean.TRUE.equals(a.getActive()))
-                .forEach(a -> { a.setActive(false); a.setCreatedAt(a.getCreatedAt()); });
+        dietAssignmentJpaRepository.findByClientIdAndActive(clientId, true)
+                .ifPresent(a -> { a.setActive(false); });
 
         DietAssignmentEntity assignment = new DietAssignmentEntity();
         assignment.setId(UUID.randomUUID());
@@ -645,8 +641,7 @@ public class CoachServiceImpl implements CoachService {
                 .collect(Collectors.toMap(NutritionThreadEntity::getClientId, t -> t, (a, b) -> a));
 
         Map<UUID, String> dietNames = new HashMap<>();
-        dietAssignmentJpaRepository.findAll().stream()
-                .filter(a -> Boolean.TRUE.equals(a.getActive()))
+        dietAssignmentJpaRepository.findByActive(true)
                 .forEach(a -> dietNames.put(a.getClientId(),
                         dietJpaRepository.findById(a.getDietId()).map(DietEntity::getName).orElse(null)));
 
