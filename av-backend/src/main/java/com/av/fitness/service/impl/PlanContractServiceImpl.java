@@ -30,6 +30,8 @@ public class PlanContractServiceImpl implements PlanContractService {
     private static final String PAYMENT_APPROVED = "PAYMENT_APPROVED";
     private static final String PAYMENT_REJECTED = "PAYMENT_REJECTED";
     private static final String COMPLETED = "COMPLETED";
+    private static final String DEFAULT_COACH_CHAT_TEMPLATE = "Hola %s, en breve nos estaremos comunicando con vos "
+            + "para presentarnos y hablar acerca del plan. Saludos";
 
     private final PlanJpaRepository planJpaRepository;
     private final PlanContractJpaRepository planContractJpaRepository;
@@ -295,7 +297,7 @@ public class PlanContractServiceImpl implements PlanContractService {
         NutritionThreadEntity thread = new NutritionThreadEntity();
         thread.setId(UUID.randomUUID());
         thread.setClientId(clientId);
-        thread.setMessages("[]");
+        thread.setMessages(defaultCoachMessage(clientName));
         thread.setCreatedAt(LocalDateTime.now());
         thread.setUpdatedAt(LocalDateTime.now());
         nutritionThreadJpaRepository.save(thread);
@@ -444,6 +446,28 @@ public class PlanContractServiceImpl implements PlanContractService {
         diet.setCreatedAt(LocalDate.now());
         diet.setUpdatedAt(LocalDateTime.now());
         return diet;
+    }
+
+    /**
+     * Builds the initial coach chat message persisted in the client's thread.
+     */
+    private String defaultCoachMessage(String clientName) {
+        String text = String.format(DEFAULT_COACH_CHAT_TEMPLATE, clientName);
+        return "[{\"id\":\"" + UUID.randomUUID()
+                + "\",\"sender\":\"COACH\",\"text\":\"" + jsonEscape(text)
+                + "\",\"date\":\"" + LocalDateTime.now() + "\"}]";
+    }
+
+    /**
+     * Escapes dynamic text before embedding it into the JSONB message payload.
+     */
+    private String jsonEscape(String value) {
+        if (value == null) return "";
+        return value
+                .replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r");
     }
 
     /**
