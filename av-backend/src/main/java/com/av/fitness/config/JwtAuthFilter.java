@@ -17,15 +17,26 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Extracts JWT from "av_access_token" cookie, validates it, and sets Spring Security context.
+ * Also supports Bearer token via Authorization header as fallback.
+ */
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
 
+    /**
+     * @param jwtService service for JWT validation and claims extraction
+     */
     public JwtAuthFilter(JwtService jwtService) {
         this.jwtService = jwtService;
     }
 
+    /**
+     * Attempts to extract a JWT from the Authorization header or the {@code av_access_token} cookie,
+     * validates it, and populates the {@link SecurityContextHolder} with the authenticated user.
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,

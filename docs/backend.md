@@ -1,6 +1,6 @@
 # Backend - Arquitectura y lineamientos
 
-Actualizado: 2026-06-16
+Actualizado: 2026-06-17
 
 ## Stack
 
@@ -42,6 +42,10 @@ Publicos:
 - `POST /api/auth/login`
 - `POST /api/auth/logout`
 - `POST /api/auth/refresh`
+- `POST /api/auth/send-verification`
+- `POST /api/auth/verify-email`
+- `POST /api/auth/forgot-password`
+- `POST /api/auth/reset-password`
 - `GET /api/plans`
 - `POST /api/plan-contracts/start`
 - `POST /api/plan-contracts/{contractId}/mock-payment`
@@ -78,6 +82,8 @@ Cliente:
 - `/api/me/notes`
 - `/api/me/thread`
 - `/api/me/thread/message`
+- `PUT /api/me/progress/{id}` (editar peso)
+- `DELETE /api/me/progress/{id}`
 
 Operacional:
 
@@ -126,6 +132,14 @@ Swagger esta habilitado y permitido por seguridad:
 
 Pendiente de decision: dejar publico en produccion o protegerlo por rol/admin.
 
+## Email
+
+Resend HTTPS API via RestTemplate, emails con template HTML dark mode (#0a0a0a, #00FF00), from: onboarding@resend.dev
+
+## Stored Procedures
+
+sp_delete_client_by_email definido en V7, elimina contracts, payments, onboardings, tokens, notes, threads.
+
 ## Validacion
 
 ```powershell
@@ -158,4 +172,5 @@ chmod +x ./mvnw
 - Aumentar cobertura de tests unitarios e integracion.
 - Agregar tests de seguridad por rol para `/api/coach/*` y `/api/me/*`.
 - Completar integraciones reales MercadoPago, Resend y OpenAI.
+- Agregar JavaDoc en controllers, services, DTOs, entidades y repositorios (COMPLETADO 2026-06-17).
 - Definir politica productiva para Swagger.

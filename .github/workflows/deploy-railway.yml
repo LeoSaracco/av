@@ -3,7 +3,7 @@ name: Deploy Railway
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [master]
 
 permissions:
   contents: read
@@ -17,7 +17,7 @@ jobs:
     name: Deploy services
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/master'
     env:
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
     steps:

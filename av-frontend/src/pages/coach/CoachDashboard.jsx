@@ -5,16 +5,31 @@
  * @route /coach
  * @auth Requiere rol "coach".
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import { CoachLayout } from '../../components/layout/CoachLayout';
 
+function timeAgo(date) {
+  if (!date) return '';
+  const diff = Date.now() - new Date(date).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'ahora';
+  if (mins < 60) return `${mins} min`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs} h`;
+  return `${Math.floor(hrs / 24)} d`;
+}
+
 export default function CoachDashboard() {
-  const { clients, routines, templates, assignments, notes, dietTemplates } = useApp();
+  const { clients, routines, templates, assignments, notes, dietTemplates, notifications, fetchNotifications } = useApp();
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
 
   const assignedCount = assignments.filter(a => a.active).length;
   const recentNotes = notes.slice(-3).reverse();
@@ -127,36 +142,53 @@ export default function CoachDashboard() {
           )}
         </div>
 
-        {/* Quick actions */}
-        <div className="card">
-          <h3 style={{ fontSize: 16, marginBottom: 16 }}>Acciones rápidas</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {[
-              { emoji: '👤', label: 'Nuevo cliente', path: '/coach/clients', action: 'add' },
-              { emoji: '📋', label: 'Nuevo template', path: '/coach/templates' },
-              { emoji: '🥗', label: 'Dieta base', path: '/coach/diet-templates' },
-              { emoji: '💪', label: 'Nueva rutina', path: '/coach/routines' },
-              { emoji: '🔗', label: 'Asignar rutina', path: '/coach/assign' },
-            ].map(a => (
-              <button key={a.label}
-                onClick={() => navigate(a.path)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
-                  background: 'var(--color-bg-3)', border: '1px solid var(--color-border)',
-                  borderRadius: 'var(--radius-md)', cursor: 'pointer', transition: 'var(--transition)',
-                  color: 'var(--color-text)', fontFamily: 'var(--font-body)', textAlign: 'left',
-                  width: '100%',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-surface)'; e.currentTarget.style.borderColor = 'var(--color-accent)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'var(--color-bg-3)'; e.currentTarget.style.borderColor = 'var(--color-border)'; }}
-              >
-                <span style={{ fontSize: 20 }}>{a.emoji}</span>
-                <span style={{ fontWeight: 500, fontSize: 14 }}>{a.label}</span>
-                <span style={{ marginLeft: 'auto', color: 'var(--color-text-3)' }}>→</span>
-              </button>
-            ))}
+        {/* Recent nutrition messages */}
+        {notifications.length > 0 && (
+          <div className="card">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <h3 style={{ fontSize: 16 }}>💬 Mensajes recientes</h3>
+              <button className="btn btn-ghost btn-sm" onClick={() => navigate('/coach/nutrition')}>Ver todos</button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {notifications.filter(n => n.lastMessage).slice(0, 3).map(n => {
+                const client = clients.find(c => c.id === n.clientId);
+                return (
+                  <div key={n.clientId}
+                    onClick={() => navigate(`/coach/nutrition?client=${n.clientId}`)}
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+                      padding: '10px 12px', borderRadius: 'var(--radius-md)',
+                      background: 'var(--color-bg-3)', cursor: 'pointer',
+                      borderLeft: n.unread ? '3px solid var(--color-accent)' : '3px solid transparent',
+                      transition: 'var(--transition)',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'var(--color-surface-2)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'var(--color-bg-3)'}
+                  >
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div className="avatar" style={{ width: 28, height: 28, fontSize: 10 }}>
+                          {(client?.name || n.clientName).split(' ').map(w => w[0]).join('').slice(0, 2)}
+                        </div>
+                        <span style={{ fontWeight: 600, fontSize: 13, fontFamily: 'var(--font-main)' }}>
+                          {client?.name || n.clientName}
+                        </span>
+                        {n.unread && <span style={{ width: 8, height: 8, borderRadius: 4, background: 'var(--color-accent)' }} />}
+                      </div>
+                      <div style={{
+                        fontSize: 12, color: 'var(--color-text-2)', marginTop: 4,
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      }}>
+                        {n.lastSender === 'COACH' ? 'Tú: ' : ''}{n.lastMessage.slice(0, 50)}
+                      </div>
+                    </div>
+                    <span style={{ fontSize: 11, color: 'var(--color-text-3)', flexShrink: 0 }}>{timeAgo(n.updatedAt)}</span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </CoachLayout>
   );

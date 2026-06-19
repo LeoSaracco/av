@@ -8,23 +8,26 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
+import Loader from '../../components/ui/Loader';
 
 const EMOJIS = { 'Ropa': '👕', 'Suplementos': '💊', 'Accesorios': '🏋️' };
 
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { products, addToCart, cartCount, loadProducts } = useApp();
+  const { products, addToCart, cartCount, loadProducts, productsLoaded } = useApp();
+  const [selectedSize, setSelectedSize] = useState('');
+  const [selectedColor, setSelectedColor] = useState('');
+  const [selectedFlavor, setSelectedFlavor] = useState('');
+  const [added, setAdded] = useState(false);
 
   useEffect(() => {
     loadProducts();
   }, [loadProducts]);
 
+  if (!productsLoaded) return <Loader fullPage text="Cargando producto..." />;
+
   const product = products.find(p => p.id === id);
-  const [selectedSize, setSelectedSize] = useState('');
-  const [selectedColor, setSelectedColor] = useState('');
-  const [selectedFlavor, setSelectedFlavor] = useState('');
-  const [added, setAdded] = useState(false);
 
   if (!product) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

@@ -1,6 +1,6 @@
 # Backlog - AV Fitness App
 
-Actualizado: 2026-06-16
+Actualizado: 2026-06-17
 
 ## Hecho
 
@@ -42,8 +42,8 @@ Actualizado: 2026-06-16
   - `mvnw.cmd`
   - `.mvn/wrapper/maven-wrapper.properties`
 - CI/CD actualizado:
-  - `ci.yml` corre en `push` y PR contra `main`.
-  - `deploy-railway.yml` corre en `push` contra `main` y manual `workflow_dispatch`.
+  - `ci.yml` corre en `push` y PR contra `master`.
+  - `deploy-railway.yml` corre en `push` contra `master` y manual `workflow_dispatch`.
   - CI usa `working-directory` correcto para `av-frontend` y `av-backend`.
   - Backend CI usa `./mvnw`.
   - Deploy usa `railway up ./av-frontend --path-as-root` y `railway up ./av-backend --path-as-root`.
@@ -54,7 +54,14 @@ Actualizado: 2026-06-16
   - inicio de contrato por API.
   - pago mock MercadoPago persistido en `payments`.
   - formulario, usuario y cliente creados al completar onboarding.
-  - auditoria de eventos clave en `audit_events`.
+- auditoria de eventos clave en `audit_events`.
+- Documentacion de codigo completada: JavaDoc en ~110 archivos backend (controllers, services, DTOs, entities, repos, config) y JSDoc en frontend (App, AppContext, Loader, Step5Account, AuthContext).
+- Email verification via Resend: envio de codigos de 6 digitos con templates HTML dark mode.
+- Auto-asignacion de rutina/dieta/hilo/nota al completar onboarding.
+- Edicion de registros de peso: PUT /api/me/progress/{id}.
+- Fix de cookies cross-origin: SameSite=None en AuthController y PlanContractController.
+- Fix visual frontend: wrap de titulo rutina, display flex en .card, borde verde consistente en historial.
+- SP sp_delete_client_by_email para limpiar datos de prueba e2e.
 
 ## Validado
 
@@ -73,13 +80,13 @@ Actualizado: 2026-06-16
   - deploy frontend OK
   - servicios separados dentro del proyecto `av`
 - GitHub:
-  - PR de migracion a monorepo mergeado en `main`.
-  - CI remoto en `main` OK.
+  - PR de migracion a monorepo mergeado en `master`.
+  - CI remoto en `master` OK.
 
 ## Pendiente
 
-- Confirmar en GitHub que `main` sea la rama protegida y productiva.
-- Configurar branch protection para `main`:
+- Confirmar en GitHub que `master` sea la rama protegida y productiva.
+- Configurar branch protection para `master`:
   - PR obligatorio.
   - CI requerido.
   - bloqueo de push directo si aplica.
@@ -91,10 +98,6 @@ Actualizado: 2026-06-16
   - MercadoPago
   - Resend
   - OpenAI
-- Documentar el codigo:
-  - componentes y contextos frontend.
-  - controllers, services, repositories, DTOs y entidades backend.
-  - flujos de auth, pagos, onboarding, coach, cliente y store.
 - Integrar MercadoPago real reemplazando el mock persistido.
 - Mejorar cobertura backend con tests de controller/service/repository.
 - Agregar prueba E2E que verifique que el home no llama endpoints privados.

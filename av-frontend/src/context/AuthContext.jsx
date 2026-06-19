@@ -4,7 +4,7 @@
  *              Usa cookies httpOnly administradas por el backend.
  */
 import React, { createContext, useContext, useState } from 'react';
-import { apiRegister, apiLogin, apiLogout, apiCompletePlanContract } from '../api/apiClient';
+import { apiRegister, apiLogin, apiLogout, apiCompletePlanContract, setBearerToken } from '../api/apiClient';
 
 const AuthContext = createContext(null);
 
@@ -18,6 +18,14 @@ function normalizeUser(data) {
   };
 }
 
+/**
+ * Authentication context provider connected to the real JWT API.
+ * Uses httpOnly cookies managed by the backend.
+ *
+ * @param {Object} props
+ * @param {ReactNode} props.children
+ * @returns {JSX.Element}
+ */
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -28,6 +36,7 @@ export function AuthProvider({ children }) {
       const result = await apiLogin(email, password);
       const normalized = normalizeUser(result);
       setUser(normalized);
+      setBearerToken(normalized.accessToken);
       return { ok: true, user: normalized };
     } catch (err) {
       return { ok: false, error: err.message || 'Credenciales incorrectas' };
@@ -42,6 +51,7 @@ export function AuthProvider({ children }) {
       const result = await apiRegister(name, email, password);
       const normalized = normalizeUser(result.user || result);
       setUser(normalized);
+      setBearerToken(normalized.accessToken);
       return { ok: true, user: normalized, clientId: result.clientId };
     } catch (err) {
       return { ok: false, error: err.message || 'Error al registrar' };
@@ -56,6 +66,7 @@ export function AuthProvider({ children }) {
       const result = await apiCompletePlanContract(contractId, data);
       const normalized = normalizeUser(result.user);
       setUser(normalized);
+      setBearerToken(normalized.accessToken);
       return {
         ok: true,
         user: normalized,
@@ -72,6 +83,7 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     try { await apiLogout(); } catch { /* ignore */ }
+    setBearerToken(null);
     setUser(null);
   };
 
@@ -86,6 +98,12 @@ export function AuthProvider({ children }) {
   );
 }
 
+/**
+ * Access authentication state and actions.
+ *
+ * @returns {Object} Context value with: user, login, registerUser,
+ *                   completePlanContract, logout, loading, isCoach, isClient.
+ */
 // eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const ctx = useContext(AuthContext);

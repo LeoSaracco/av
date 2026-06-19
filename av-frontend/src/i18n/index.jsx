@@ -1,5 +1,5 @@
 /**
- * @file index.js
+ * @file index.jsx
  * @description Contexto de internacionalización con soporte es/en.
  *              Detecta idioma desde `navigator.language` y expone el hook `useI18n()`.
  */

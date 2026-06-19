@@ -1,7 +1,7 @@
 /**
  * @file Registro y seguimiento del progreso de peso del cliente. Incluye
- *       gráfico de evolución (Recharts), estadísticas de resumen,
- *       historial cronológico y alta/baja de registros.
+ *       grafico de evolucion (Recharts), estadisticas de resumen,
+ *       historial cronologico y alta/baja/edicion de registros.
  * @route /client/progress
  * @auth Requiere rol "client".
  */
@@ -9,7 +9,8 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
 import { ClientLayout } from '../../components/layout/ClientLayout';
-import { Modal } from '../../components/ui/Modals';
+import { Modal, ConfirmModal } from '../../components/ui/Modals';
+import { inlineSpinnerStyle } from '../../utils/spinnerStyle';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 function CustomTooltip({ active, payload, label }) {
@@ -24,20 +25,58 @@ function CustomTooltip({ active, payload, label }) {
   return null;
 }
 
+const emptyForm = () => ({ date: new Date().toISOString().slice(0, 10), weight: '', comment: '' });
+
 export default function ClientProgress() {
   const { user } = useAuth();
-  const { getClient, getProgressForClient, addProgress, deleteProgress } = useApp();
+  const { getClient, getProgressForClient, addProgress, deleteProgress, updateProgress, loadError } = useApp();
   const [modal, setModal] = useState(false);
-  const [form, setForm] = useState({ date: new Date().toISOString().slice(0, 10), weight: '', comment: '' });
+  const [form, setForm] = useState(emptyForm());
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [weightError, setWeightError] = useState('');
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [editingEntry, setEditingEntry] = useState(null);
 
   const client = getClient(user?.clientId);
   const progress = client ? getProgressForClient(client.id) : [];
 
-  const handleSave = () => {
-    if (!form.weight || isNaN(parseFloat(form.weight))) return;
-    addProgress(client.id, { date: form.date, weight: parseFloat(form.weight), comment: form.comment });
-    setModal(false);
-    setForm({ date: new Date().toISOString().slice(0, 10), weight: '', comment: '' });
+  const openCreate = () => { setEditingEntry(null); setForm(emptyForm()); setWeightError(''); setModal(true); };
+  const openEdit = (entry) => { setEditingEntry(entry); setForm({ date: entry.date, weight: entry.weight.toString(), comment: entry.comment || '' }); setWeightError(''); setModal(true); };
+  const closeModal = () => { setModal(false); setWeightError(''); setEditingEntry(null); };
+
+  const handleSave = async () => {
+    if (!form.weight || isNaN(parseFloat(form.weight))) {
+      setWeightError('Ingresa un peso valido');
+      return;
+    }
+    setSaving(true);
+    try {
+      const data = { date: form.date, weight: parseFloat(form.weight), comment: form.comment };
+      if (editingEntry) {
+        await updateProgress(editingEntry.id, data);
+      } else {
+        await addProgress(client.id, data);
+      }
+      closeModal();
+    } catch {
+      // toast handled by context
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirmDeleteId) return;
+    setDeleting(true);
+    try {
+      await deleteProgress(confirmDeleteId);
+      setConfirmDeleteId(null);
+    } catch {
+      // toast handled by context
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const firstWeight = progress.length > 0 ? progress[0].weight : null;
@@ -46,19 +85,24 @@ export default function ClientProgress() {
   const minW = progress.length > 0 ? Math.min(...progress.map(p => p.weight)) : 0;
   const maxW = progress.length > 0 ? Math.max(...progress.map(p => p.weight)) : 0;
 
-  const chartData = progress.map(p => ({ ...p, date: p.date.slice(5) })); // MM-DD format
+  const chartData = progress.map(p => ({ ...p, date: p.date.slice(5) }));
 
   return (
     <ClientLayout>
       <div style={{ marginBottom: 24, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <div style={{ fontSize: 12, color: 'var(--color-text-3)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 6 }}>Mi evolución</div>
+          <div style={{ fontSize: 12, color: 'var(--color-text-3)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 6 }}>Mi evolucion</div>
           <h1 style={{ fontSize: 22 }}>Progreso de peso</h1>
         </div>
-        <button className="btn btn-primary btn-sm" onClick={() => setModal(true)}>+ Registrar</button>
+        <button className="btn btn-primary btn-sm" onClick={openCreate}>+ Registrar</button>
       </div>
 
-      {/* Summary stats */}
+      {loadError && (
+        <div style={{ background: 'rgba(255,59,59,0.1)', border: '1px solid rgba(255,59,59,0.3)', borderRadius: 'var(--radius-md)', padding: '10px 14px', fontSize: 13, color: 'var(--color-error)', marginBottom: 20 }}>
+          {loadError}
+        </div>
+      )}
+
       {progress.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 20 }}>
           {[
@@ -74,10 +118,9 @@ export default function ClientProgress() {
         </div>
       )}
 
-      {/* Chart */}
       {progress.length >= 2 && (
         <div className="card" style={{ marginBottom: 20, padding: '20px 8px 12px' }}>
-          <h3 style={{ fontSize: 14, marginBottom: 16, paddingLeft: 12 }}>Evolución de peso</h3>
+          <h3 style={{ fontSize: 14, marginBottom: 16, paddingLeft: 12 }}>Evolucion de peso</h3>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={chartData} margin={{ top: 5, right: 20, left: -15, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
@@ -95,13 +138,12 @@ export default function ClientProgress() {
         </div>
       )}
 
-      {/* History */}
       {progress.length === 0 ? (
         <div className="empty-state">
           <span style={{ fontSize: 48 }}>📊</span>
           <h3>Sin registros</h3>
-          <p>Registrá tu peso hoy para comenzar a ver tu evolución</p>
-          <button className="btn btn-primary" onClick={() => setModal(true)}>+ Registrar ahora</button>
+          <p>Registra tu peso hoy para comenzar a ver tu evolucion</p>
+          <button className="btn btn-primary" onClick={openCreate}>+ Registrar ahora</button>
         </div>
       ) : (
         <div>
@@ -110,22 +152,48 @@ export default function ClientProgress() {
             {[...progress].reverse().map((p, i) => {
               const prev = progress[progress.length - 2 - i];
               const diff = prev ? (p.weight - prev.weight).toFixed(1) : null;
+              const diffNum = diff !== null ? parseFloat(diff) : null;
+              const accentColor = diffNum !== null && diffNum < 0 ? 'var(--color-accent)' : diffNum !== null && diffNum > 0 ? 'var(--color-warning)' : 'var(--color-accent)';
+
               return (
-                <div key={p.id} className="card" style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: '14px 16px' }}>
-                  <div style={{ textAlign: 'center', minWidth: 56 }}>
-                    <div style={{ fontSize: 20, fontWeight: 800, fontFamily: 'var(--font-main)', color: 'var(--color-accent)' }}>{p.weight}</div>
-                    <div style={{ fontSize: 10, color: 'var(--color-text-3)' }}>kg</div>
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 600, fontSize: 13 }}>{p.date}</div>
-                    {p.comment && <p style={{ fontSize: 12, color: 'var(--color-text-2)', marginTop: 2 }}>{p.comment}</p>}
-                  </div>
-                  {diff !== null && (
-                    <div style={{ fontSize: 12, fontWeight: 700, color: parseFloat(diff) < 0 ? 'var(--color-accent)' : parseFloat(diff) > 0 ? 'var(--color-warning)' : 'var(--color-text-3)' }}>
-                      {parseFloat(diff) > 0 ? '+' : ''}{diff}
+                <div key={p.id} style={{
+                  background: 'var(--color-surface)',
+                  border: '1px solid var(--color-border)',
+                  borderLeft: `3px solid ${accentColor}`,
+                  borderRadius: 'var(--radius-md)',
+                  padding: '16px',
+                  position: 'relative',
+                  transition: 'var(--transition)',
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+                    <span style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-text)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      {new Date(p.date + 'T00:00:00').toLocaleDateString('es-AR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </span>
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      <button onClick={() => openEdit(p)} style={{ background: 'none', border: 'none', color: 'var(--color-text-3)', cursor: 'pointer', fontSize: 14, padding: '2px 4px', lineHeight: 1 }} title="Editar registro">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                      </button>
+                      <button onClick={() => setConfirmDeleteId(p.id)} style={{ background: 'none', border: 'none', color: 'var(--color-text-3)', cursor: 'pointer', fontSize: 16, padding: '2px 4px', lineHeight: 1 }} title="Eliminar registro">✕</button>
                     </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 24, marginBottom: p.comment ? 8 : 0, alignItems: 'flex-end' }}>
+                    <div style={{ fontSize: 22, fontWeight: 800, fontFamily: 'var(--font-main)', color: 'var(--color-accent)' }}>
+                      {p.weight} <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-text-3)' }}>kg</span>
+                    </div>
+                    {diff !== null && (
+                      <div>
+                        <div style={{ fontSize: 18, fontWeight: 700, fontFamily: 'var(--font-main)', color: diffNum < 0 ? 'var(--color-accent)' : diffNum > 0 ? 'var(--color-warning)' : 'var(--color-text-3)' }}>
+                          {diffNum > 0 ? '+' : ''}{diff}
+                        </div>
+                        <div style={{ fontSize: 10, color: 'var(--color-text-3)', marginTop: 2 }}>kg cambio</div>
+                      </div>
+                    )}
+                  </div>
+                  {p.comment && (
+                    <p style={{ fontSize: 13, color: 'var(--color-text-2)', margin: 0, lineHeight: 1.5, fontStyle: 'italic' }}>
+                      {p.comment}
+                    </p>
                   )}
-                  <button onClick={() => deleteProgress(p.id)} style={{ background: 'none', border: 'none', color: 'var(--color-text-3)', cursor: 'pointer', fontSize: 14, padding: 4 }}>✕</button>
                 </div>
               );
             })}
@@ -133,12 +201,14 @@ export default function ClientProgress() {
         </div>
       )}
 
-      <Modal open={modal} onClose={() => setModal(false)}
-        title="Nuevo registro de peso"
+      <Modal open={modal} onClose={closeModal}
+        title={editingEntry ? 'Editar registro de peso' : 'Nuevo registro de peso'}
         footer={
           <>
-            <button className="btn btn-ghost" onClick={() => setModal(false)}>Cancelar</button>
-            <button className="btn btn-primary" onClick={handleSave}>Guardar registro</button>
+            <button className="btn btn-ghost" onClick={closeModal} disabled={saving}>Cancelar</button>
+            <button className="btn btn-primary" onClick={handleSave} disabled={saving} style={{ minWidth: 150, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              {saving ? <div style={inlineSpinnerStyle(18, '#000', 'rgba(0,0,0,0.25)')} /> : (editingEntry ? 'Guardar cambios' : 'Guardar registro')}
+            </button>
           </>
         }>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -148,14 +218,25 @@ export default function ClientProgress() {
           </div>
           <div className="form-group">
             <label className="form-label">Peso (kg) *</label>
-            <input className="form-input" type="number" step="0.1" min="30" max="200" placeholder="Ej: 72.5" value={form.weight} onChange={e => setForm(f => ({ ...f, weight: e.target.value }))} />
+            <input className="form-input" type="number" step="0.1" min="30" max="200" placeholder="Ej: 72.5" value={form.weight} onChange={e => { setForm(f => ({ ...f, weight: e.target.value })); setWeightError(''); }} />
+            {weightError && <span style={{ fontSize: 12, color: 'var(--color-error)', marginTop: 4, display: 'block' }}>{weightError}</span>}
           </div>
           <div className="form-group">
             <label className="form-label">Comentario</label>
-            <textarea className="form-input" rows={3} placeholder="Cómo te sentiste hoy, observaciones..." value={form.comment} onChange={e => setForm(f => ({ ...f, comment: e.target.value }))} />
+            <textarea className="form-input" rows={3} placeholder="Como te sentiste hoy, observaciones..." value={form.comment} onChange={e => setForm(f => ({ ...f, comment: e.target.value }))} />
           </div>
         </div>
       </Modal>
+
+      <ConfirmModal
+        open={!!confirmDeleteId}
+        onClose={() => setConfirmDeleteId(null)}
+        onConfirm={handleDelete}
+        title="Eliminar registro"
+        message="Seguro que queres eliminar este registro de peso? No se puede deshacer."
+        confirmLabel={deleting ? <div style={inlineSpinnerStyle(16, '#fff', 'rgba(255,255,255,0.25)')} /> : 'Eliminar'}
+        confirmDisabled={deleting}
+      />
     </ClientLayout>
   );
 }

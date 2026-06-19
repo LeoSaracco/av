@@ -11,11 +11,17 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
+/**
+ * Configures SpringDoc OpenAPI / Swagger UI.
+ */
 @Configuration
 public class OpenApiConfig {
 
     public static final String BEARER_AUTH = "bearerAuth";
 
+    /**
+     * @return the configured {@link OpenAPI} definition with Bearer JWT security scheme
+     */
     @Bean
     public OpenAPI avOpenAPI() {
         return new OpenAPI()

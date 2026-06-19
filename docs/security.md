@@ -1,6 +1,6 @@
 # Seguridad - AV Fitness App
 
-Actualizado: 2026-06-16
+Actualizado: 2026-06-17
 
 ## Estado actual
 
@@ -36,6 +36,10 @@ Prohibido:
 - clientes, rutinas, dietas, notas, progreso, asignaciones, pagos, threads.
 - seed fallback de negocio.
 
+## Cookies
+
+- SameSite=None configurado via auth.cookie-secure=true en produccion para soportar cross-origin entre av-frontend-production.up.railway.app y av-backend-production.up.railway.app.
+
 ## Swagger
 
 Actualmente:
@@ -52,12 +56,13 @@ Riesgo pendiente:
 - `npm audit --audit-level=high` bloqueante en frontend.
 - Backend compila y testea con Maven Wrapper.
 - GitHub secret requerido: `RAILWAY_TOKEN`; no documentar nunca su valor.
-- Branch protection recomendada para `main`.
+- Branch protection recomendada para `master`.
 
 ## Pendientes
 
-- Activar branch protection en `main`.
+- Activar branch protection en `master`.
 - Revisar resultado remoto de `npm audit --audit-level=high` si cambian dependencias.
 - Agregar tests de autorizacion por rol en backend.
 - Definir politica productiva de Swagger.
 - Agregar secret scanning en CI si se decide exigirlo como gate.
+- Email verification tokens con expiracion de 10 minutos y limpieza programada cada 1 hora. (COMPLETADO)

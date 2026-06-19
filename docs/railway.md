@@ -1,6 +1,6 @@
 # Railway - Estado operativo y guia para agentes
 
-Actualizado: 2026-06-16
+Actualizado: 2026-06-17
 
 ## Estado actual
 
@@ -66,7 +66,7 @@ Workflow:
 
 Triggers:
 
-- `push` a `main`
+- `push` a `master`
 - `workflow_dispatch`
 
 Secret requerido:
@@ -111,7 +111,7 @@ Backend:
 | `CORS_ALLOWED_ORIGINS` | frontend productivo y localhost dev |
 | `AUTH_COOKIE_SECURE=true` | cookies seguras HTTPS |
 | `MERCADOPAGO_ACCESS_TOKEN` | credencial real pendiente |
-| `RESEND_API_KEY` | credencial real pendiente |
+| `RESEND_API_KEY` | configurado |
 | `OPENAI_API_KEY` | credencial real pendiente |
 
 No documentar valores secretos en Git.
@@ -168,7 +168,7 @@ git status --short --branch
 
 El remoto esperado es `https://github.com/LeoSaracco/av`.
 
-3. Trabajar contra `main` actualizado.
+3. Trabajar contra `master` actualizado.
 4. Mantener estructura `av-frontend/` y `av-backend/`.
 5. No recrear `railway.toml` en raiz para deploy monorepo.
 6. No subir `.env`, `.env.production`, `node_modules`, `dist` ni `target`.
@@ -193,7 +193,7 @@ cd ..\av-backend
 .\mvnw.cmd package -DskipTests --batch-mode
 ```
 
-9. Despues de push a `main`, revisar:
+9. Despues de push a `master`, revisar:
 
 ```powershell
 gh run list --repo LeoSaracco/av --limit 5
@@ -204,6 +204,20 @@ gh run list --repo LeoSaracco/av --limit 5
 ```powershell
 Invoke-RestMethod https://av-backend-production.up.railway.app/actuator/health
 Invoke-WebRequest https://av-frontend-production.up.railway.app/ -UseBasicParsing
+```
+
+### Lineamiento: Verificacion de deploys locales
+
+Al verificar deploys desde la terminal local, usar `Start-Sleep` de **maximo 20 segundos**. 
+Los deploys Railway pueden tardar 2-4 minutos; no tiene sentido esperar en un sleep largo 
+porque el CI de GitHub Actions ya tiene su propio ciclo de verificacion independiente.
+
+```powershell
+# Correcto: espera corta, luego el pipeline se verifica via gh run list
+Start-Sleep -Seconds 15; gh run list --repo LeoSaracco/av --limit 3
+
+# Incorrecto: no usar sleeps > 20s
+# Start-Sleep -Seconds 45
 ```
 
 ## Queries de validacion en base

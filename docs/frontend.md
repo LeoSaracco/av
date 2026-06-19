@@ -1,6 +1,6 @@
 # Frontend - Arquitectura y lineamientos
 
-Actualizado: 2026-06-16
+Actualizado: 2026-06-17
 
 ## Stack
 
@@ -37,6 +37,38 @@ pages/components -> context -> apiClient -> backend
 - `Store.jsx`/`ProductDetail.jsx`: disparan carga de productos.
 - `PaymentSimulator.jsx`: inicia contrato y confirma pago mock por API.
 - `Onboarding.jsx`: completa contrato, crea usuario/cliente y guarda formulario por API.
+
+## Componentes
+
+### Loader.jsx
+
+Loader.jsx: spinner reutilizable con color verde (--color-accent). Soporta 3 modos: fullPage (overlay centrado), inline (flex row), y default (solo spinner). Tamanos: sm (20px), md (32px), lg (48px).
+
+### SearchSelect
+
+Componente interno en `Assign.jsx`. Buscador + dropdown custom sin dependencias.
+Reemplaza `<select>` cuando hay mas de ~10 opciones y el usuario necesita
+buscar/filtrar. Props: `options`, `value`, `onChange`, `placeholder`, `disabled`,
+`mobile`. Dropdown con `position: absolute`, `z-index: 60`, `max-height` dinamico.
+En mobile hace `dropUp` si no hay espacio abajo. Cierre al click fuera via
+`mousedown` listener en `document`.
+
+### StepIndicator
+
+Indicador visual de pasos (`●━━○━━○`) para flujos multi-etapa dentro de modales.
+Usado en el modal de Asignar/Reasignar rutina.
+
+### `useIsMobile()` hook
+
+Hook que detecta `window.innerWidth < 480` y se actualiza en `resize`.
+Usado en modales y componentes para adaptar layout mobile vs desktop.
+
+## Fix visuales - Junio 2026
+
+- word-break en titulo de rutina (ClientDashboard)
+- display:flex column en .card para que gap funcione
+- borde verde consistente en todas las cards de historial
+- boton Crear cuenta deshabilitado hasta codeSent
 
 ## Variables
 
@@ -89,9 +121,10 @@ Estado validado:
 - build OK
 - 25 tests OK
 
-## Pendientes frontend
+## Pendientes frontend (actualizado 2026-06-17)
 
 - Agregar E2E que capture requests del home y falle si aparecen `/api/coach/*` o `/api/me/*`.
 - Mejorar code splitting: el bundle supera 500 KB y Vite emite warning.
 - Revisar vulnerabilidades de `npm audit --audit-level=high` en CI.
+- Documentar componentes con JSDoc (COMPLETADO).
 - Reemplazar stubs restantes de UI, por ejemplo upload real de avatar y reconexion WebSocket.

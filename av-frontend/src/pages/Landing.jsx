@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import Loader from '../components/ui/Loader';
 
 /**
  * Componente principal de la landing page.
@@ -189,9 +190,13 @@ export default function Landing() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24, alignItems: 'stretch' }}>
             {plans.length === 0 && (
-              <p style={{ color: 'var(--color-text-2)', textAlign: 'center', gridColumn: '1 / -1' }}>
-                {loaded ? 'No hay planes disponibles.' : 'Cargando planes...'}
-              </p>
+              <div style={{ gridColumn: '1 / -1' }}>
+                {loaded ? (
+                  <p style={{ color: 'var(--color-text-2)', textAlign: 'center' }}>No hay planes disponibles.</p>
+                ) : (
+                  <Loader inline text="Cargando planes..." />
+                )}
+              </div>
             )}
             {plans.map(plan => (
               <div key={plan.id} className={`plan-card${plan.featured ? ' featured' : ''}`}>

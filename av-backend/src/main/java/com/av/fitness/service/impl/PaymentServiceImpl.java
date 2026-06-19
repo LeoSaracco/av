@@ -13,6 +13,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * Implements Mercado Pago mock payment flow.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -20,6 +23,13 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentJpaRepository paymentJpaRepository;
 
+    /**
+     * Creates a mock payment preference for a given plan and client.
+     *
+     * @param request  the payment preference request containing the plan ID
+     * @param clientId the UUID of the client
+     * @return the generated preference ID
+     */
     @Override
     public String createPreference(PaymentPreferenceRequest request, UUID clientId) {
         PaymentEntity payment = new PaymentEntity();
@@ -42,6 +52,13 @@ public class PaymentServiceImpl implements PaymentService {
         return payment.getPreferenceId();
     }
 
+    /**
+     * Retrieves the current payment status for a given preference.
+     *
+     * @param preferenceId the payment preference ID
+     * @return a response containing the payment status, amount, and currency
+     * @throws RuntimeException if the payment is not found
+     */
     @Override
     public PaymentStatusResponse checkStatus(String preferenceId) {
         PaymentEntity payment = paymentJpaRepository.findByPreferenceId(preferenceId)
@@ -55,6 +72,12 @@ public class PaymentServiceImpl implements PaymentService {
                 .build();
     }
 
+    /**
+     * Processes a mock webhook payload to update the payment status.
+     * Parses the raw payload for preference_id and status fields.
+     *
+     * @param payload the raw webhook payload string
+     */
     @Override
     public void handleWebhook(String payload) {
         String[] parts = payload.split(",");

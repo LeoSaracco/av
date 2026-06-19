@@ -1,14 +1,29 @@
 /**
  * @file Cliente HTTP para la API del backend.
- *       Usa cookies httpOnly administradas por el backend.
+ *       Usa cookies httpOnly + Authorization Bearer como fallback.
  *       Configurable mediante variable de entorno VITE_API_URL.
  *       Cubre 47 endpoints del backend.
  */
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
+let bearerToken = null;
+
+/**
+ * Stores the access token in memory for Bearer header fallback.
+ * Called by AuthContext after login/register/completePlanContract.
+ * Set to null on logout.
+ */
+export function setBearerToken(token) {
+  bearerToken = token || null;
+}
+
 function getAuthHeaders() {
-  return { 'Content-Type': 'application/json' };
+  const headers = { 'Content-Type': 'application/json' };
+  if (bearerToken) {
+    headers['Authorization'] = `Bearer ${bearerToken}`;
+  }
+  return headers;
 }
 
 async function request(method, path, body = null) {
@@ -61,6 +76,18 @@ function normalizeDiet(diet) {
   return { ...diet, meals: parseJsonField(diet.meals, []) };
 }
 
+function normalizeThread(thread) {
+  if (!thread) return thread;
+  return { ...thread, messages: parseJsonField(thread.messages, []) };
+}
+
+function stringifyJsonArray(data, field) {
+  if (data && data[field] !== undefined && Array.isArray(data[field])) {
+    return { ...data, [field]: JSON.stringify(data[field]) };
+  }
+  return data;
+}
+
 // ── Auth ──────────────────────────────────────────────────────────────────────
 export async function apiRegister(name, email, password) {
   return request('POST', '/auth/register', { name, email, password });
@@ -81,6 +108,18 @@ export async function apiVerifyEmail(email, code) {
 
 export async function apiLogout() {
   try { await request('POST', '/auth/logout'); } catch { /* ignore */ }
+}
+
+export async function apiSendVerificationCode(email) {
+  return request('POST', '/auth/send-verification', { email });
+}
+
+export async function apiForgotPassword(email) {
+  return request('POST', '/auth/forgot-password', { email });
+}
+
+export async function apiResetPassword(email, code, newPassword) {
+  return request('POST', '/auth/reset-password', { email, code, newPassword });
 }
 
 // ── Plans ─────────────────────────────────────────────────────────────────────
@@ -153,16 +192,30 @@ export async function apiDeleteProgress(id) {
   return request('DELETE', `/me/progress/${id}`);
 }
 
+export async function apiUpdateProgress(id, weight, date, comment) {
+  return request('PUT', `/me/progress/${id}`, { weight, date, comment });
+}
+
 export async function apiGetMyNotes() {
   return request('GET', '/me/notes');
 }
 
 export async function apiGetMyThread() {
-  return request('GET', '/me/thread');
+  return normalizeThread(await request('GET', '/me/thread'));
 }
 
 export async function apiSendMessage(text) {
-  return request('POST', '/me/thread/message', { message: text });
+  return normalizeThread(await request('POST', '/me/thread/message', { message: text }));
+}
+
+/** Marks the client's own nutrition thread as read. */
+export async function apiMarkMyThreadRead() {
+  return request('PUT', '/me/thread/read');
+}
+
+/** Returns the client's unread-coach-message notification. */
+export async function apiGetMyNotifications() {
+  return request('GET', '/me/notifications');
 }
 
 // ── Coach: Clients ────────────────────────────────────────────────────────────
@@ -197,11 +250,11 @@ export async function apiGetTemplates() {
 }
 
 export async function apiCreateTemplate(data) {
-  return normalizeTemplate(await request('POST', '/coach/templates', data));
+  return normalizeTemplate(await request('POST', '/coach/templates', stringifyJsonArray(data, 'exercises')));
 }
 
 export async function apiUpdateTemplate(id, data) {
-  return normalizeTemplate(await request('PUT', `/coach/templates/${id}`, data));
+  return normalizeTemplate(await request('PUT', `/coach/templates/${id}`, stringifyJsonArray(data, 'exercises')));
 }
 
 export async function apiDeleteTemplate(id) {
@@ -215,11 +268,11 @@ export async function apiGetRoutines() {
 }
 
 export async function apiCreateRoutine(data) {
-  return normalizeRoutine(await request('POST', '/coach/routines', data));
+  return normalizeRoutine(await request('POST', '/coach/routines', stringifyJsonArray(data, 'exercises')));
 }
 
 export async function apiUpdateRoutine(id, data) {
-  return normalizeRoutine(await request('PUT', `/coach/routines/${id}`, data));
+  return normalizeRoutine(await request('PUT', `/coach/routines/${id}`, stringifyJsonArray(data, 'exercises')));
 }
 
 export async function apiDeleteRoutine(id) {
@@ -231,8 +284,9 @@ export async function apiCreateRoutineFromTemplate(templateId, name, goal) {
 }
 
 // ── Coach: Assignments ────────────────────────────────────────────────────────
-export async function apiAssignRoutine(clientId, routineId, dietId) {
-  return request('POST', '/coach/assignments', { clientId, routineId, dietId });
+export async function apiAssignRoutine(clientId, routineId, dietId, reason, observations) {
+  return request('POST', '/coach/assignments',
+    { clientId, routineId, dietId, reason, observations });
 }
 
 export async function apiGetAssignments() {
@@ -275,11 +329,11 @@ export async function apiGetDietTemplates() {
 }
 
 export async function apiCreateDietTemplate(data) {
-  return normalizeDiet(await request('POST', '/coach/diet-templates', data));
+  return normalizeDiet(await request('POST', '/coach/diet-templates', stringifyJsonArray(data, 'meals')));
 }
 
 export async function apiUpdateDietTemplate(id, data) {
-  return normalizeDiet(await request('PUT', `/coach/diet-templates/${id}`, data));
+  return normalizeDiet(await request('PUT', `/coach/diet-templates/${id}`, stringifyJsonArray(data, 'meals')));
 }
 
 export async function apiDeleteDietTemplate(id) {
@@ -293,11 +347,11 @@ export async function apiGetDiets() {
 }
 
 export async function apiCreateDiet(data) {
-  return normalizeDiet(await request('POST', '/coach/diets', data));
+  return normalizeDiet(await request('POST', '/coach/diets', stringifyJsonArray(data, 'meals')));
 }
 
 export async function apiUpdateDiet(id, data) {
-  return normalizeDiet(await request('PUT', `/coach/diets/${id}`, data));
+  return normalizeDiet(await request('PUT', `/coach/diets/${id}`, stringifyJsonArray(data, 'meals')));
 }
 
 export async function apiDeleteDiet(id) {
@@ -310,11 +364,26 @@ export async function apiCreateDietFromTemplate(templateId, name, goal) {
 
 // ── Coach: Nutrition Thread ───────────────────────────────────────────────────
 export async function apiGetClientThread(clientId) {
-  return request('GET', `/coach/clients/${clientId}/thread`);
+  return normalizeThread(await request('GET', `/coach/clients/${clientId}/thread`));
 }
 
 export async function apiSendCoachMessage(clientId, text) {
-  return request('POST', `/coach/clients/${clientId}/thread/message`, { message: text });
+  return normalizeThread(await request('POST', `/coach/clients/${clientId}/thread/message`, { message: text }));
+}
+
+/** Returns lightweight notification previews for all client threads. */
+export async function apiGetNotifications() {
+  return request('GET', '/coach/notifications');
+}
+
+/** Marks a client's thread as read by the coach. */
+export async function apiMarkThreadRead(clientId) {
+  return request('PUT', `/coach/threads/${clientId}/read`);
+}
+
+/** Assigns a diet to a client via the backend, deactivating previous. */
+export async function apiAssignDiet(clientId, dietId) {
+  return request('POST', `/coach/clients/${clientId}/diet-assignment`, { dietId });
 }
 
 // ── Store ─────────────────────────────────────────────────────────────────────

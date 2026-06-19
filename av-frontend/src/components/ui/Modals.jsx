@@ -36,10 +36,10 @@ export function Toast() {
  * @param {React.ReactNode} [props.footer] - Contenido opcional del pie del modal
  * @returns {JSX.Element|null} Elemento modal o null si no está abierto
  */
-export function Modal({ open, onClose, title, children, footer }) {
+export function Modal({ open, onClose, title, children, footer, className }) {
   if (!open) return null;
   return (
-    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+    <div className={`modal-overlay${className ? ' ' + className : ''}`} onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal-box animate-slide">
         <div className="modal-header">
           <h3>{title}</h3>
@@ -68,16 +68,18 @@ export function Modal({ open, onClose, title, children, footer }) {
  * @param {string} [props.message] - Mensaje de advertencia
  * @returns {JSX.Element} Modal de confirmación
  */
-export function ConfirmModal({ open, onClose, onConfirm, title, message }) {
+export function ConfirmModal({ open, onClose, onConfirm, title, message, confirmLabel, confirmDisabled }) {
   return (
-    <Modal open={open} onClose={onClose} title={title || 'Confirmar acción'}
+    <Modal open={open} onClose={onClose} title={title || 'Confirmar accion'} className="confirm-modal"
       footer={
         <>
-          <button className="btn btn-ghost" onClick={onClose}>Cancelar</button>
-          <button className="btn btn-danger" onClick={() => { onConfirm(); onClose(); }}>Eliminar</button>
+          <button className="btn btn-ghost" onClick={onClose} disabled={confirmDisabled}>Cancelar</button>
+          <button className="btn btn-danger" onClick={onConfirm} disabled={confirmDisabled}>
+            {confirmLabel || 'Eliminar'}
+          </button>
         </>
       }>
-      <p style={{ color: 'var(--color-text-2)' }}>{message || '¿Estás seguro? Esta acción no se puede deshacer.'}</p>
+      <p style={{ color: 'var(--color-text-2)' }}>{message || 'Estas seguro? Esta accion no se puede deshacer.'}</p>
     </Modal>
   );
 }

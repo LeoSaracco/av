@@ -8,6 +8,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { CoachLayout } from '../../components/layout/CoachLayout';
+import { inlineSpinnerStyle } from '../../utils/spinnerStyle';
 import { Modal, ConfirmModal } from '../../components/ui/Modals';
 
 const EMPTY_CLIENT = { name: '', email: '', phone: '', goal: '', status: 'activo' };
@@ -20,6 +21,8 @@ export default function Clients() {
   const [form, setForm] = useState(EMPTY_CLIENT);
   const [editId, setEditId] = useState(null);
   const [confirmId, setConfirmId] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const filtered = clients.filter(c =>
     c.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -28,11 +31,16 @@ export default function Clients() {
 
   const openAdd = () => { setForm(EMPTY_CLIENT); setEditId(null); setModal('form'); };
   const openEdit = (c) => { setForm({ name: c.name, email: c.email, phone: c.phone || '', goal: c.goal, status: c.status }); setEditId(c.id); setModal('form'); };
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.name.trim() || !form.email.trim()) return;
-    if (editId) updateClient(editId, form);
-    else addClient(form);
-    setModal(null);
+    setSaving(true);
+    try {
+      if (editId) await updateClient(editId, form);
+      else await addClient(form);
+      setModal(null);
+    } catch { /* ignore */ } finally {
+      setSaving(false);
+    }
   };
 
   const getRoutineForClient = (clientId) => {
@@ -68,7 +76,7 @@ export default function Clients() {
       ) : (
         <>
           {/* Desktop table */}
-          <div className="table-wrapper" style={{ display: window.innerWidth < 640 ? 'none' : 'block' }}>
+          <div className="table-wrapper desktop-only">
             <table>
               <thead>
                 <tr>
@@ -116,7 +124,7 @@ export default function Clients() {
           </div>
 
           {/* Mobile cards */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div className="mobile-only" style={{ gap: 12 }}>
             {filtered.map(c => {
               const routine = getRoutineForClient(c.id);
               return (
@@ -152,9 +160,9 @@ export default function Clients() {
         title={editId ? 'Editar cliente' : 'Nuevo cliente'}
         footer={
           <>
-            <button className="btn btn-ghost" onClick={() => setModal(null)}>Cancelar</button>
-            <button className="btn btn-primary" onClick={handleSave}>
-              {editId ? 'Guardar cambios' : 'Crear cliente'}
+            <button className="btn btn-ghost" onClick={() => setModal(null)} disabled={saving}>Cancelar</button>
+            <button className="btn btn-primary" onClick={handleSave} disabled={saving} style={saving ? { minWidth: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 } : {}}>
+              {saving ? <div style={inlineSpinnerStyle(18, '#000', 'rgba(0,0,0,0.25)')} /> : editId ? 'Guardar cambios' : 'Crear cliente'}
             </button>
           </>
         }>
@@ -186,10 +194,12 @@ export default function Clients() {
         </div>
       </Modal>
 
-      <ConfirmModal open={!!confirmId} onClose={() => setConfirmId(null)}
-        onConfirm={() => deleteClient(confirmId)}
+      <ConfirmModal open={!!confirmId} onClose={() => { if (!deleting) setConfirmId(null); }}
+        onConfirm={async () => { setDeleting(true); try { await deleteClient(confirmId); } catch { /* ignore */ } setDeleting(false); setConfirmId(null); }}
         title="Eliminar cliente"
-        message="¿Eliminar este cliente? Se perderán sus datos, notas y asignaciones." />
+        message="¿Eliminar este cliente? Se perderán sus datos, notas y asignaciones."
+        confirmDisabled={deleting}
+        confirmLabel={deleting ? <div style={inlineSpinnerStyle(16, '#fff', 'rgba(255,255,255,0.25)')} /> : 'Eliminar'} />
     </CoachLayout>
   );
 }

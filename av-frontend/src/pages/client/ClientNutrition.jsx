@@ -9,6 +9,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import { ClientLayout } from '../../components/layout/ClientLayout';
+import { inlineSpinnerStyle } from '../../utils/spinnerStyle';
 
 export default function ClientNutrition() {
   const { user } = useAuth();
@@ -20,16 +21,19 @@ export default function ClientNutrition() {
   const thread = getNutritionThreadForClient(clientId);
 
   const [inputMsg, setInputMsg] = useState('');
+  const [sending, setSending] = useState(false);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [thread.messages]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (inputMsg.trim()) {
-      addNutritionMessage(clientId, 'client', inputMsg);
+      setSending(true);
       setInputMsg('');
+      await addNutritionMessage(clientId, 'client', inputMsg.trim());
+      setSending(false);
     }
   };
 
@@ -127,7 +131,10 @@ export default function ClientNutrition() {
               <input className="form-input" placeholder="Escribir mensaje..." value={inputMsg} onChange={e => setInputMsg(e.target.value)} onKeyDown={e => {
                 if (e.key === 'Enter') handleSend();
               }} />
-              <button className="btn btn-primary" onClick={handleSend} disabled={!inputMsg.trim()}>Enviar</button>
+              <button className="btn btn-primary" onClick={handleSend} disabled={!inputMsg.trim() || sending}
+                style={sending ? { minWidth: 80, display: 'flex', alignItems: 'center', justifyContent: 'center' } : {}}>
+                {sending ? <div style={inlineSpinnerStyle(16, '#000', 'rgba(0,0,0,0.25)')} /> : 'Enviar'}
+              </button>
             </div>
           </div>
         </div>

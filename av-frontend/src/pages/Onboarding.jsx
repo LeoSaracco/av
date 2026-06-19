@@ -40,7 +40,6 @@ const STEP_META = [
 ];
 
 const TOTAL_STEPS = 6;
-const DEMO_CODE = '123456';
 
 // ── Persistencia local del borrador ────────────────────────────────────────────
 // ── Componente principal ───────────────────────────────────────────────────────
@@ -67,6 +66,7 @@ export default function Onboarding() {
   const [errors, setErrors] = useState({});
   const [done, setDone] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [codeSent, setCodeSent] = useState(false);
 
   const setField = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
 
@@ -117,7 +117,6 @@ export default function Onboarding() {
       if (form.step5_password?.length < 6) e.step5_password = 'Mínimo 6 caracteres';
       if (form.step5_password !== form.step5_confirm) e.step5_confirm = 'Las contraseñas no coinciden';
       required('step5_code', 'Ingresá el código de verificación');
-      if (form.step5_code !== DEMO_CODE) e.step5_code = `Código incorrecto (probá con ${DEMO_CODE})`;
       if (!form.step5_terms) e.step5_terms = 'Debés aceptar los términos';
     }
     setErrors(e);
@@ -201,7 +200,7 @@ export default function Onboarding() {
       case 3: return <Step3Health form={form} set={setField} errors={errors} planId={planId} />;
       case 4: return <Step4Profile form={form} set={setField} errors={errors} />;
       case 5: return <Step5Summary form={form} onGoToStep={setStep} />;
-      case 6: return <Step5Account form={form} set={setField} errors={errors} email={form.step1_email} />;
+      case 6: return <Step5Account form={form} set={setField} errors={errors} email={form.step1_email} onCodeSent={() => setCodeSent(true)} />;
       default: return null;
     }
   };
@@ -269,7 +268,7 @@ export default function Onboarding() {
             {step < TOTAL_STEPS ? (
               <button className="btn btn-primary" onClick={nextStep}>{step === 5 ? 'Todo OK, continuar →' : 'Siguiente →'}</button>
             ) : (
-              <button className="btn btn-primary" onClick={handleSubmit} disabled={submitting}>
+              <button className="btn btn-primary" onClick={handleSubmit} disabled={!codeSent || submitting}>
                 {submitting ? 'Creando cuenta...' : 'Crear cuenta ✓'}
               </button>
             )}

@@ -44,12 +44,12 @@ export default function ClientDashboard() {
 
       {/* Quick stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginBottom: 20 }}>
-        <div className="stat-card">
+        <div className="stat-card" onClick={() => navigate('/client/routine')} style={{ cursor: 'pointer' }}>
           <div style={{ fontSize: 24 }}>💪</div>
           <div className="stat-value" style={{ fontSize: 20 }}>{routine?.exercises?.length || 0}</div>
           <div className="stat-label">Ejercicios</div>
         </div>
-        <div className="stat-card">
+        <div className="stat-card" onClick={() => navigate('/client/progress')} style={{ cursor: 'pointer' }}>
           <div style={{ fontSize: 24 }}>📊</div>
           <div className="stat-value" style={{ fontSize: 20 }}>{progress.length}</div>
           <div className="stat-label">Registros</div>
@@ -78,7 +78,7 @@ export default function ClientDashboard() {
         {routine ? (
           <>
             <div>
-              <div style={{ fontWeight: 700, fontFamily: 'var(--font-main)', fontSize: 16 }}>{routine.name}</div>
+              <div style={{ fontWeight: 700, fontFamily: 'var(--font-main)', fontSize: 16, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.4 }}>{routine.name}</div>
               <div style={{ fontSize: 12, color: 'var(--color-accent)', marginTop: 4, fontWeight: 600 }}>{routine.goal}</div>
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>

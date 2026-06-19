@@ -41,6 +41,9 @@ logging:
     com.av.fitness: DEBUG
     org.springframework.security: DEBUG
 
+auth:
+  cookie-secure: ${AUTH_COOKIE_SECURE:false}
+
 jwt:
   access-token-expiration: 900000
   refresh-token-expiration: 604800000
@@ -48,3 +51,7 @@ jwt:
 
 cors:
   allowed-origins: http://localhost:5173
+
+resend:
+  api-key: ${RESEND_API_KEY:}
+  from-email: ${RESEND_FROM_EMAIL:onboarding@resend.dev}

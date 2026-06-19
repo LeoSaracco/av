@@ -7,6 +7,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { CoachLayout } from '../../components/layout/CoachLayout';
+import { inlineSpinnerStyle } from '../../utils/spinnerStyle';
 import { Modal, ConfirmModal } from '../../components/ui/Modals';
 
 const EMPTY_EX = { name: '', sets: 3, reps: 10, rest: '60s', notes: '', videoUrl: '' };
@@ -20,24 +21,35 @@ export default function Templates() {
   const [editId, setEditId] = useState(null);
   const [confirmId, setConfirmId] = useState(null);
   const [viewId, setViewId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   const filtered = templates.filter(t =>
     t.name.toLowerCase().includes(search.toLowerCase()) ||
     t.goal.toLowerCase().includes(search.toLowerCase())
   );
 
-  const openAdd = () => { setForm({ ...EMPTY_TPL, exercises: [] }); setEditId(null); setModal('form'); };
+  const openAdd = () => { setForm({ ...EMPTY_TPL, exercises: [] }); setEditId(null); setSaveError(''); setModal('form'); };
   const openEdit = (t) => {
     setForm({ name: t.name, goal: t.goal, description: t.description || '', exercises: t.exercises.map(e => ({ ...e })) });
     setEditId(t.id); setModal('form');
   };
   const openView = (t) => { setViewId(t.id); setModal('view'); };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.name.trim()) return;
-    if (editId) updateTemplate(editId, form);
-    else addTemplate(form);
-    setModal(null);
+    setSaving(true);
+    setSaveError('');
+    try {
+      if (editId) await updateTemplate(editId, form);
+      else await addTemplate(form);
+      setModal(null);
+    } catch (err) {
+      setSaveError(err.message || 'Error al guardar');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const addExercise = () => setForm(f => ({ ...f, exercises: [...f.exercises, { ...EMPTY_EX, id: Date.now().toString() }] }));
@@ -150,8 +162,11 @@ export default function Templates() {
         title={editId ? 'Editar template' : 'Nuevo template'}
         footer={
           <>
-            <button className="btn btn-ghost" onClick={() => setModal(null)}>Cancelar</button>
-            <button className="btn btn-primary" onClick={handleSave}>{editId ? 'Guardar' : 'Crear template'}</button>
+            {saveError && <span style={{ fontSize: 12, color: 'var(--color-danger)', marginRight: 'auto' }}>{saveError}</span>}
+            <button className="btn btn-ghost" onClick={() => setModal(null)} disabled={saving}>Cancelar</button>
+            <button className="btn btn-primary" onClick={handleSave} disabled={saving} style={saving ? { minWidth: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 } : {}}>
+              {saving ? <div style={inlineSpinnerStyle(18, '#000', 'rgba(0,0,0,0.25)')} /> : editId ? 'Guardar' : 'Crear template'}
+            </button>
           </>
         }>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -208,9 +223,11 @@ export default function Templates() {
         </div>
       </Modal>
 
-      <ConfirmModal open={!!confirmId} onClose={() => setConfirmId(null)}
-        onConfirm={() => deleteTemplate(confirmId)}
-        title="Eliminar template" message="¿Eliminar este template? Las rutinas creadas desde él no se verán afectadas." />
+      <ConfirmModal open={!!confirmId} onClose={() => { if (!deleting) setConfirmId(null); }}
+        onConfirm={async () => { setDeleting(true); try { await deleteTemplate(confirmId); } catch { /* ignore */ } setDeleting(false); setConfirmId(null); }}
+        title="Eliminar template" message="¿Eliminar este template? Las rutinas creadas desde él no se verán afectadas."
+        confirmDisabled={deleting}
+        confirmLabel={deleting ? <div style={inlineSpinnerStyle(16, '#fff', 'rgba(255,255,255,0.25)')} /> : 'Eliminar'} />
     </CoachLayout>
   );
 }

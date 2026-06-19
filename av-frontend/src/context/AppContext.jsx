@@ -1,3 +1,15 @@
+/**
+ * @file AppContext.jsx — In-memory business data state and operations.
+ * @description
+ * Manages cache for clients, templates, routines, diets, assignments,
+ * notes, progress, products, plans, cart, nutrition threads, and onboarding
+ * submissions. Loads public plans on mount; coach data, client data, and
+ * products are loaded lazily when the corresponding layout mounts.
+ *
+ * All mutations go through the backend API; the local cache is updated
+ * after each successful API call. No data is persisted to localStorage.
+ */
+
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import * as api from '../api/apiClient';
 
@@ -7,6 +19,17 @@ function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2);
 }
 
+/**
+ * Context provider wrapping the entire app with business data.
+ *
+ * Provides state caches for clients, templates, routines, diets,
+ * assignments, notes, progress, products, plans, cart, nutrition threads,
+ * and onboarding submissions. Public plans are fetched on mount; coach
+ * data, client data, and products are loaded lazily via dedicated helpers.
+ *
+ * All exposed mutation functions call the backend API first, then update
+ * the corresponding local cache slice atomically.
+ */
 export function AppProvider({ children }) {
   const [clients, setClients] = useState([]);
   const [templates, setTemplates] = useState([]);
@@ -22,6 +45,8 @@ export function AppProvider({ children }) {
   const [dietAssignments, setDietAssignments] = useState([]);
   const [nutritionThreads, setNutritionThreads] = useState([]);
   const [onboardingSubmissions, setOnboardingSubmissions] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState(null);
   const [coachLoaded, setCoachLoaded] = useState(false);
@@ -42,6 +67,9 @@ export function AppProvider({ children }) {
     fetchPublicPlans();
   }, []);
 
+  /**
+   * Lazy-loads product catalog from API (idempotent — no-op if already loaded).
+   */
   const loadProducts = useCallback(async () => {
     if (productsLoaded) return;
     try {
@@ -52,6 +80,10 @@ export function AppProvider({ children }) {
     }
   }, [productsLoaded]);
 
+  /**
+   * Lazy-loads coach data (clients, templates, routines, diet templates,
+   * diets, notes) from API. Idempotent — no-op once coachLoaded is true.
+   */
   const loadCoachData = useCallback(async () => {
     if (coachLoaded) return;
     try {
@@ -73,6 +105,12 @@ export function AppProvider({ children }) {
     }
   }, [coachLoaded]);
 
+  /**
+   * Lazy-loads client-scoped data (routine, diet, progress, notes) for the
+   * given authenticated user. Idempotent — no-op once clientLoaded is true.
+   *
+   * @param {Object} user - Authenticated user object with clientId, name, email, goal.
+   */
   const loadClientData = useCallback(async (user) => {
     if (clientLoaded || !user) return;
     const clientId = user.clientId || user.id;
@@ -92,6 +130,9 @@ export function AppProvider({ children }) {
         setDiets([diet]);
         setDietAssignments([{ clientId, dietId: diet.id, assignedAt: diet.assignedAt || '', active: true }]);
       }
+      api.apiGetMyThread().then(t => {
+        if (t) setNutritionThreads(prev => prev.filter(x => x.clientId !== clientId).concat(t));
+      }).catch(() => {});
       setProgress(myProgress.map(item => ({ ...item, clientId })));
       setNotes(myNotes.map(item => ({ ...item, clientId })));
       setClientLoaded(true);
@@ -116,13 +157,13 @@ export function AppProvider({ children }) {
   const deleteClient = async (id) => { try { await api.apiDeleteClient(id); setClients(prev => prev.filter(c => c.id !== id)); showToast('Cliente eliminado', 'info'); } catch { showToast('Error', 'error'); } };
   const getClient = (id) => clients.find(c => c.id === id);
 
-  const addTemplate = async (data) => { try { const created = await api.apiCreateTemplate(data); setTemplates(prev => [...prev, created]); showToast('Template creado'); } catch { showToast('Error', 'error'); } };
-  const updateTemplate = async (id, data) => { try { const updated = await api.apiUpdateTemplate(id, data); setTemplates(prev => prev.map(t => t.id === id ? updated : t)); showToast('Template actualizado'); } catch { showToast('Error', 'error'); } };
+  const addTemplate = async (data) => { try { const created = await api.apiCreateTemplate(data); setTemplates(prev => [...prev, created]); showToast('Template creado'); return created; } catch (err) { showToast(err.message || 'Error', 'error'); throw err; } };
+  const updateTemplate = async (id, data) => { try { const updated = await api.apiUpdateTemplate(id, data); setTemplates(prev => prev.map(t => t.id === id ? updated : t)); showToast('Template actualizado'); return updated; } catch (err) { showToast(err.message || 'Error', 'error'); throw err; } };
   const deleteTemplate = async (id) => { try { await api.apiDeleteTemplate(id); setTemplates(prev => prev.filter(t => t.id !== id)); showToast('Template eliminado', 'info'); } catch { showToast('Error', 'error'); } };
   const getTemplate = (id) => templates.find(t => t.id === id);
 
-  const addRoutine = async (data) => { try { const created = await api.apiCreateRoutine(data); setRoutines(prev => [...prev, created]); showToast('Rutina creada'); } catch { showToast('Error', 'error'); } };
-  const updateRoutine = async (id, data) => { try { const updated = await api.apiUpdateRoutine(id, data); setRoutines(prev => prev.map(r => r.id === id ? updated : r)); showToast('Rutina actualizada'); } catch { showToast('Error', 'error'); } };
+  const addRoutine = async (data) => { try { const created = await api.apiCreateRoutine(data); setRoutines(prev => [...prev, created]); showToast('Rutina creada'); return created; } catch (err) { showToast(err.message || 'Error', 'error'); throw err; } };
+  const updateRoutine = async (id, data) => { try { const updated = await api.apiUpdateRoutine(id, data); setRoutines(prev => prev.map(r => r.id === id ? updated : r)); showToast('Rutina actualizada'); return updated; } catch (err) { showToast(err.message || 'Error', 'error'); throw err; } };
   const deleteRoutine = async (id) => { try { await api.apiDeleteRoutine(id); setRoutines(prev => prev.filter(r => r.id !== id)); showToast('Rutina eliminada', 'info'); } catch { showToast('Error', 'error'); } };
   const getRoutine = (id) => routines.find(r => r.id === id);
   const duplicateRoutine = async (id) => {
@@ -133,12 +174,16 @@ export function AppProvider({ children }) {
     try { const created = await api.apiCreateRoutineFromTemplate(templateId, name, goal); setRoutines(prev => [...prev, created]); showToast('Rutina creada desde template'); } catch { showToast('Error', 'error'); }
   };
 
-  const assignRoutine = async (clientId, routineId, dietId) => {
+  const assignRoutine = async (clientId, routineId, dietId, reason, observations) => {
     try {
-      const created = await api.apiAssignRoutine(clientId, routineId, dietId);
+      const created = await api.apiAssignRoutine(clientId, routineId, dietId, reason, observations);
       setAssignments(prev => prev.filter(a => a.clientId !== clientId).concat(created));
       showToast('Rutina asignada');
-    } catch { showToast('Error', 'error'); }
+      return created;
+    } catch (err) {
+      showToast(err.message || 'Error', 'error');
+      throw err;
+    }
   };
   const getAssignmentForClient = (clientId) => assignments.find(a => a.clientId === clientId && a.active);
 
@@ -149,22 +194,27 @@ export function AppProvider({ children }) {
 
   const addProgress = async (clientId, data) => { try { const created = await api.apiLogProgress(data.weight, data.date, data.comment); setProgress(prev => [...prev, { ...created, clientId }]); showToast('Progreso registrado'); } catch { showToast('Error', 'error'); } };
   const deleteProgress = async (id) => { try { await api.apiDeleteProgress(id); setProgress(prev => prev.filter(p => p.id !== id)); } catch { showToast('Error', 'error'); } };
+  const updateProgress = async (id, data) => { try { const updated = await api.apiUpdateProgress(id, data.weight, data.date, data.comment); setProgress(prev => prev.map(p => p.id === id ? { ...p, ...updated } : p)); showToast('Progreso actualizado'); } catch { showToast('Error', 'error'); } };
   const getProgressForClient = (clientId) => progress.filter(p => p.clientId === clientId).sort((a, b) => new Date(a.date) - new Date(b.date));
 
-  const addDietTemplate = async (data) => { try { const created = await api.apiCreateDietTemplate(data); setDietTemplates(prev => [...prev, created]); showToast('Dieta creada'); } catch { showToast('Error', 'error'); } };
-  const updateDietTemplate = async (id, data) => { try { const updated = await api.apiUpdateDietTemplate(id, data); setDietTemplates(prev => prev.map(d => d.id === id ? updated : d)); } catch { showToast('Error', 'error'); } };
+  const addDietTemplate = async (data) => { try { const created = await api.apiCreateDietTemplate(data); setDietTemplates(prev => [...prev, created]); showToast('Dieta creada'); return created; } catch (err) { showToast(err.message || 'Error', 'error'); throw err; } };
+  const updateDietTemplate = async (id, data) => { try { const updated = await api.apiUpdateDietTemplate(id, data); setDietTemplates(prev => prev.map(d => d.id === id ? updated : d)); showToast('Dieta actualizada'); return updated; } catch (err) { showToast(err.message || 'Error', 'error'); throw err; } };
   const deleteDietTemplate = async (id) => { try { await api.apiDeleteDietTemplate(id); setDietTemplates(prev => prev.filter(d => d.id !== id)); } catch { showToast('Error', 'error'); } };
   const getDietTemplate = (id) => dietTemplates.find(d => d.id === id);
 
-  const addDiet = async (data) => { try { const created = await api.apiCreateDiet(data); setDiets(prev => [...prev, created]); } catch { showToast('Error', 'error'); } };
-  const updateDiet = async (id, data) => { try { const updated = await api.apiUpdateDiet(id, data); setDiets(prev => prev.map(d => d.id === id ? updated : d)); } catch { showToast('Error', 'error'); } };
+  const addDiet = async (data) => { try { const created = await api.apiCreateDiet(data); setDiets(prev => [...prev, created]); showToast('Dieta creada'); return created; } catch (err) { showToast(err.message || 'Error', 'error'); throw err; } };
+  const updateDiet = async (id, data) => { try { const updated = await api.apiUpdateDiet(id, data); setDiets(prev => prev.map(d => d.id === id ? updated : d)); showToast('Dieta actualizada'); return updated; } catch (err) { showToast(err.message || 'Error', 'error'); throw err; } };
   const deleteDiet = async (id) => { try { await api.apiDeleteDiet(id); setDiets(prev => prev.filter(d => d.id !== id)); } catch { showToast('Error', 'error'); } };
   const getDiet = (id) => diets.find(d => d.id === id);
   const createDietFromTemplate = async (templateId, name, goal) => {
     try { const created = await api.apiCreateDietFromTemplate(templateId, name, goal); setDiets(prev => [...prev, created]); } catch { showToast('Error', 'error'); }
   };
-  const assignDiet = (clientId, dietId) => {
-    setDietAssignments(prev => prev.filter(a => a.clientId !== clientId).concat({ clientId, dietId, assignedAt: new Date().toISOString(), active: true }));
+  const assignDiet = async (clientId, dietId) => {
+    try {
+      await api.apiAssignDiet(clientId, dietId);
+      setDietAssignments(prev => prev.filter(a => a.clientId !== clientId).concat({ clientId, dietId, assignedAt: new Date().toISOString(), active: true }));
+      showToast('Dieta asignada');
+    } catch { showToast('Error al asignar dieta', 'error'); }
   };
   const getDietAssignmentForClient = (clientId) => dietAssignments.find(a => a.clientId === clientId && a.active);
 
@@ -178,6 +228,67 @@ export function AppProvider({ children }) {
     } catch { showToast('Error al enviar mensaje', 'error'); }
   };
 
+  /**
+   * Fetches and caches a client's full nutrition thread from the backend.
+   */
+  const loadThreadForClient = async (clientId) => {
+    try {
+      const thread = await api.apiGetClientThread(clientId);
+      setNutritionThreads(prev => prev.filter(t => t.clientId !== clientId).concat(thread));
+    } catch { /* ignore */ }
+  };
+
+  const fetchNotifications = async () => {
+    try {
+      const data = await api.apiGetNotifications();
+      setNotifications(prev => {
+        if (JSON.stringify(prev) === JSON.stringify(data)) return prev;
+        return data;
+      });
+      setUnreadCount(data.filter(n => n.unread).length);
+    } catch { /* ignore */ }
+  };
+
+  /**
+   * Fetches the single notification for the authenticated client.
+   * Sets unreadCount to 1 if there are unread coach messages, 0 otherwise.
+   */
+  const fetchClientNotifications = async () => {
+    try {
+      const data = await api.apiGetMyNotifications();
+      setUnreadCount(prev => {
+        const next = data?.unread ? 1 : 0;
+        return prev === next ? prev : next;
+      });
+    } catch { /* ignore */ }
+  };
+
+  const markThreadRead = async (clientId) => {
+    try {
+      await api.apiMarkThreadRead(clientId);
+      setNotifications(prev => prev.map(n => n.clientId === clientId ? { ...n, unread: false } : n));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch { /* ignore */ }
+  };
+
+  /** Marks the current client's own thread as read. */
+  const markMyThreadRead = async () => {
+    try {
+      await api.apiMarkMyThreadRead();
+      setUnreadCount(0);
+    } catch { /* ignore */ }
+  };
+
+  const markAllThreadsRead = async () => {
+    try {
+      for (const n of notifications) {
+        if (n.unread) await api.apiMarkThreadRead(n.clientId);
+      }
+      setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+      setUnreadCount(0);
+    } catch { /* ignore */ }
+  };
+
   const addToCart = (product, opts = {}) => {
     const key = `${product.id}_${opts.size || ''}_${opts.color || ''}_${opts.flavor || ''}`;
     setCart(prev => {
@@ -189,7 +300,9 @@ export function AppProvider({ children }) {
   const removeFromCart = (key) => setCart(prev => prev.filter(i => i.key !== key));
   const updateCartQty = (key, qty) => { if (qty < 1) removeFromCart(key); else setCart(prev => prev.map(i => i.key === key ? { ...i, qty } : i)); };
   const clearCart = () => setCart([]);
+  /** Total monetary value of all items in cart. */
   const cartTotal = cart.reduce((sum, i) => sum + i.product.price * i.qty, 0);
+  /** Total number of items in cart (sum of quantities). */
   const cartCount = cart.reduce((sum, i) => sum + i.qty, 0);
 
   const createOnboardingSubmission = async (data) => {
@@ -211,16 +324,17 @@ export function AppProvider({ children }) {
       clients, templates, routines, assignments, notes, progress, products, plans, cart, loaded, loadError,
       coachLoaded, clientLoaded, productsLoaded, loadCoachData, loadClientData, loadProducts,
       dietTemplates, diets, dietAssignments, nutritionThreads, onboardingSubmissions,
+      notifications, unreadCount, fetchNotifications, fetchClientNotifications, markThreadRead, markMyThreadRead, markAllThreadsRead,
       addClient, updateClient, deleteClient, getClient,
       addTemplate, updateTemplate, deleteTemplate, getTemplate,
       addRoutine, updateRoutine, deleteRoutine, duplicateRoutine, getRoutine, createRoutineFromTemplate,
       assignRoutine, getAssignmentForClient,
       addNote, updateNote, deleteNote, getNotesForClient,
-      addProgress, deleteProgress, getProgressForClient,
+      addProgress, deleteProgress, updateProgress, getProgressForClient,
       addDietTemplate, updateDietTemplate, deleteDietTemplate, getDietTemplate,
       addDiet, updateDiet, deleteDiet, getDiet, createDietFromTemplate,
       assignDiet, getDietAssignmentForClient,
-      getNutritionThreadForClient, addNutritionMessage,
+      getNutritionThreadForClient, addNutritionMessage, loadThreadForClient,
       addToCart, removeFromCart, updateCartQty, clearCart, cartTotal, cartCount,
       createOnboardingSubmission, getOnboardingByEmail,
       toast, showToast, uid,
@@ -230,6 +344,13 @@ export function AppProvider({ children }) {
   );
 }
 
+/**
+ * Convenience hook to consume AppContext.
+ * Must be called within an {@link AppProvider}.
+ *
+ * @returns {Object} The full context value (state slices + actions).
+ * @throws {Error} If called outside of AppProvider.
+ */
 // eslint-disable-next-line react-refresh/only-export-components
 export function useApp() {
   const ctx = useContext(AppContext);

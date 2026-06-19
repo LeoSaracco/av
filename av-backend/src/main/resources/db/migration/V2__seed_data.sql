@@ -47,15 +47,15 @@ INSERT INTO routine_templates (id, name, goal, description, exercises, created_a
 
 -- Seed Routines
 INSERT INTO routines (id, name, goal, template_id, exercises, created_at) VALUES
-('81111111-1111-1111-1111-111111111111', 'Full Body Hipertrofia - Martina',
+('81111111-1111-1111-1111-111111111111', 'Full Body Hipertrofia 4x10',
  'Ganar tono muscular y fuerza general', '71111111-1111-1111-1111-111111111111',
  '[{"id":"e1b11111-1111-1111-1111-111111111111","name":"Sentadilla libre","sets":4,"reps":10,"rest":"90s","notes":"Profundidad paralela, rodillas hacia afuera","videoUrl":""},{"id":"e2b11111-1111-1111-1111-111111111111","name":"Press de banca plano","sets":4,"reps":10,"rest":"75s","notes":"Retraccion escapular, tocar pecho","videoUrl":""},{"id":"e3b11111-1111-1111-1111-111111111111","name":"Remo con barra","sets":4,"reps":10,"rest":"75s","notes":"Espalda recta, tirar con codos","videoUrl":""},{"id":"e4b11111-1111-1111-1111-111111111111","name":"Peso muerto rumano","sets":3,"reps":12,"rest":"90s","notes":"Rodillas semiflexionadas, cadera atras","videoUrl":""},{"id":"e5b11111-1111-1111-1111-111111111111","name":"Press militar","sets":3,"reps":12,"rest":"60s","notes":"Sin arquear la espalda","videoUrl":""}]',
  '2025-09-20'),
-('82222222-2222-2222-2222-222222222222', 'Hipertrofia Intensa - Lucas',
+('82222222-2222-2222-2222-222222222222', 'Hipertrofia Intensa 5x8',
  'Maxima ganancia de masa muscular', '71111111-1111-1111-1111-111111111111',
  '[{"id":"e1c11111-1111-1111-1111-111111111111","name":"Sentadilla libre","sets":5,"reps":8,"rest":"120s","notes":"Profundidad maxima, con pausa abajo","videoUrl":""},{"id":"e2c11111-1111-1111-1111-111111111111","name":"Press de banca","sets":5,"reps":8,"rest":"90s","notes":"Arco moderado, tocar pecho","videoUrl":""},{"id":"e3c11111-1111-1111-1111-111111111111","name":"Remo Pendlay","sets":4,"reps":8,"rest":"90s","notes":"Explosivo, desde peso muerto","videoUrl":""},{"id":"e4c11111-1111-1111-1111-111111111111","name":"Peso muerto convencional","sets":3,"reps":5,"rest":"120s","notes":"Barra pegada a las piernas, activar dorsal","videoUrl":""}]',
  '2025-10-05'),
-('83333333-3333-3333-3333-333333333333', 'Running + Funcional - Sofia',
+('83333333-3333-3333-3333-333333333333', 'Circuito HIIT + Funcional 4x15',
  'Mejorar capacidad aerobica y fuerza funcional para running',
  '72222222-2222-2222-2222-222222222222',
  '[{"id":"e1d11111-1111-1111-1111-111111111111","name":"Circuito HIIT","sets":4,"reps":15,"rest":"30s","notes":"30s trabajo, 15s descanso","videoUrl":""},{"id":"e2d11111-1111-1111-1111-111111111111","name":"Zancadas con salto","sets":3,"reps":12,"rest":"45s","notes":"Rodilla no toca suelo, salto explosivo","videoUrl":""},{"id":"e3d11111-1111-1111-1111-111111111111","name":"Plancha dinamica","sets":3,"reps":10,"rest":"30s","notes":"Hombro sobre muneca, core firme","videoUrl":""},{"id":"e4d11111-1111-1111-1111-111111111111","name":"Sentadilla búlgara","sets":3,"reps":12,"rest":"60s","notes":"Pie trasero elevado, equilibrio","videoUrl":""}]',

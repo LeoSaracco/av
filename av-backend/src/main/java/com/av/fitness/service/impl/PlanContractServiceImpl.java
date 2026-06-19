@@ -13,8 +13,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
+/**
+ * Implements the plan contracting flow: start contract → mock payment → complete onboarding.
+ * On completion, auto-assigns a default routine, diet, thread, and welcome note to the new client.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -34,9 +39,24 @@ public class PlanContractServiceImpl implements PlanContractService {
     private final UserJpaRepository userJpaRepository;
     private final OnboardingJpaRepository onboardingJpaRepository;
     private final RefreshTokenJpaRepository refreshTokenJpaRepository;
+    private final RoutineTemplateJpaRepository routineTemplateJpaRepository;
+    private final DietTemplateJpaRepository dietTemplateJpaRepository;
+    private final RoutineJpaRepository routineJpaRepository;
+    private final DietJpaRepository dietJpaRepository;
+    private final AssignmentJpaRepository assignmentJpaRepository;
+    private final DietAssignmentJpaRepository dietAssignmentJpaRepository;
+    private final NutritionThreadJpaRepository nutritionThreadJpaRepository;
+    private final NoteJpaRepository noteJpaRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
+    /**
+     * Starts a new plan contract by creating a contract and associated mock payment.
+     *
+     * @param request the request containing the plan ID
+     * @return the start response with contract and payment details
+     * @throws RuntimeException if the plan ID is invalid or the plan is not found
+     */
     @Override
     public StartPlanContractResponse start(StartPlanContractRequest request) {
         UUID planUuid = parseUuid(request.getPlanId(), "Plan invalido");
@@ -92,6 +112,15 @@ public class PlanContractServiceImpl implements PlanContractService {
                 .build();
     }
 
+    /**
+     * Processes a mock payment for an existing contract, updating both payment and contract status.
+     *
+     * @param contractId the UUID of the contract
+     * @param request    the mock payment request containing the preference ID and desired status
+     * @return the mock payment response with updated payment and contract statuses
+     * @throws RuntimeException if the contract or payment is not found, or the payment does not belong to the contract,
+     *                          or if the mock status is invalid
+     */
     @Override
     public MockPaymentResponse mockPayment(UUID contractId, MockPaymentRequest request) {
         PlanContractEntity contract = findContract(contractId);
@@ -126,6 +155,16 @@ public class PlanContractServiceImpl implements PlanContractService {
                 .build();
     }
 
+    /**
+     * Completes the onboarding process for a contract whose payment has been approved.
+     * Creates a new client and user, assigns default routine, diet, nutrition thread,
+     * and welcome note, and issues authentication tokens.
+     *
+     * @param contractId the UUID of the contract
+     * @param request    the onboarding completion request containing client details
+     * @return the completion response with contract status and authentication tokens
+     * @throws RuntimeException if payment is not approved or the email is already registered
+     */
     @Override
     public CompletePlanContractResponse completeOnboarding(UUID contractId, CompletePlanContractRequest request) {
         PlanContractEntity contract = findContract(contractId);
@@ -164,6 +203,8 @@ public class PlanContractServiceImpl implements PlanContractService {
         user.setClientId(clientId);
         user.setCreatedAt(now);
         userJpaRepository.save(user);
+
+        assignDefaults(clientId, user.getName(), contract.getPlanId(), request.getGoal());
 
         OnboardingEntity onboarding = new OnboardingEntity();
         onboarding.setId(UUID.randomUUID());
@@ -205,11 +246,225 @@ public class PlanContractServiceImpl implements PlanContractService {
                 .build();
     }
 
+    /**
+     * Auto-assigns a default routine, diet (if a nutrition plan), nutrition thread,
+     * and welcome note to the newly created client.
+     *
+     * @param clientId   the UUID of the new client
+     * @param clientName the client's name
+     * @param planId     the plan ID to check for nutrition inclusion
+     * @param goal       the client's goal for template matching
+     */
+    private void assignDefaults(UUID clientId, String clientName, String planId, String goal) {
+        boolean includeDiet = isNutritionPlan(planId);
+
+        RoutineTemplateEntity routineTemplate = findRoutineTemplate(goal);
+        RoutineEntity routine = createRoutineFromTemplate(clientName, routineTemplate);
+        routineJpaRepository.save(routine);
+
+        AssignmentEntity assignment = new AssignmentEntity();
+        assignment.setId(UUID.randomUUID());
+        assignment.setClientId(clientId);
+        assignment.setRoutineId(routine.getId());
+        assignment.setAssignedAt(LocalDate.now());
+        assignment.setActive(true);
+        assignment.setCreatedAt(LocalDateTime.now());
+        assignmentJpaRepository.save(assignment);
+
+        audit("DEFAULT_ROUTINE_ASSIGNED", "ASSIGNMENT", assignment.getId(), null, clientId,
+                "{\"routineId\":\"" + routine.getId() + "\",\"template\":\"" + routineTemplate.getName() + "\"}");
+
+        if (includeDiet) {
+            DietTemplateEntity dietTemplate = findDietTemplate(goal);
+            DietEntity diet = createDietFromTemplate(clientName, dietTemplate);
+            dietJpaRepository.save(diet);
+
+            DietAssignmentEntity dietAssignment = new DietAssignmentEntity();
+            dietAssignment.setId(UUID.randomUUID());
+            dietAssignment.setClientId(clientId);
+            dietAssignment.setDietId(diet.getId());
+            dietAssignment.setAssignedAt(LocalDate.now());
+            dietAssignment.setActive(true);
+            dietAssignment.setCreatedAt(LocalDateTime.now());
+            dietAssignmentJpaRepository.save(dietAssignment);
+
+            audit("DEFAULT_DIET_ASSIGNED", "DIET_ASSIGNMENT", dietAssignment.getId(), null, clientId,
+                    "{\"dietId\":\"" + diet.getId() + "\",\"template\":\"" + dietTemplate.getName() + "\"}");
+        }
+
+        NutritionThreadEntity thread = new NutritionThreadEntity();
+        thread.setId(UUID.randomUUID());
+        thread.setClientId(clientId);
+        thread.setMessages("[]");
+        thread.setCreatedAt(LocalDateTime.now());
+        thread.setUpdatedAt(LocalDateTime.now());
+        nutritionThreadJpaRepository.save(thread);
+
+        NoteEntity note = new NoteEntity();
+        note.setId(UUID.randomUUID());
+        note.setClientId(clientId);
+        note.setText("Bienvenido! Ya te arme una rutina inicial basada en tus objetivos. Pronto la voy a personalizar.");
+        note.setCreatedAt(LocalDate.now());
+        note.setUpdatedAt(LocalDate.now());
+        note.setUpdatedAtTz(LocalDateTime.now());
+        noteJpaRepository.save(note);
+
+        audit("WELCOME_NOTE_CREATED", "NOTE", note.getId(), null, clientId, "{}");
+    }
+
+    /**
+     * Determines whether the given plan includes nutrition features.
+     *
+     * @param planId the plan ID
+     * @return true if the plan includes a diet component
+     */
+    private boolean isNutritionPlan(String planId) {
+        return "f2222222-2222-2222-2222-222222222222".equals(planId)
+                || "f3333333-3333-3333-3333-333333333333".equals(planId);
+    }
+
+    /**
+     * Checks whether the given goal string indicates a weight loss objective.
+     *
+     * @param goal the client's goal description
+     * @return true if the goal matches weight loss keywords
+     */
+    private boolean isWeightLossGoal(String goal) {
+        if (goal == null) return false;
+        String g = goal.toLowerCase();
+        return g.contains("bajar") || g.contains("perder") || g.contains("quemar")
+                || g.contains("grasa") || g.contains("definir") || g.contains("adelgazar")
+                || g.contains("definicion") || g.contains("peso");
+    }
+
+    /**
+     * Checks whether the given goal string indicates a muscle gain objective.
+     *
+     * @param goal the client's goal description
+     * @return true if the goal matches muscle gain keywords
+     */
+    private boolean isMuscleGainGoal(String goal) {
+        if (goal == null) return false;
+        String g = goal.toLowerCase();
+        return g.contains("ganar") || g.contains("masa") || g.contains("muscular")
+                || g.contains("volumen") || g.contains("hipertrofia") || g.contains("fuerza")
+                || g.contains("aumentar");
+    }
+
+    /**
+     * Finds the best-matching routine template based on the client's goal.
+     *
+     * @param goal the client's goal description
+     * @return the matching routine template, or the first available template as fallback
+     * @throws RuntimeException if no templates are available
+     */
+    private RoutineTemplateEntity findRoutineTemplate(String goal) {
+        List<RoutineTemplateEntity> templates = routineTemplateJpaRepository.findAll();
+        if (templates.isEmpty()) throw new RuntimeException("No hay plantillas de rutina disponibles");
+
+        if (isWeightLossGoal(goal)) {
+            return templates.stream()
+                    .filter(t -> t.getName().toLowerCase().contains("cardio")
+                            || t.getGoal().toLowerCase().contains("quemar"))
+                    .findFirst()
+                    .orElse(templates.get(0));
+        }
+        if (isMuscleGainGoal(goal)) {
+            return templates.stream()
+                    .filter(t -> t.getName().toLowerCase().contains("hipertrofia")
+                            || t.getGoal().toLowerCase().contains("masa"))
+                    .findFirst()
+                    .orElse(templates.get(0));
+        }
+        return templates.get(0);
+    }
+
+    /**
+     * Finds the best-matching diet template based on the client's goal.
+     *
+     * @param goal the client's goal description
+     * @return the matching diet template, or the first available template as fallback
+     * @throws RuntimeException if no templates are available
+     */
+    private DietTemplateEntity findDietTemplate(String goal) {
+        List<DietTemplateEntity> templates = dietTemplateJpaRepository.findAll();
+        if (templates.isEmpty()) throw new RuntimeException("No hay plantillas de dieta disponibles");
+
+        if (isWeightLossGoal(goal)) {
+            return templates.stream()
+                    .filter(t -> t.getName().toLowerCase().contains("deficit")
+                            || t.getGoal().toLowerCase().contains("perdida"))
+                    .findFirst()
+                    .orElse(templates.get(0));
+        }
+        if (isMuscleGainGoal(goal)) {
+            return templates.stream()
+                    .filter(t -> t.getName().toLowerCase().contains("volumen")
+                            || t.getGoal().toLowerCase().contains("aumento"))
+                    .findFirst()
+                    .orElse(templates.get(0));
+        }
+        return templates.get(0);
+    }
+
+    /**
+     * Creates a new routine instance from a given template, personalizing the name.
+     *
+     * @param clientName the client's name
+     * @param template   the routine template to copy from
+     * @return the newly created routine entity
+     */
+    private RoutineEntity createRoutineFromTemplate(String clientName, RoutineTemplateEntity template) {
+        RoutineEntity routine = new RoutineEntity();
+        routine.setId(UUID.randomUUID());
+        routine.setName(template.getName() + " - " + clientName);
+        routine.setGoal(template.getGoal());
+        routine.setTemplateId(template.getId());
+        routine.setExercises(template.getExercises());
+        routine.setCreatedAt(LocalDate.now());
+        routine.setUpdatedAt(LocalDateTime.now());
+        return routine;
+    }
+
+    /**
+     * Creates a new diet instance from a given template, personalizing the name.
+     *
+     * @param clientName the client's name
+     * @param template   the diet template to copy from
+     * @return the newly created diet entity
+     */
+    private DietEntity createDietFromTemplate(String clientName, DietTemplateEntity template) {
+        DietEntity diet = new DietEntity();
+        diet.setId(UUID.randomUUID());
+        diet.setName(template.getName() + " - " + clientName);
+        diet.setGoal(template.getGoal());
+        diet.setTemplateId(template.getId());
+        diet.setIndications(template.getIndications());
+        diet.setMeals(template.getMeals());
+        diet.setCreatedAt(LocalDate.now());
+        diet.setUpdatedAt(LocalDateTime.now());
+        return diet;
+    }
+
+    /**
+     * Retrieves a plan contract by its ID.
+     *
+     * @param contractId the UUID of the contract
+     * @return the contract entity
+     * @throws RuntimeException if the contract is not found
+     */
     private PlanContractEntity findContract(UUID contractId) {
         return planContractJpaRepository.findById(contractId)
                 .orElseThrow(() -> new RuntimeException("Contratacion no encontrada"));
     }
 
+    /**
+     * Issues access and refresh tokens for the newly created user.
+     *
+     * @param user     the user entity
+     * @param clientId the UUID of the associated client
+     * @return a token response containing both tokens and user info
+     */
     private TokenResponse issueTokens(UserEntity user, UUID clientId) {
         String accessToken = jwtService.generateAccessToken(user.getId(), "CLIENT", clientId);
         String refreshToken = jwtService.generateRefreshToken();
@@ -231,6 +486,14 @@ public class PlanContractServiceImpl implements PlanContractService {
                 .build();
     }
 
+    /**
+     * Parses a string into a UUID, throwing a descriptive error on failure.
+     *
+     * @param value   the string to parse
+     * @param message the error message if parsing fails
+     * @return the parsed UUID
+     * @throws RuntimeException if the string is not a valid UUID
+     */
     private UUID parseUuid(String value, String message) {
         try {
             return UUID.fromString(value);
@@ -239,6 +502,13 @@ public class PlanContractServiceImpl implements PlanContractService {
         }
     }
 
+    /**
+     * Normalizes and validates the mock payment status.
+     *
+     * @param status the raw status string
+     * @return the normalized status (APPROVED or REJECTED)
+     * @throws RuntimeException if the status is not a valid mock status
+     */
     private String normalizeMockStatus(String status) {
         String normalized = status.trim().toUpperCase();
         if ("APPROVED".equals(normalized) || "REJECTED".equals(normalized)) {
@@ -247,6 +517,16 @@ public class PlanContractServiceImpl implements PlanContractService {
         throw new RuntimeException("Estado de pago mock invalido");
     }
 
+    /**
+     * Records an audit event for traceability.
+     *
+     * @param eventType     the type of event
+     * @param aggregateType the domain aggregate type
+     * @param aggregateId   the UUID of the aggregate
+     * @param actorUserId   the UUID of the acting user (nullable)
+     * @param clientId      the UUID of the client (nullable)
+     * @param payload       JSON payload with event details
+     */
     private void audit(String eventType, String aggregateType, UUID aggregateId,
                        UUID actorUserId, UUID clientId, String payload) {
         AuditEventEntity event = new AuditEventEntity();

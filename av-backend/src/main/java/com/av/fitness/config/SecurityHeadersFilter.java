@@ -9,9 +9,16 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * Adds security headers (X-Content-Type-Options, X-Frame-Options, etc.).
+ * Sets Content-Security-Policy, HSTS, Referrer-Policy, and Permissions-Policy on every response.
+ */
 @Component
 public class SecurityHeadersFilter extends OncePerRequestFilter {
 
+    /**
+     * Appends security-related HTTP headers to the response before passing it down the filter chain.
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,

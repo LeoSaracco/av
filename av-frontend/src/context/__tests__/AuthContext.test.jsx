@@ -11,6 +11,7 @@ vi.mock('../../api/apiClient', () => ({
   apiLogin: vi.fn(),
   apiLogout: vi.fn(),
   apiCompletePlanContract: vi.fn(),
+  setBearerToken: vi.fn(),
 }));
 
 import * as api from '../../api/apiClient';

@@ -1,6 +1,6 @@
 # Definition of Done
 
-Actualizado: 2026-06-16
+Actualizado: 2026-06-17
 
 Ningun cambio se considera terminado solo porque compila. Debe estar alineado con arquitectura, seguridad, CI/CD y documentacion.
 
@@ -63,8 +63,8 @@ Requisitos:
 
 ## Pipeline
 
-- CI corre en `push` y PR contra `main`.
-- Deploy corre en `push` a `main` y manual `workflow_dispatch`.
+- CI corre en `push` y PR contra `master`.
+- Deploy corre en `push` a `master` y manual `workflow_dispatch`.
 - Workflows usan `working-directory` correcto:
   - `av-frontend`
   - `av-backend`
@@ -84,6 +84,7 @@ Actualizar segun corresponda:
 - `docs/pipeline.md`
 - `docs/security.md`
 - `README.md`
+- El codigo debe tener JavaDoc (backend) o JSDoc (frontend) en controllers, services, DTOs, entidades y componentes principales.
 
 ## Pendientes aceptables solo si quedan documentados
 

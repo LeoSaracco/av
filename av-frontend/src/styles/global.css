@@ -150,6 +150,8 @@ img { max-width: 100%; display: block; }
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: 20px;
+  display: flex;
+  flex-direction: column;
   transition: var(--transition);
 }
 .card:hover { border-color: var(--color-border-hover); }
@@ -286,6 +288,16 @@ select.form-input { appearance: none; cursor: pointer; }
   padding: 20px;
   animation: fadeIn 0.2s ease;
 }
+@media (max-width: 640px) {
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .confirm-modal {
+    align-items: center;
+    padding: 20px;
+  }
+}
 .modal-box {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -293,9 +305,24 @@ select.form-input { appearance: none; cursor: pointer; }
   width: 100%;
   max-width: 540px;
   max-height: 90vh;
+  max-height: 90dvh;
   overflow-y: auto;
   animation: slideUp 0.25s ease;
   box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+}
+@media (max-width: 640px) {
+  .modal-box {
+    width: 100%;
+    max-width: 100%;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    max-height: 85vh;
+    max-height: 85dvh;
+  }
+  .confirm-modal .modal-box {
+    border-radius: var(--radius-xl);
+    max-height: 80vh;
+    max-height: 80dvh;
+  }
 }
 .modal-header {
   display: flex;
@@ -343,6 +370,7 @@ select.form-input { appearance: none; cursor: pointer; }
 .coach-layout {
   display: flex;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 .coach-sidebar {
@@ -423,6 +451,7 @@ select.form-input { appearance: none; cursor: pointer; }
 
 .coach-main {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -514,6 +543,14 @@ tbody tr:last-child td { border-bottom: none; }
 tbody tr { transition: var(--transition); }
 tbody tr:hover { background: var(--color-surface); }
 
+/* ─── RESPONSIVE DISPLAY ─────────────────────────────────────────────────────── */
+.desktop-only { display: block; }
+.mobile-only  { display: none; }
+@media (max-width: 640px) {
+  .desktop-only { display: none; }
+  .mobile-only  { display: flex; flex-direction: column; }
+}
+
 /* ─── EXERCISE CARD ──────────────────────────────────────────────────────────── */
 .exercise-card {
   background: var(--color-bg-3);
@@ -576,6 +613,11 @@ tbody tr:hover { background: var(--color-surface); }
   position: sticky;
   top: 0;
   z-index: 100;
+  overflow: hidden;
+}
+@media (max-width: 400px) {
+  .client-navbar { padding: 0 12px; }
+  .client-navbar .btn-sm { font-size: 12px; padding: 4px 8px; }
 }
 .client-bottom-nav {
   position: fixed;
@@ -638,9 +680,18 @@ tbody tr:hover { background: var(--color-surface); }
 @keyframes fadeOutDown { from { opacity: 1; } to { opacity: 0; transform: translateX(-50%) translateY(10px); } }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 @keyframes spin { to { transform: rotate(360deg); } }
+@keyframes dotPulse { 0%, 100% { opacity: 0.2; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-4px); } }
 
 .animate-fade { animation: fadeIn 0.3s ease; }
 .animate-slide { animation: slideUp 0.3s ease; }
+
+.dot-typing {
+  display: inline-block;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-accent);
+  animation: dotPulse 1.4s infinite ease-in-out;
+}
 
 /* ─── DIVIDER ────────────────────────────────────────────────────────────────── */
 .divider { height: 1px; background: var(--color-border); margin: 20px 0; }
