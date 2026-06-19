@@ -3,6 +3,7 @@ package com.av.fitness.controller;
 import com.av.fitness.dto.coach.DietResponse;
 import com.av.fitness.dto.coach.NoteResponse;
 import com.av.fitness.dto.coach.RoutineResponse;
+import com.av.fitness.dto.coach.ThreadNotificationResponse;
 import com.av.fitness.dto.ProgressResponse;
 import com.av.fitness.dto.ThreadResponse;
 import com.av.fitness.model.UserEntity;
@@ -161,6 +162,32 @@ public class MeController {
             @RequestBody Map<String, String> body) {
         UUID clientId = resolveClientId(auth);
         return ResponseEntity.ok(clientService.sendMessage(clientId, body.get("message")));
+    }
+
+    /**
+     * Marks the client's nutrition thread as read.
+     *
+     * @param auth injected Spring Security authentication
+     * @return {@code 200 OK}
+     */
+    @PutMapping("/thread/read")
+    public ResponseEntity<Void> markMyThreadRead(Authentication auth) {
+        UUID clientId = resolveClientId(auth);
+        clientService.markMyThreadRead(clientId);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Returns a lightweight notification for the authenticated client
+     * indicating whether there are unread coach messages.
+     *
+     * @param auth injected Spring Security authentication
+     * @return notification with unread flag
+     */
+    @GetMapping("/notifications")
+    public ResponseEntity<ThreadNotificationResponse> getMyNotifications(Authentication auth) {
+        UUID clientId = resolveClientId(auth);
+        return ResponseEntity.ok(clientService.getMyNotification(clientId));
     }
 
     /**

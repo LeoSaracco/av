@@ -3,6 +3,7 @@ package com.av.fitness.service;
 import com.av.fitness.dto.coach.DietResponse;
 import com.av.fitness.dto.coach.NoteResponse;
 import com.av.fitness.dto.coach.RoutineResponse;
+import com.av.fitness.dto.coach.ThreadNotificationResponse;
 import com.av.fitness.dto.ProgressResponse;
 import com.av.fitness.dto.ThreadResponse;
 import java.util.List;
@@ -87,4 +88,20 @@ public interface ClientService {
      * @return ThreadResponse containing the updated thread
      */
     ThreadResponse sendMessage(UUID clientId, String message);
+
+    /**
+     * Marks the client's nutrition thread as read (sets client_last_read_at).
+     *
+     * @param clientId the client UUID
+     */
+    void markMyThreadRead(UUID clientId);
+
+    /**
+     * Returns a lightweight notification for the authenticated client
+     * indicating whether there are unread coach messages.
+     *
+     * @param clientId the client UUID
+     * @return a single ThreadNotificationResponse or empty list
+     */
+    ThreadNotificationResponse getMyNotification(UUID clientId);
 }

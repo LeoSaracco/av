@@ -208,6 +208,14 @@ export async function apiSendMessage(text) {
   return normalizeThread(await request('POST', '/me/thread/message', { message: text }));
 }
 
+export async function apiMarkMyThreadRead() {
+  return request('PUT', '/me/thread/read');
+}
+
+export async function apiGetMyNotifications() {
+  return request('GET', '/me/notifications');
+}
+
 // ── Coach: Clients ────────────────────────────────────────────────────────────
 export async function apiGetClients() {
   return request('GET', '/coach/clients');

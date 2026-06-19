@@ -43,6 +43,7 @@ import ClientGoals from './pages/client/ClientGoals';
 import ClientNutrition from './pages/client/ClientNutrition';
 import ClientNotes from './pages/client/ClientNotes';
 import ClientAIAssistant from './pages/client/ClientAIAssistant';
+import ClientChat from './pages/client/ClientChat';
 
 // Store pages
 import Store from './pages/store/Store';
@@ -121,6 +122,7 @@ export default function App() {
             <Route path="/client/progress" element={<ClientRoute><ClientProgress /></ClientRoute>} />
             <Route path="/client/goals" element={<ClientRoute><ClientGoals /></ClientRoute>} />
             <Route path="/client/nutrition" element={<ClientRoute><ClientNutrition /></ClientRoute>} />
+            <Route path="/client/chat" element={<ClientRoute><ClientChat /></ClientRoute>} />
             <Route path="/client/ai-assistant" element={<ClientRoute><ClientAIAssistant /></ClientRoute>} />
             <Route path="/client/notes" element={<ClientRoute><ClientNotes /></ClientRoute>} />
 

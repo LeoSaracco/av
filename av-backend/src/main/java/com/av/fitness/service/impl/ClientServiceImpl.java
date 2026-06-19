@@ -3,6 +3,7 @@ package com.av.fitness.service.impl;
 import com.av.fitness.dto.coach.DietResponse;
 import com.av.fitness.dto.coach.NoteResponse;
 import com.av.fitness.dto.coach.RoutineResponse;
+import com.av.fitness.dto.coach.ThreadNotificationResponse;
 import com.av.fitness.dto.MessageDto;
 import com.av.fitness.dto.ProgressResponse;
 import com.av.fitness.dto.ThreadResponse;
@@ -230,6 +231,60 @@ public class ClientServiceImpl implements ClientService {
                 .messages(parseMessages(entity.getMessages()))
                 .lastReadAt(entity.getLastReadAt())
                 .updatedAt(entity.getUpdatedAt())
+                .build();
+    }
+
+    /**
+     * Marks the client's thread as read.
+     *
+     * @param clientId the client UUID
+     */
+    @Override
+    public void markMyThreadRead(UUID clientId) {
+        nutritionThreadJpaRepository.findByClientId(clientId).ifPresent(entity -> {
+            entity.setClientLastReadAt(LocalDateTime.now());
+            nutritionThreadJpaRepository.save(entity);
+        });
+    }
+
+    /**
+     * Returns a lightweight notification for the client indicating
+     * whether the coach has sent unread messages.
+     *
+     * @param clientId the client UUID
+     * @return notification with unread flag
+     */
+    @Override
+    public ThreadNotificationResponse getMyNotification(UUID clientId) {
+        NutritionThreadEntity entity = nutritionThreadJpaRepository.findByClientId(clientId)
+                .orElse(null);
+        if (entity == null) {
+            return ThreadNotificationResponse.builder()
+                    .clientId(clientId).unread(false).build();
+        }
+
+        List<MessageDto> parsed = parseMessages(entity.getMessages());
+        MessageDto lastMsg = parsed.isEmpty() ? null : parsed.get(parsed.size() - 1);
+
+        boolean unread = false;
+        String lastSender = null;
+        String lastMessage = null;
+        if (lastMsg != null) {
+            lastSender = lastMsg.getSender();
+            lastMessage = lastMsg.getText();
+            if ("COACH".equals(lastSender)) {
+                unread = entity.getClientLastReadAt() == null
+                        || entity.getUpdatedAt().isAfter(entity.getClientLastReadAt());
+            }
+        }
+
+        return ThreadNotificationResponse.builder()
+                .threadId(entity.getId())
+                .clientId(clientId)
+                .lastMessage(lastMessage)
+                .lastSender(lastSender)
+                .updatedAt(entity.getUpdatedAt())
+                .unread(unread)
                 .build();
     }
 }

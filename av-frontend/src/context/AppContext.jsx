@@ -233,6 +233,13 @@ export function AppProvider({ children }) {
     } catch { /* ignore */ }
   };
 
+  const fetchClientNotifications = async () => {
+    try {
+      const data = await api.apiGetMyNotifications();
+      setUnreadCount(data?.unread ? 1 : 0);
+    } catch { /* ignore */ }
+  };
+
   const markThreadRead = async (clientId) => {
     try {
       await api.apiMarkThreadRead(clientId);
@@ -286,7 +293,7 @@ export function AppProvider({ children }) {
       clients, templates, routines, assignments, notes, progress, products, plans, cart, loaded, loadError,
       coachLoaded, clientLoaded, productsLoaded, loadCoachData, loadClientData, loadProducts,
       dietTemplates, diets, dietAssignments, nutritionThreads, onboardingSubmissions,
-      notifications, unreadCount, fetchNotifications, markThreadRead, markAllThreadsRead,
+      notifications, unreadCount, fetchNotifications, fetchClientNotifications, markThreadRead, markAllThreadsRead,
       addClient, updateClient, deleteClient, getClient,
       addTemplate, updateTemplate, deleteTemplate, getTemplate,
       addRoutine, updateRoutine, deleteRoutine, duplicateRoutine, getRoutine, createRoutineFromTemplate,

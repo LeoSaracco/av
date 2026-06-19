@@ -44,4 +44,8 @@ public class NutritionThreadEntity {
     /** When the coach last read this thread (null = never). */
     @Column(name = "last_read_at")
     private LocalDateTime lastReadAt;
+
+    /** When the client last read this thread (null = never). */
+    @Column(name = "client_last_read_at")
+    private LocalDateTime clientLastReadAt;
 }
