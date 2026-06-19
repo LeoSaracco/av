@@ -76,7 +76,7 @@ export default function Clients() {
       ) : (
         <>
           {/* Desktop table */}
-          <div className="table-wrapper" style={{ display: window.innerWidth < 640 ? 'none' : 'block' }}>
+          <div className="table-wrapper desktop-only">
             <table>
               <thead>
                 <tr>
@@ -124,7 +124,7 @@ export default function Clients() {
           </div>
 
           {/* Mobile cards */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div className="mobile-only" style={{ gap: 12 }}>
             {filtered.map(c => {
               const routine = getRoutineForClient(c.id);
               return (

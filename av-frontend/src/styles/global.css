@@ -370,6 +370,7 @@ select.form-input { appearance: none; cursor: pointer; }
 .coach-layout {
   display: flex;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 .coach-sidebar {
@@ -450,6 +451,7 @@ select.form-input { appearance: none; cursor: pointer; }
 
 .coach-main {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -540,6 +542,14 @@ td {
 tbody tr:last-child td { border-bottom: none; }
 tbody tr { transition: var(--transition); }
 tbody tr:hover { background: var(--color-surface); }
+
+/* ─── RESPONSIVE DISPLAY ─────────────────────────────────────────────────────── */
+.desktop-only { display: block; }
+.mobile-only  { display: none; }
+@media (max-width: 640px) {
+  .desktop-only { display: none; }
+  .mobile-only  { display: flex; flex-direction: column; }
+}
 
 /* ─── EXERCISE CARD ──────────────────────────────────────────────────────────── */
 .exercise-card {
