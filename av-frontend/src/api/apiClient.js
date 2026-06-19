@@ -76,6 +76,11 @@ function normalizeDiet(diet) {
   return { ...diet, meals: parseJsonField(diet.meals, []) };
 }
 
+function normalizeThread(thread) {
+  if (!thread) return thread;
+  return { ...thread, messages: parseJsonField(thread.messages, []) };
+}
+
 function stringifyJsonArray(data, field) {
   if (data && data[field] !== undefined && Array.isArray(data[field])) {
     return { ...data, [field]: JSON.stringify(data[field]) };
@@ -196,11 +201,11 @@ export async function apiGetMyNotes() {
 }
 
 export async function apiGetMyThread() {
-  return request('GET', '/me/thread');
+  return normalizeThread(await request('GET', '/me/thread'));
 }
 
 export async function apiSendMessage(text) {
-  return request('POST', '/me/thread/message', { message: text });
+  return normalizeThread(await request('POST', '/me/thread/message', { message: text }));
 }
 
 // ── Coach: Clients ────────────────────────────────────────────────────────────
@@ -349,11 +354,23 @@ export async function apiCreateDietFromTemplate(templateId, name, goal) {
 
 // ── Coach: Nutrition Thread ───────────────────────────────────────────────────
 export async function apiGetClientThread(clientId) {
-  return request('GET', `/coach/clients/${clientId}/thread`);
+  return normalizeThread(await request('GET', `/coach/clients/${clientId}/thread`));
 }
 
 export async function apiSendCoachMessage(clientId, text) {
-  return request('POST', `/coach/clients/${clientId}/thread/message`, { message: text });
+  return normalizeThread(await request('POST', `/coach/clients/${clientId}/thread/message`, { message: text }));
+}
+
+export async function apiGetNotifications() {
+  return request('GET', '/coach/notifications');
+}
+
+export async function apiMarkThreadRead(clientId) {
+  return request('PUT', `/coach/threads/${clientId}/read`);
+}
+
+export async function apiAssignDiet(clientId, dietId) {
+  return request('POST', `/coach/clients/${clientId}/diet-assignment`, { dietId });
 }
 
 // ── Store ─────────────────────────────────────────────────────────────────────

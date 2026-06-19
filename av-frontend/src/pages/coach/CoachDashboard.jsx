@@ -5,16 +5,31 @@
  * @route /coach
  * @auth Requiere rol "coach".
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import { CoachLayout } from '../../components/layout/CoachLayout';
 
+function timeAgo(date) {
+  if (!date) return '';
+  const diff = Date.now() - new Date(date).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'ahora';
+  if (mins < 60) return `${mins} min`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs} h`;
+  return `${Math.floor(hrs / 24)} d`;
+}
+
 export default function CoachDashboard() {
-  const { clients, routines, templates, assignments, notes, dietTemplates } = useApp();
+  const { clients, routines, templates, assignments, notes, dietTemplates, notifications, fetchNotifications } = useApp();
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
 
   const assignedCount = assignments.filter(a => a.active).length;
   const recentNotes = notes.slice(-3).reverse();
@@ -126,6 +141,54 @@ export default function CoachDashboard() {
             </div>
           )}
         </div>
+
+        {/* Recent nutrition messages */}
+        {notifications.length > 0 && (
+          <div className="card">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <h3 style={{ fontSize: 16 }}>💬 Mensajes recientes</h3>
+              <button className="btn btn-ghost btn-sm" onClick={() => navigate('/coach/nutrition')}>Ver todos</button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {notifications.filter(n => n.lastMessage).slice(0, 3).map(n => {
+                const client = clients.find(c => c.id === n.clientId);
+                return (
+                  <div key={n.clientId}
+                    onClick={() => navigate(`/coach/nutrition?client=${n.clientId}`)}
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+                      padding: '10px 12px', borderRadius: 'var(--radius-md)',
+                      background: 'var(--color-bg-3)', cursor: 'pointer',
+                      borderLeft: n.unread ? '3px solid var(--color-accent)' : '3px solid transparent',
+                      transition: 'var(--transition)',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'var(--color-surface-2)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'var(--color-bg-3)'}
+                  >
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div className="avatar" style={{ width: 28, height: 28, fontSize: 10 }}>
+                          {(client?.name || n.clientName).split(' ').map(w => w[0]).join('').slice(0, 2)}
+                        </div>
+                        <span style={{ fontWeight: 600, fontSize: 13, fontFamily: 'var(--font-main)' }}>
+                          {client?.name || n.clientName}
+                        </span>
+                        {n.unread && <span style={{ width: 8, height: 8, borderRadius: 4, background: 'var(--color-accent)' }} />}
+                      </div>
+                      <div style={{
+                        fontSize: 12, color: 'var(--color-text-2)', marginTop: 4,
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      }}>
+                        {n.lastSender === 'COACH' ? 'Tú: ' : ''}{n.lastMessage.slice(0, 50)}
+                      </div>
+                    </div>
+                    <span style={{ fontSize: 11, color: 'var(--color-text-3)', flexShrink: 0 }}>{timeAgo(n.updatedAt)}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </CoachLayout>
   );

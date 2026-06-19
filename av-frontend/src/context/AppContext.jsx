@@ -45,6 +45,8 @@ export function AppProvider({ children }) {
   const [dietAssignments, setDietAssignments] = useState([]);
   const [nutritionThreads, setNutritionThreads] = useState([]);
   const [onboardingSubmissions, setOnboardingSubmissions] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState(null);
   const [coachLoaded, setCoachLoaded] = useState(false);
@@ -204,8 +206,12 @@ export function AppProvider({ children }) {
   const createDietFromTemplate = async (templateId, name, goal) => {
     try { const created = await api.apiCreateDietFromTemplate(templateId, name, goal); setDiets(prev => [...prev, created]); } catch { showToast('Error', 'error'); }
   };
-  const assignDiet = (clientId, dietId) => {
-    setDietAssignments(prev => prev.filter(a => a.clientId !== clientId).concat({ clientId, dietId, assignedAt: new Date().toISOString(), active: true }));
+  const assignDiet = async (clientId, dietId) => {
+    try {
+      await api.apiAssignDiet(clientId, dietId);
+      setDietAssignments(prev => prev.filter(a => a.clientId !== clientId).concat({ clientId, dietId, assignedAt: new Date().toISOString(), active: true }));
+      showToast('Dieta asignada');
+    } catch { showToast('Error al asignar dieta', 'error'); }
   };
   const getDietAssignmentForClient = (clientId) => dietAssignments.find(a => a.clientId === clientId && a.active);
 
@@ -217,6 +223,32 @@ export function AppProvider({ children }) {
         : await api.apiSendCoachMessage(clientId, text);
       setNutritionThreads(prev => prev.filter(t => t.clientId !== clientId).concat(thread));
     } catch { showToast('Error al enviar mensaje', 'error'); }
+  };
+
+  const fetchNotifications = async () => {
+    try {
+      const data = await api.apiGetNotifications();
+      setNotifications(data);
+      setUnreadCount(data.filter(n => n.unread).length);
+    } catch { /* ignore */ }
+  };
+
+  const markThreadRead = async (clientId) => {
+    try {
+      await api.apiMarkThreadRead(clientId);
+      setNotifications(prev => prev.map(n => n.clientId === clientId ? { ...n, unread: false } : n));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch { /* ignore */ }
+  };
+
+  const markAllThreadsRead = async () => {
+    try {
+      for (const n of notifications) {
+        if (n.unread) await api.apiMarkThreadRead(n.clientId);
+      }
+      setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+      setUnreadCount(0);
+    } catch { /* ignore */ }
   };
 
   const addToCart = (product, opts = {}) => {
@@ -254,6 +286,7 @@ export function AppProvider({ children }) {
       clients, templates, routines, assignments, notes, progress, products, plans, cart, loaded, loadError,
       coachLoaded, clientLoaded, productsLoaded, loadCoachData, loadClientData, loadProducts,
       dietTemplates, diets, dietAssignments, nutritionThreads, onboardingSubmissions,
+      notifications, unreadCount, fetchNotifications, markThreadRead, markAllThreadsRead,
       addClient, updateClient, deleteClient, getClient,
       addTemplate, updateTemplate, deleteTemplate, getTemplate,
       addRoutine, updateRoutine, deleteRoutine, duplicateRoutine, getRoutine, createRoutineFromTemplate,

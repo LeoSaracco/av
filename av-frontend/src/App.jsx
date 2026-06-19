@@ -33,6 +33,7 @@ import DietTemplates from './pages/coach/DietTemplates';
 import Routines from './pages/coach/Routines';
 import Assign from './pages/coach/Assign';
 import Notes from './pages/coach/Notes';
+import CoachNutrition from './pages/coach/CoachNutrition';
 
 // Client pages
 import ClientDashboard from './pages/client/ClientDashboard';
@@ -112,6 +113,7 @@ export default function App() {
             <Route path="/coach/routines" element={<CoachRoute><Routines /></CoachRoute>} />
             <Route path="/coach/assign" element={<CoachRoute><Assign /></CoachRoute>} />
             <Route path="/coach/notes" element={<CoachRoute><Notes /></CoachRoute>} />
+            <Route path="/coach/nutrition" element={<CoachRoute><CoachNutrition /></CoachRoute>} />
 
             {/* Client */}
             <Route path="/client" element={<ClientRoute><ClientDashboard /></ClientRoute>} />
