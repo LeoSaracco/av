@@ -19,7 +19,7 @@ const navItems = [
   { label: 'Templates', path: '/coach/templates', icon: LayoutIcon },
   { label: 'Rutinas', path: '/coach/routines', icon: DumbbellIcon },
   { label: 'Dieta/Nutrición', path: '/coach/diet-templates', icon: AppleIcon },
-  { label: 'Chat Nutrición', path: '/coach/nutrition', icon: ChatIcon },
+  { label: 'Chats', path: '/coach/nutrition', icon: ChatIcon },
   { label: 'Asignaciones', path: '/coach/assign', icon: LinkIcon },
   { label: 'Observaciones', path: '/coach/notes', icon: NotesIcon },
 ];

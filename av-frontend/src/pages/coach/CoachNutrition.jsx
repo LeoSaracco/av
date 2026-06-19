@@ -137,7 +137,7 @@ export default function CoachNutrition() {
           }}>
             <div style={{ padding: '16px', borderBottom: '1px solid var(--color-border)' }}>
               <h2 style={{ fontFamily: 'var(--font-main)', fontSize: 18, margin: '0 0 12px 0' }}>
-                Nutrición
+                Chats
               </h2>
               <div className="search-bar" style={{ maxWidth: '100%' }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-3)" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>

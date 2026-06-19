@@ -22,7 +22,7 @@ import NotificationBell from '../ui/NotificationBell';
  */
 export function ClientLayout({ children }) {
   const { user, logout } = useAuth();
-  const { loadClientData, clientLoaded, fetchClientNotifications } = useApp();
+  const { loadClientData, clientLoaded, fetchClientNotifications, markMyThreadRead } = useApp();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -47,7 +47,7 @@ export function ClientLayout({ children }) {
           Adrián Vila
         </NavLink>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <NotificationBell onClick={() => navigate('/client/chat')} />
+          <NotificationBell onClick={() => { markMyThreadRead(); navigate('/client/chat'); }} />
           <div className="avatar" style={{ width: 34, height: 34, fontSize: 13 }}>
             {user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
           </div>
