@@ -110,7 +110,9 @@ Los workflows viven en `.github/workflows/`.
 
 - `ci.yml`: corre en `push` y PR contra `master`.
 - `deploy-railway.yml`: corre en `push` contra `master` y manualmente con `workflow_dispatch`.
+- `tenable-scan.yml`: corre manualmente con `workflow_dispatch` para lanzar/exportar un scan de Tenable.io y bloquear por severidad.
 - Secret requerido en GitHub Actions: `RAILWAY_TOKEN`.
+- Secrets requeridos para Tenable: `TENABLE_ACCESS_KEY`, `TENABLE_SECRET_KEY`, `TENABLE_SCAN_ID`.
 
 Deploy Railway:
 
