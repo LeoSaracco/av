@@ -1,0 +1,60 @@
+name: OWASP ZAP Baseline
+
+on:
+  workflow_dispatch:
+    inputs:
+      fail_action:
+        description: Fail the workflow when ZAP reports alerts.
+        required: true
+        default: false
+        type: boolean
+  schedule:
+    - cron: "0 8 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  zap-baseline:
+    name: ZAP baseline - ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: frontend
+            target: https://av-frontend-production.up.railway.app
+            artifact: zap-frontend
+          - name: backend
+            target: https://av-backend-production.up.railway.app
+            artifact: zap-backend
+    steps:
+      - name: Run ZAP baseline scan
+        uses: zaproxy/action-baseline@6c5a007541891231cd9e0ddec25d4f25c59c9874 # v0.15.0
+        with:
+          target: ${{ matrix.target }}
+          allow_issue_writing: false
+          fail_action: ${{ github.event_name == 'workflow_dispatch' && inputs.fail_action || false }}
+          artifact_name: ${{ matrix.artifact }}
+          cmd_options: "-a -m 3"
+
+      - name: Write scan summary
+        if: always()
+        env:
+          TARGET_NAME: ${{ matrix.name }}
+          TARGET_URL: ${{ matrix.target }}
+          ARTIFACT_NAME: ${{ matrix.artifact }}
+        run: |
+          {
+            echo "## OWASP ZAP Baseline"
+            echo ""
+            echo "- Target: ${TARGET_NAME}"
+            echo "- URL: ${TARGET_URL}"
+            echo "- Artifact: ${ARTIFACT_NAME}"
+            echo "- Mode: passive baseline scan"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -110,6 +110,7 @@ Los workflows viven en `.github/workflows/`.
 
 - `ci.yml`: corre en `push` y PR contra `master`.
 - `deploy-railway.yml`: corre en `push` contra `master` y manualmente con `workflow_dispatch`.
+- `zap-baseline.yml`: corre OWASP ZAP Baseline manualmente y cada lunes contra frontend/backend productivos.
 - Secret requerido en GitHub Actions: `RAILWAY_TOKEN`.
 
 Deploy Railway:
