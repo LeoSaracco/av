@@ -168,9 +168,9 @@ public class AuthController {
     private ResponseEntity<TokenResponse> withAuthCookies(TokenResponse response) {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, authCookie("av_access_token",
-                        response.getAccessToken(), 15 * 60).toString())
+                        response.getAccessToken(), 15L * 60).toString())
                 .header(HttpHeaders.SET_COOKIE, authCookie("av_refresh_token",
-                        response.getRefreshToken(), 7 * 24 * 60 * 60).toString())
+                        response.getRefreshToken(), 7L * 24 * 60 * 60).toString())
                 .body(response);
     }
 

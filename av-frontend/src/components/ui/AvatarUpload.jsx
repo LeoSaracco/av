@@ -52,7 +52,7 @@ export default function AvatarUpload({
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef(null);
 
-  const sizeClass = size === 'lg' || size === 'xl' ? `avatar-${size}` : size === 'sm' ? '' : '';
+  const sizeClass = size === 'lg' || size === 'xl' ? `avatar-${size}` : '';
 
   const displayUrl = preview || avatarUrl;
   const initials = getInitials(name);

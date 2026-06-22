@@ -78,9 +78,9 @@ public class PlanContractController {
         TokenResponse user = response.getUser();
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, authCookie("av_access_token",
-                        user.getAccessToken(), 15 * 60).toString())
+                        user.getAccessToken(), 15L * 60).toString())
                 .header(HttpHeaders.SET_COOKIE, authCookie("av_refresh_token",
-                        user.getRefreshToken(), 7 * 24 * 60 * 60).toString())
+                        user.getRefreshToken(), 7L * 24 * 60 * 60).toString())
                 .body(response);
     }
 
