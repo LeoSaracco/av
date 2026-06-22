@@ -56,29 +56,7 @@ Riesgo pendiente:
 - `npm audit --audit-level=high` bloqueante en frontend.
 - Backend compila y testea con Maven Wrapper.
 - GitHub secret requerido: `RAILWAY_TOKEN`; no documentar nunca su valor.
-- Workflow manual `tenable-scan.yml` para Tenable.io / Tenable Vulnerability Management.
-- Secrets requeridos para Tenable: `TENABLE_ACCESS_KEY`, `TENABLE_SECRET_KEY`, `TENABLE_SCAN_ID`; no documentar nunca sus valores.
-- El gate Tenable falla por defecto con hallazgos `critical` o `high`.
 - Branch protection recomendada para `master`.
-
-## Tenable.io
-
-El scan productivo debe configurarse en Tenable.io y guardarse como un scan reutilizable. El workflow de GitHub Actions solo lanza el scan, espera finalizacion, exporta resultados CSV y aplica el gate de severidad.
-
-Uso recomendado:
-
-1. Configurar en Tenable.io los targets productivos que correspondan a Railway.
-2. Guardar el ID del scan en el secret `TENABLE_SCAN_ID`.
-3. Ejecutar manualmente `Tenable Vulnerability Scan` desde GitHub Actions.
-4. Revisar el summary del job y el artefacto `tenable-results-*`.
-
-Inputs del workflow:
-
-- `scan_id`: override opcional del secret `TENABLE_SCAN_ID`.
-- `launch_scan`: si esta activo, dispara el scan antes de exportar.
-- `wait_for_completion`: si esta activo, espera el resultado antes del export.
-- `alt_targets`: override opcional de targets separados por coma.
-- `fail_on_severities`: severidades que bloquean el job, por defecto `critical,high`.
 
 ## Pendientes
 
