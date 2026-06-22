@@ -24,14 +24,22 @@ jobs:
           - name: frontend
             target: https://av-frontend-production.up.railway.app
             artifact: zap-frontend
+            rules: .zap/frontend-rules.tsv
           - name: backend
             target: https://av-backend-production.up.railway.app
             artifact: zap-backend
+            rules: .zap/backend-rules.tsv
     steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 1
+
       - name: Run ZAP baseline scan
         uses: zaproxy/action-baseline@6c5a007541891231cd9e0ddec25d4f25c59c9874 # v0.15.0
         with:
           target: ${{ matrix.target }}
+          rules_file_name: ${{ matrix.rules }}
           allow_issue_writing: false
           fail_action: true
           artifact_name: ${{ matrix.artifact }}

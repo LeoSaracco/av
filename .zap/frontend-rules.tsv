@@ -1,0 +1,6 @@
+10015	IGNORE	Re-examine Cache-control Directives
+10027	IGNORE	Information Disclosure - Suspicious Comments
+10049	IGNORE	Storable and Cacheable Content
+10094	IGNORE	Base64 Disclosure
+10109	IGNORE	Modern Web Application
+90005	IGNORE	Sec-Fetch-* request headers are scanner/client controlled

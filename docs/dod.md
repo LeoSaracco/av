@@ -6,6 +6,8 @@ Ningun cambio se considera terminado solo porque compila. Debe estar alineado co
 
 ## Gates generales
 
+- No declarar `YA ESTA TERMINADO`, `YA ESTA FUNCIONANDO` ni equivalente hasta que todos los checks aplicables hayan pasado y se haya verificado el resultado en el entorno objetivo.
+- Si un check aplicable falla, el estado correcto es `pendiente` o `bloqueado`, con el error y el proximo paso documentados.
 - El cambio esta limitado al alcance pedido.
 - No introduce secrets.
 - Los procesos de negocio nuevos se comunican via API y persisten estado en base.
