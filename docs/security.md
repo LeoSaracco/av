@@ -55,7 +55,7 @@ Riesgo pendiente:
 
 - `npm audit --audit-level=high` bloqueante en frontend.
 - Backend compila y testea con Maven Wrapper.
-- `zap-baseline.yml` ejecuta OWASP ZAP Baseline contra frontend/backend productivos, genera artifacts y no bloquea por defecto.
+- `zap-baseline.yml` ejecuta OWASP ZAP Baseline contra frontend/backend productivos, genera artifacts y bloquea si encuentra alerts.
 - GitHub secret requerido: `RAILWAY_TOKEN`; no documentar nunca su valor.
 - Branch protection recomendada para `master`.
 
@@ -72,7 +72,7 @@ Politica inicial:
 
 - Ejecucion manual con `workflow_dispatch`.
 - Ejecucion programada los lunes a las 08:00 UTC.
-- `fail_action=false` por defecto para medir falsos positivos antes de volverlo bloqueante.
+- `fail_action=true` por defecto: cualquier alert de ZAP falla el workflow.
 - Artifacts esperados: `zap-frontend` y `zap-backend`.
 
 ## Pendientes

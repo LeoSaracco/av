@@ -2,12 +2,6 @@ name: OWASP ZAP Baseline
 
 on:
   workflow_dispatch:
-    inputs:
-      fail_action:
-        description: Fail the workflow when ZAP reports alerts.
-        required: true
-        default: false
-        type: boolean
   schedule:
     - cron: "0 8 * * 1"
 
@@ -39,7 +33,7 @@ jobs:
         with:
           target: ${{ matrix.target }}
           allow_issue_writing: false
-          fail_action: ${{ github.event_name == 'workflow_dispatch' && inputs.fail_action || false }}
+          fail_action: true
           artifact_name: ${{ matrix.artifact }}
           cmd_options: "-a -m 3"
 
@@ -57,4 +51,5 @@ jobs:
             echo "- URL: ${TARGET_URL}"
             echo "- Artifact: ${ARTIFACT_NAME}"
             echo "- Mode: passive baseline scan"
+            echo "- Quality gate: fail on any ZAP alert"
           } >> "$GITHUB_STEP_SUMMARY"
