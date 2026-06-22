@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
-    branches: [master]
+    branches: [main]
 
 permissions:
   contents: read
@@ -84,3 +84,83 @@ jobs:
         run: ./mvnw --batch-mode test
       - name: Package
         run: ./mvnw --batch-mode package -DskipTests
+
+  sonarqube-frontend:
+    name: SonarQube Frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: frontend
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    defaults:
+      run:
+        working-directory: av-frontend
+    env:
+      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      SONAR_TOKEN: ${{ secrets.AV_FE_SONAR_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Setup Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: av-frontend/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Test with coverage
+        run: npm test -- --coverage
+      - name: SonarQube scan and Quality Gate
+        uses: SonarSource/sonarqube-scan-action@713881670b6b3676cda39549040e2d88c70d582e # v6.0.0
+        with:
+          projectBaseDir: av-frontend
+
+  sonarqube-backend:
+    name: SonarQube Backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: backend
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    defaults:
+      run:
+        working-directory: av-backend
+    env:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/avdb
+      SPRING_DATASOURCE_USERNAME: avuser
+      SPRING_DATASOURCE_PASSWORD: avpass
+      JWT_SECRET: ci-secret-must-be-at-least-32-characters
+      CORS_ALLOWED_ORIGINS: http://localhost:5173
+      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      SONAR_TOKEN: ${{ secrets.AV_BE_SONAR_TOKEN }}
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: avdb
+          POSTGRES_USER: avuser
+          POSTGRES_PASSWORD: avpass
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U avuser -d avdb"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Setup Java
+        uses: actions/setup-java@387ac29b308b003ca37ba93a6cab5eb57c8f5f93 # v4.0.0
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Ensure Maven Wrapper is executable
+        run: chmod +x ./mvnw
+      - name: Test and package
+        run: ./mvnw --batch-mode test package -DskipTests=false
+      - name: SonarQube scan and Quality Gate
+        uses: SonarSource/sonarqube-scan-action@713881670b6b3676cda39549040e2d88c70d582e # v6.0.0
+        with:
+          projectBaseDir: av-backend
